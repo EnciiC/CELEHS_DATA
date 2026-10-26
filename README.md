@@ -50,10 +50,12 @@ Browsing documentation, viewing schemas, and downloading fake examples do not in
 .\.venv\Scripts\python.exe -m pytest local_demo/tests -q
 ```
 
-## Online deployment status
+## Put it online
 
-Publishing this repository does not deploy a working website. This version still binds to the local computer and expects a local Ollama model. GitHub Pages cannot run its Python backend or model service.
+The app supports local Ollama or Cloudflare-hosted `gpt-oss-20b`. A Render Free web-service Blueprint is included. Follow [DEPLOY_RENDER.md](DEPLOY_RENDER.md) to enter your private Cloudflare settings, configure Gateway billing/spend limits, deploy, and run the first live test.
 
-An online version needs a hosted backend and model service, explicit allowed domains, HTTPS, request limits, a spending cap, and protected administrative operations. A hosted-model API adapter and deployment configuration are not configured in this release. Keep provider credentials in backend secrets, never in browser code or this repository. Do not expose an Ollama service directly to the internet.
+Hosted chat starts paused. Documentation, schemas and synthetic previews remain available without inference charges. Public mode restricts allowed hosts/origins, disables catalog reload and limits chat requests. Configure provider-side budgets before enabling chat; process-local request counters reset when the service restarts. Keep provider credentials in Render secrets, never in browser code or this repository. Do not expose Ollama directly to the internet.
+
+The adapter is covered by simulated-provider tests. Real Cloudflare schema compatibility, credentials, billing and answer quality still need the first live test. Publishing the source alone does not deploy the website. GitHub Pages cannot run this Python backend.
 
 Review source-document permissions before redistributing them or sending them to a hosted model provider. Adding sign-in later does not retract copies already made from a public repository. Generated examples are for file-format and software testing only, not clinical inference or treatment advice.

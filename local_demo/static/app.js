@@ -9,7 +9,7 @@ function el(tag, text, cls) {
 }
 async function api(url, options) {
   const response = await fetch(url, options);
-  if (!response.ok) throw new Error(`Request failed (${response.status}). Please try again.`);
+  if (!response.ok) throw new Error(response.status === 429 ? 'Chat is busy or its request limit was reached. Please try later. You can still browse datasets.' : `Request failed (${response.status}). Please try again.`);
   return response.json();
 }
 function toast(message) {
@@ -48,9 +48,14 @@ async function loadCatalog() {
 async function status() {
   try {
     const data = await api('/api/health');
+    const hosted = !data.local_only;
     const ready = data.model.reachable && data.model.installed;
     $('#status-dot').classList.toggle('ready', ready);
-    $('#model-status').textContent = ready ? 'gpt-oss-20b available' : 'Dataset search available';
+    $('#model-status').textContent = ready ? 'gpt-oss-20b available' : hosted && data.model.enabled ? 'Hosted model configured · not yet verified' : 'Dataset search available';
+    $('#deployment-label').textContent = hosted ? 'Hosted on Render · model by Cloudflare' : 'Runs on this computer';
+    $('#deployment-heading').textContent = hosted ? 'DATASET FINDER' : 'LOCAL DEMO';
+    $('#reload').hidden = hosted;
+    $('#hosted-notice').hidden = !hosted;
   } catch { $('#model-status').textContent = 'Server unavailable'; }
 }
 async function openDocument(id, kind, files = []) {
@@ -211,7 +216,7 @@ function formattedFact(fact) {
 function renderAnswer(result, box) {
   box.replaceChildren();
   const header = el('div', null, 'answer-header');
-  const engineName = result.engine === 'local_llm' ? 'Local LLM' : result.engine === 'guide' ? 'Guide' : 'Dataset search';
+  const engineName = result.engine === 'hosted_llm' ? 'Hosted LLM' : result.engine === 'local_llm' ? 'Local LLM' : result.engine === 'guide' ? 'Guide' : 'Dataset search';
   header.append(el('span', 'Dataset Finder', 'assistant-name'), el('span', `${engineName} · ${result.elapsed_seconds}s`, 'engine-label'));
   box.append(header);
   if (result.warning) box.append(el('p', result.warning, 'answer-warning'));

@@ -18,18 +18,19 @@
     </nav>
     <p class="nav-caption">IN THIS DEMO</p>
     <div id="sidebar-datasets"></div>
-    <div class="sidebar-bottom"><span class="status-dot" id="status-dot"></span><span id="model-status">Checking local model…</span><small>Runs on this computer</small></div>
+    <div class="sidebar-bottom"><span class="status-dot" id="status-dot"></span><span id="model-status">Checking model…</span><small id="deployment-label">Runs on this computer</small></div>
   </aside>
   <main>
     <header class="topbar"><span>Lab resources <span class="separator">/</span> <strong id="page-label">Search</strong></span><button class="quiet-button" id="reload">Reload local files</button></header>
     <div class="content">
       <section id="ask-view">
-        <div class="page-heading"><span class="eyebrow">LOCAL DEMO</span><h1>Search lab datasets</h1><p>Find source files, read documentation, and explore synthetic examples.</p></div>
+        <div class="page-heading"><span class="eyebrow" id="deployment-heading">DATASET FINDER</span><h1>Search lab datasets</h1><p>Find source files, read documentation, and explore synthetic examples.</p></div>
         <form id="question-form" class="question-box">
           <label class="sr-only" for="question">Your dataset question</label>
           <textarea id="question" rows="2" maxlength="1500" placeholder="Describe the dataset or research question you have in mind…" required></textarea>
           <div class="question-footer single-action"><button class="primary-button" id="ask-button" type="submit">Search datasets <span aria-hidden="true">→</span></button></div>
         </form>
+        <p id="hosted-notice" class="page-footer" hidden>Questions and relevant documentation are sent to Cloudflare's hosted model when chat is enabled. Do not enter patient information.</p>
         <div class="examples"><span>Try a question</span><button data-query="I wanted to see IBD data, guide me and let me know where I can find it">Where can I find IBD data?</button><button data-query="I wanted to see AD, what we have now">What AD data do we have?</button><button data-query="Can you show me what IBD monthly count data look like?">IBD monthly structure</button><button data-query="Compare the monthly count columns for MGB AD and UPMC AD">Compare AD monthly columns</button><button data-query="Show IBD monthly lab columns">IBD monthly lab data</button><button data-query="What can we do with IBD data?">MAJOR IBD project aims</button></div>
         <div id="conversation" aria-live="polite"></div>
         <div id="initial-catalog"><div class="section-heading"><h2>Available in this demo</h2><span id="dataset-total">3 dataset groups</span></div><div class="dataset-grid" id="home-cards"></div></div>

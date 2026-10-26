@@ -14,10 +14,13 @@ from .agent import Agent
 from .catalog import Catalog, PROJECT, INPUT, original_html
 from .notes import short_notes
 from .presentation import file_views
+from .hosting import Hosting, ChatLimits
 
 
 @asynccontextmanager
 async def lifespan(app):
+    app.state.hosting = Hosting.from_env()
+    app.state.chat_limits = ChatLimits()
     app.state.catalog = Catalog()
     app.state.agent = Agent(app.state.catalog)
     yield
@@ -25,18 +28,30 @@ async def lifespan(app):
 
 app = FastAPI(title="CELEHS Dataset Demo API", version="0.1.0", lifespan=lifespan,
               docs_url=None, redoc_url=None)
-app.add_middleware(TrustedHostMiddleware, allowed_hosts=["localhost", "127.0.0.1", "testserver"])
+app.add_middleware(TrustedHostMiddleware, allowed_hosts=list(Hosting.from_env().hosts))
 
 
 @app.middleware("http")
 async def local_origin(request: Request, call_next):
-    if request.method == "POST" and request.headers.get("origin") not in {
-        None, "http://127.0.0.1:8000", "http://localhost:8000", "http://testserver"}:
-        return JSONResponse({"detail": "This local API accepts same-origin requests only"}, status_code=403)
+    hosting = request.app.state.hosting
+    if request.method == "POST":
+        if request.headers.get("origin") not in hosting.origins | {None}:
+            return JSONResponse({"detail": "This API accepts same-origin requests only"}, status_code=403)
+        # Bound JSON bodies, including chunked requests, before Pydantic parses them.
+        body = bytearray()
+        async for chunk in request.stream():
+            body.extend(chunk)
+            if len(body) > 16384:
+                return JSONResponse({"detail": "Request is too large"}, status_code=413)
+        request._body = bytes(body)
     response = await call_next(request)
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["Referrer-Policy"] = "same-origin"
     response.headers["Cache-Control"] = "no-store"
+    response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'"
+    response.headers["X-Frame-Options"] = "DENY"
+    if hosting.public:
+        response.headers["Strict-Transport-Security"] = "max-age=31536000"
     return response
 
 
@@ -49,7 +64,7 @@ def record(request, dataset_id):
 @app.get("/api/health")
 async def health(request: Request):
     status = await request.app.state.agent.status()
-    return {"status": "ok", "datasets": len(request.app.state.catalog.records), "local_only": True,
+    return {"status": "ok", "datasets": len(request.app.state.catalog.records), "local_only": not request.app.state.hosting.public,
             "model": status}
 
 
@@ -149,11 +164,24 @@ class Question(BaseModel):
 async def chat(question: Question, request: Request):
     query = question.query.strip()
     if not query: raise HTTPException(422, "Enter a question")
-    return await request.app.state.agent.answer(query, question.previous_dataset_ids, question.use_llm, question.pending_topic)
+    agent = request.app.state.agent
+    if request.app.state.hosting.public:
+        # Chat can remain source-only during setup; no paid calls until both switches are on.
+        use_llm = question.use_llm and bool(agent.cloud and agent.cloud.ready)
+        async with request.app.state.chat_limits.slot():
+            result = await agent.answer(query, question.previous_dataset_ids, use_llm, question.pending_topic)
+        if result.get('engine') == 'local_llm':
+            result['engine'] = 'hosted_llm'
+        if question.use_llm and not use_llm:
+            result['warning'] = 'Hosted chat is paused. This answer uses saved documentation; you can also browse datasets.'
+        return result
+    return await agent.answer(query, question.previous_dataset_ids, question.use_llm, question.pending_topic)
 
 
 @app.post("/api/catalog/reload")
 def reload_catalog(request: Request):
+    if request.app.state.hosting.public:
+        raise HTTPException(403, "Update the source repository and redeploy to refresh public documentation")
     request.app.state.catalog.rebuild()
     return {"datasets": request.app.state.catalog.summaries(), "status": "reloaded"}
 

@@ -19,6 +19,8 @@ from .semantic import ROUTER_SYSTEM, routing_context, route_schema, validate_rou
 from .document_stats import date_view
 from .comparison import comparison_summary
 from .readme_resources import is_lab_query, is_project_query, lab_answer_facts, project_answer_facts
+from .hosting import provider
+from .hosted import CloudflareModel, MODEL as CLOUD_MODEL
 
 OLLAMA = os.environ.get("CATALOG_OLLAMA_URL", "http://127.0.0.1:11435").rstrip("/")
 MODEL = os.environ.get("CATALOG_MODEL", "celehs-catalog")
@@ -98,8 +100,12 @@ class Agent:
         self.catalog = catalog
         self.lock = asyncio.Lock()
         self.last_result = {"engine": None, "error": None}
+        self.cloud = CloudflareModel() if provider() == 'cloudflare' else None
+        self.model = CLOUD_MODEL if self.cloud else MODEL
 
     async def status(self):
+        if self.cloud:
+            return {**self.cloud.status(), 'last_result': self.last_result}
         try:
             async with httpx.AsyncClient(trust_env=False, timeout=3) as client:
                 response = await client.get(OLLAMA + "/api/tags")
@@ -112,6 +118,9 @@ class Agent:
                     "last_result": self.last_result}
 
     async def structured(self, system, context, schema):
+        if self.cloud:
+            async with self.lock:
+                return await self.cloud.structured(system, context, schema)
         body = {"model": MODEL, "stream": False, "think": "low", "format": schema,
                 "options": {"num_ctx": 12288, "num_predict": 1500, "temperature": 0, "seed": 42},
                 "keep_alive": "30m", "messages": [{"role": "system", "content": system},
@@ -191,7 +200,7 @@ class Agent:
             try:
                 interpretation, route_evidence = await self.interpret(query, previous, pending_topic)
             except (httpx.HTTPError, ValueError, KeyError, TypeError):
-                route_warning = 'The local model could not interpret this question. Using conservative document search.'
+                route_warning = 'The model could not interpret this question. Using conservative document search.'
         preferred = intent(query)
         if interpretation:
             if direct_document_request(query, self.catalog.records) and not re.search(r'\b(?:mean|means|meaning|explain)\b', query.lower()):
@@ -220,7 +229,7 @@ class Agent:
         if interpretation and interpretation['mode'] in {'not_documented','clarify','out_of_scope'}:
             result = semantic_guidance(interpretation, query)
             self.last_result = {'engine':'local_llm', 'error':None}
-            return {**result, 'engine':'local_llm', 'model':MODEL, 'query':query,
+            return {**result, 'engine':'local_llm', 'model':self.model, 'query':query,
                     'interpretation':interpretation['mode'], 'elapsed_seconds':round(time.monotonic()-started, 2)}
         if interpretation and interpretation['mode'] == 'explain':
             ids = interpretation['dataset_ids']
@@ -229,7 +238,7 @@ class Agent:
                          'facts':[f for f in facts if f['dataset_id'] == i], 'files':[], 'dictionaries':[],
                          'offer_preview':False, 'additional_note':None} for i in ids]
             self.last_result = {'engine':'local_llm', 'error':None}
-            return {'query':query, 'engine':'local_llm','model':MODEL,'intent':'explain',
+            return {'query':query, 'engine':'local_llm','model':self.model,'intent':'explain',
                     'answer':interpretation['short_answer'],'intro':interpretation['short_answer'],
                     'datasets':sections,'sources':[{**f['source'],'dataset_id':f['dataset_id']} for f in facts],
                     'compact':True,'actions':[{'label':'Browse files and columns','view':'browse'}],
@@ -262,7 +271,7 @@ class Agent:
                 plan = await self.select(query, ids, available)
                 engine = "local_llm"
             except (httpx.HTTPError, ValueError, KeyError, TypeError) as error:
-                warning = "The local model is unavailable or returned an invalid selection. This answer uses the saved documentation."
+                warning = "The model is unavailable or returned an invalid selection. This answer uses the saved documentation."
                 self.last_result = {"engine": "catalog", "error": type(error).__name__}
         sections, cited = [], []
         by_id = {f["id"]: f for f in available}
@@ -364,7 +373,7 @@ class Agent:
             label = names([self.catalog.records[i] for i in ids])
             actions = [{'label':'Show file locations', 'query':f'Where can I find {label} data?'},
                        {'label':'Show monthly columns', 'query':f'Show {label} monthly columns'}]
-        return {"query": query, "engine": engine, "model": MODEL if engine == "local_llm" else None,
+        return {"query": query, "engine": engine, "model": self.model if engine == "local_llm" else None,
                 "answer": intro if compact else "\n\n".join(lines), "intro": intro, "intent": purpose, "datasets": sections, "sources": sources,
                 "compact":compact, "actions":actions, 'comparison':comparison,
                 "interpretation":'verified_storage' if verified_storage_ids else interpretation['mode'] if interpretation else 'lexical_fallback',
