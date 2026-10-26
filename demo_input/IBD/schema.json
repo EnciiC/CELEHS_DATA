@@ -1,0 +1,160 @@
+{
+  "dataset_name": "MGB IBD Project Data",
+  "synthetic": true,
+  "files": [
+    {
+      "name": "IBD_2020_codified_raw_fake_data.csv",
+      "columns": [
+        {
+          "name": "PATIENT_NUM",
+          "meaning": "Patient identifier. 患者编号。",
+          "demo_type": "Text",
+          "example": "SYN_PAT_000001",
+          "missing": "None in demo",
+          "demo_rule": "200 generated IDs. Same patient as Patient_num in monthly files. Actual R storage type not verified."
+        },
+        {
+          "name": "ENCOUNTER_NUM",
+          "meaning": "Encounter identifier used to link encounter information. 就诊编号。",
+          "demo_type": "Text",
+          "example": "SYN_ENC_000001_1",
+          "missing": "None in demo",
+          "demo_rule": "Three encounter IDs per synthetic patient. Each encounter belongs to one patient."
+        },
+        {
+          "name": "START_DATE",
+          "meaning": "Start date of the code occurrence. 代码记录的开始日期。",
+          "demo_type": "Date (CSV: YYYY-MM-DD)",
+          "example": "2021-05-12",
+          "missing": "None in demo",
+          "demo_rule": "Synthetic dates from 2019-01-01 to 2025-12-01. Actual source date storage type not verified."
+        },
+        {
+          "name": "END_DATE",
+          "meaning": "End date of the code occurrence. May be missing, same as start, or later. 结束日期可缺失、与开始日期相同或更晚。",
+          "demo_type": "Date (CSV: YYYY-MM-DD) or NA",
+          "example": "NA",
+          "missing": "Literal NA",
+          "demo_rule": "55% NA, 35% same day, 10% later by 1–30 days. Demonstration probabilities, not measured source statistics."
+        },
+        {
+          "name": "CONCEPT_CD",
+          "meaning": "Concept or local code. May include ICD10, RXNORM, ERX, EPRC, PheCode, or provider-related values. 概念或本地代码。",
+          "demo_type": "Text",
+          "example": "ICD10:K50",
+          "missing": "None in demo",
+          "demo_rule": "Mixed code formats. Provider values use SYNTHETIC_PROVIDER placeholders. Code meanings require the source lookup."
+        }
+      ],
+      "row_meaning": "One synthetic code occurrence for a patient and encounter."
+    },
+    {
+      "name": "codified_data_monthly_fake_data.csv",
+      "columns": [
+        {
+          "name": "EMPI",
+          "meaning": "Patient identifier. Real EMPI is sensitive and stays on the source server. 真实EMPI需保留在源服务器。",
+          "demo_type": "Text",
+          "example": "SYN_EMPI_000001",
+          "missing": "None in demo",
+          "demo_rule": "Generated placeholder with one-to-one mapping to Patient_num. No real EMPI used."
+        },
+        {
+          "name": "Patient_num",
+          "meaning": "Corresponding patient identifier. 对应的患者编号。",
+          "demo_type": "Text",
+          "example": "SYN_PAT_000001",
+          "missing": "None in demo",
+          "demo_rule": "Same generated ID as raw PATIENT_NUM."
+        },
+        {
+          "name": "month",
+          "meaning": "Calendar month in which the code or CUI occurred. 发生月份。",
+          "demo_type": "Integer",
+          "example": 1,
+          "missing": "None in demo",
+          "demo_rule": "Integer 1–12."
+        },
+        {
+          "name": "year",
+          "meaning": "Calendar year in which the code or CUI occurred. 发生年份。",
+          "demo_type": "Integer",
+          "example": 2022,
+          "missing": "None in demo",
+          "demo_rule": "2019–2025, an illustrative period, not the confirmed cohort coverage."
+        },
+        {
+          "name": "Rollup_Code",
+          "meaning": "Code after rollup for codified data. 汇总后的codified代码。",
+          "demo_type": "Text",
+          "example": "RXNORM:900001",
+          "missing": "None in demo",
+          "demo_rule": "RXNORM, PheCode, and LOINC format examples. Use the source codified mapping dictionary for real meanings."
+        },
+        {
+          "name": "N",
+          "meaning": "Number of occurrences of this Rollup_Code for this patient in this month. 该患者该月该代码出现次数。",
+          "demo_type": "Integer",
+          "example": 3,
+          "missing": "None in demo",
+          "demo_rule": "Positive integer 1–20. 70% of draws use 1–3, otherwise 4–20. Demonstration probabilities only."
+        }
+      ],
+      "row_meaning": "One synthetic patient, month, year, and Rollup_Code count."
+    },
+    {
+      "name": "NLP_data_monthly_fake_data.csv",
+      "columns": [
+        {
+          "name": "EMPI",
+          "meaning": "Patient identifier. Real EMPI is sensitive and stays on the source server. 真实EMPI需保留在源服务器。",
+          "demo_type": "Text",
+          "example": "SYN_EMPI_000001",
+          "missing": "None in demo",
+          "demo_rule": "Generated placeholder with one-to-one mapping to Patient_num. No real EMPI used."
+        },
+        {
+          "name": "month",
+          "meaning": "Calendar month in which the code or CUI occurred. 发生月份。",
+          "demo_type": "Integer",
+          "example": 1,
+          "missing": "None in demo",
+          "demo_rule": "Integer 1–12."
+        },
+        {
+          "name": "year",
+          "meaning": "Calendar year in which the code or CUI occurred. 发生年份。",
+          "demo_type": "Integer",
+          "example": 2022,
+          "missing": "None in demo",
+          "demo_rule": "2019–2025, an illustrative period, not the confirmed cohort coverage."
+        },
+        {
+          "name": "CUI",
+          "meaning": "Concept identifier in NLP results. NLP结果中的概念编号。",
+          "demo_type": "Text",
+          "example": "C0003864",
+          "missing": "None in demo",
+          "demo_rule": "C followed by seven digits. Includes the 13 user-provided examples and 20 generated examples. No medical meanings assigned."
+        },
+        {
+          "name": "N",
+          "meaning": "Number of occurrences of this CUI for this patient in this month. 该患者该月该CUI出现次数。",
+          "demo_type": "Integer",
+          "example": 3,
+          "missing": "None in demo",
+          "demo_rule": "Positive integer 1–20. 70% of draws use 1–3, otherwise 4–20. Demonstration probabilities only."
+        },
+        {
+          "name": "Patient_num",
+          "meaning": "Corresponding patient identifier. 对应的患者编号。",
+          "demo_type": "Text",
+          "example": "SYN_PAT_000001",
+          "missing": "None in demo",
+          "demo_rule": "Same generated ID as raw PATIENT_NUM."
+        }
+      ],
+      "row_meaning": "One synthetic patient, month, year, and CUI count."
+    }
+  ]
+}

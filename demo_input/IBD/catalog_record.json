@@ -1,0 +1,229 @@
+{
+  "dataset_id": "IBD",
+  "dataset_name": "MGB IBD Project Data",
+  "site": "MGB",
+  "contact": "Sara Morini",
+  "storage_platform": [
+    "MGB Windows/SFA",
+    "Eris"
+  ],
+  "has_o2_copy": false,
+  "description": "Raw EHR records, monthly codified/NLP counts, monthly laboratory summaries, and documentation of the five-aim MAJOR IBD project.",
+  "sources": [
+    {
+      "kind": "Original documentation",
+      "path": "Local authoring path omitted from public metadata",
+      "local_copy": "README_original.docx"
+    },
+    {
+      "kind": "User clarification",
+      "date": "2026-10-05"
+    }
+  ],
+  "source_counts_from_readme": {
+    "codified_unique_patients": 56704,
+    "nlp_unique_patients": 55436,
+    "note": "Overlapping sources. These are real documented cohort counts, not fake-data counts."
+  },
+  "files": [
+    {
+      "file": "IBD_2020_codified_raw_fake_data.csv",
+      "synthetic": true,
+      "rows": 1000,
+      "columns": [
+        "PATIENT_NUM",
+        "ENCOUNTER_NUM",
+        "START_DATE",
+        "END_DATE",
+        "CONCEPT_CD"
+      ],
+      "row_meaning": "One synthetic code occurrence for a patient and encounter."
+    },
+    {
+      "file": "codified_data_monthly_fake_data.csv",
+      "synthetic": true,
+      "rows": 1000,
+      "columns": [
+        "EMPI",
+        "Patient_num",
+        "month",
+        "year",
+        "Rollup_Code",
+        "N"
+      ],
+      "row_meaning": "One synthetic patient, month, year, and Rollup_Code count."
+    },
+    {
+      "file": "NLP_data_monthly_fake_data.csv",
+      "synthetic": true,
+      "rows": 1000,
+      "columns": [
+        "EMPI",
+        "month",
+        "year",
+        "CUI",
+        "N",
+        "Patient_num"
+      ],
+      "row_meaning": "One synthetic patient, month, year, and CUI count."
+    }
+  ],
+  "original_readmes": [
+    {
+      "kind": "ibd_lab",
+      "file": "IBD_LAB_MONTHLY_README.md",
+      "label": "IBD monthly laboratory data — original README",
+      "description": "Monthly lab values, columns, processing script, and reported coverage. Owner: Enci Cai.",
+      "source_path": "Local authoring path omitted from public metadata"
+    },
+    {
+      "kind": "ibd_project",
+      "file": "IBD_README.md",
+      "label": "MAJOR IBD project — original README",
+      "description": "Five aims, cohorts, analysis settings, processing folders, and reported results. Owner: Enci Cai.",
+      "source_path": "Local authoring path omitted from public metadata"
+    }
+  ],
+  "column_dictionary": "column_dictionary.csv",
+  "schema_file": "schema.json",
+  "code_inventory": "demo_code_inventory.csv",
+  "dictionaries": [
+    {
+      "name": "Codified mapping dictionary",
+      "kind": "Dictionary",
+      "location": "/data/aws-eris/Sara/IBD/2026-03-16_Refresh/codified_daily/dictionary_mapping_v3.4.tsv",
+      "description": "Mapping used for codified rollup. Dictionary contents have not been copied or verified locally.",
+      "source": "Sara documentation"
+    },
+    {
+      "name": "NLP dictionary",
+      "kind": "Dictionary",
+      "location": "/data/aws-eris/Sara/refactored-nile-processing-main/NILE/2026-05-26_IBD_dict_w_vedo_acr.txt",
+      "description": "NILE dictionary including the vedo acronym. Dictionary contents have not been copied or verified locally.",
+      "source": "Sara documentation"
+    },
+    {
+      "name": "CONCEPT_CD / NAME_CHAR lookup",
+      "kind": "Dictionary lookup",
+      "location": "//SMBgpa.partners.org/asw_mgb$/Sara/IBD/For_Enci_2026-10-05/2026-10-05_concept_dimension_full_table.csv",
+      "description": "The MAJOR project README identifies this full concept_dimension export with concept_path, concept_cd, and name_char. The export contents have not been loaded or verified locally.",
+      "source_kind": "ibd_project",
+      "source": "MAJOR IBD project README"
+    }
+  ],
+  "resources": [
+    {
+      "name": "IBD raw codified data",
+      "kind": "Raw data",
+      "location": "//SMBgpa.partners.org/asw_mgb$/Sara/IBD/IBD_2020_codified/raw",
+      "description": "IBD_2020 observation_fact extract, split into RData batches. Five columns in this demo.",
+      "source": "User clarification and Sara documentation"
+    },
+    {
+      "name": "IBD_2019_MART_EXTENDED",
+      "kind": "Raw data",
+      "location": "//SMBgpa.partners.org/asw_mgb$/SHARE/IBD_2019_MART_EXTENDED",
+      "alternative_location": "/data/aws-eris/IBD_2019_MART_EXTENDED",
+      "description": "RPDR source with diagnosis, encounter, lab, medication, and other files. Full file schemas have not been supplied.",
+      "source": "User clarification and Sara documentation"
+    },
+    {
+      "name": "IBD_2019_2025_MART",
+      "kind": "Raw data",
+      "location": "//SMBgpa.partners.org/asw_mgb$/SHARE/IBD_2019_2025_MART",
+      "alternative_location": "/data/aws-eris/IBD_2019_2025_MART",
+      "description": "RPDR source with diagnosis, encounter, lab, medication, and other files. Full file schemas have not been supplied.",
+      "source": "User clarification and Sara documentation"
+    },
+    {
+      "name": "IBD daily codified data",
+      "kind": "Processed data",
+      "location": "\\\\eristwofs.partners.org\\ASW-ERIS\\Sara\\IBD\\2026-03-16_Refresh\\codified_daily",
+      "alternative_location": "/data/aws-eris/Sara/IBD/2026-03-16_Refresh/codified_daily",
+      "file": "merged_daily_data.RDS",
+      "description": "Day-level diagnosis, medication, procedure, and lab data using Rollup_Code. No daily fake file was generated because its complete schema was not supplied.",
+      "source": "User clarification and Sara documentation"
+    },
+    {
+      "name": "IBD monthly codified counts",
+      "kind": "Processed data",
+      "location": "\\\\eristwofs.partners.org\\ASW-ERIS\\IBD_DATA_REAGGREGATED\\codified_data_monthly.Rdata",
+      "alternative_location": "/data/aws-eris/IBD_DATA_REAGGREGATED/codified_data_monthly.RData",
+      "description": "EMPI, Patient_num, month, year, Rollup_Code, N. User supplied the structure and occurrence-count meaning.",
+      "source": "User clarification"
+    },
+    {
+      "name": "IBD monthly NLP counts",
+      "kind": "Processed data",
+      "location": "\\\\eristwofs.partners.org\\ASW-ERIS\\IBD_DATA_REAGGREGATED\\NLP_data_monthly.RData",
+      "alternative_location": "/data/aws-eris/IBD_DATA_REAGGREGATED/NLP_data_monthly.RData",
+      "description": "EMPI, month, year, CUI, N, Patient_num. N counts CUI occurrences for a patient in a month.",
+      "source": "User clarification"
+    },
+    {
+      "name": "Codified mapping dictionary",
+      "kind": "Dictionary",
+      "location": "/data/aws-eris/Sara/IBD/2026-03-16_Refresh/codified_daily/dictionary_mapping_v3.4.tsv",
+      "description": "Mapping used for codified rollup. Dictionary contents have not been copied or verified locally.",
+      "source": "Sara documentation"
+    },
+    {
+      "name": "NLP dictionary",
+      "kind": "Dictionary",
+      "location": "/data/aws-eris/Sara/refactored-nile-processing-main/NILE/2026-05-26_IBD_dict_w_vedo_acr.txt",
+      "description": "NILE dictionary including the vedo acronym. Dictionary contents have not been copied or verified locally.",
+      "source": "Sara documentation"
+    },
+    {
+      "name": "CONCEPT_CD / NAME_CHAR lookup",
+      "kind": "Dictionary lookup",
+      "location": "//SMBgpa.partners.org/asw_mgb$/Sara/IBD/For_Enci_2026-10-05/2026-10-05_concept_dimension_full_table.csv",
+      "description": "The MAJOR project README identifies this full concept_dimension export with concept_path, concept_cd, and name_char. The export contents have not been loaded or verified locally.",
+      "source_kind": "ibd_project",
+      "source": "MAJOR IBD project README"
+    },
+    {
+      "name": "Codified processing script",
+      "kind": "Script",
+      "location": "/data/aws-eris/Sara/IBD/2026-03-16_Refresh/codified_rollup.R",
+      "description": "Script used for codified processing and monthly counts.",
+      "source": "Sara documentation"
+    },
+    {
+      "name": "NLP processing script",
+      "kind": "Script",
+      "location": "/data/aws-eris/Sara/IBD/2026-03-16_Refresh/2026-03-16_NLP_Processing.R",
+      "description": "Script used for NLP processing and monthly counts.",
+      "source": "Sara documentation"
+    }
+  ],
+  "assumptions": {
+    "seed": 20261005,
+    "rows_per_data_file": 1000,
+    "synthetic_patients": 200,
+    "date_range_for_demo": [
+      "2019-01-01",
+      "2025-12-31"
+    ],
+    "end_date_probability": {
+      "missing": 0.55,
+      "same_as_start": 0.35,
+      "later": 0.1
+    },
+    "monthly_count_range": [
+      1,
+      20
+    ],
+    "id_type": "Text with SYN_ prefix. Source R ID storage types have not been verified.",
+    "monthly_files": "Independent demonstration records; they are not derived by aggregating this raw fake file.",
+    "code_validity": "Generated codes preserve format only; validity and medical meaning are not asserted."
+  },
+  "search_rules": [
+    "Return dictionary paths and purpose alongside dataset results.",
+    "Real EMPI stays on the source server.",
+    "Do not claim an O2 copy exists.",
+    "Do not use fake records as evidence of real cohort distributions or code coverage.",
+    "Microbiome availability is not documented in the supplied source.",
+    "The MAJOR IBD README documents a concept_dimension export for concept names; the export itself has not been loaded locally."
+  ]
+}

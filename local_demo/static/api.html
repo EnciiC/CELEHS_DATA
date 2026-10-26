@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CELEHS Web API</title><link rel="stylesheet" href="/style.css"><script src="/api.js" defer></script></head>
+<body><div class="content" style="max-width:1000px">
+<a href="/">← Dataset Finder</a>
+<div class="page-heading" style="margin-top:25px"><span class="eyebrow">LOCAL WEB API</span><h1>CELEHS Dataset API</h1><p>Try requests against the local dataset search tool. All assets and requests on this page stay local.</p></div>
+<div class="panel-box"><h2>Try a request</h2>
+<form id="api-form"><p><label for="endpoint">Endpoint</label><br><select id="endpoint" style="max-width:100%;padding:9px;margin-top:7px"><option value="/api/health">GET /api/health</option><option value="/api/datasets?q=AD">GET /api/datasets?q=AD</option><option value="/api/datasets/UPMC_AD/schema">GET /api/datasets/UPMC_AD/schema</option><option value="/api/chat">POST /api/chat</option></select></p>
+<label for="api-question">Question for POST /api/chat</label><textarea id="api-question" maxlength="1500" style="border:1px solid #dfe7e4;border-radius:6px;margin:10px 0">I wanted to see AD, what we have now</textarea><button class="primary-button" id="run-request">Run request</button></form>
+<pre id="api-output" style="max-height:550px;overflow:auto;white-space:pre-wrap;font-size:11px"></pre></div>
+<div class="panel-box"><h2>Endpoints</h2><div class="table-scroll"><table><thead><tr><th>Method</th><th>Path</th><th>Purpose</th></tr></thead><tbody>
+<tr><td>GET</td><td>/api/health</td><td>Local service and model status.</td></tr>
+<tr><td>GET</td><td>/api/datasets?q=AD</td><td>List or filter datasets.</td></tr>
+<tr><td>GET</td><td>/api/datasets/{id}</td><td>Dataset information and file references.</td></tr>
+<tr><td>GET</td><td>/api/datasets/{id}/schema</td><td>Column descriptions and types.</td></tr>
+<tr><td>GET</td><td>/api/datasets/{id}/readme/{kind}</td><td>Documents. kind: notes (short file guide), synthetic (how the fake data were made), tracker (matching spreadsheet entry), original, original_section. catalog is a compatibility alias for synthetic. Optional files parameter scopes the short guide to selected fake-data filenames.</td></tr>
+<tr><td>GET</td><td>/api/datasets/{id}/files/{filename}/preview?limit=10</td><td>Synthetic rows only, maximum 50.</td></tr>
+<tr><td>GET</td><td>/api/datasets/{id}/download/{filename}</td><td>Approved synthetic CSV or documentation download.</td></tr>
+<tr><td>POST</td><td>/api/chat</td><td>Body: {"query":"Show IBD","use_llm":true}</td></tr>
+<tr><td>POST</td><td>/api/catalog/reload</td><td>Reload prepared local files.</td></tr>
+</tbody></table></div><p>Dataset IDs: IBD, MGB_AD, UPMC_AD.</p><a href="/openapi.json">OpenAPI JSON specification</a></div>
+</div></body></html>

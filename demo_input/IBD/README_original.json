@@ -1,0 +1,137 @@
+{
+  "text": "IBD Project Data\nCurrent as of 2026-09-28, created by SM Sweet\n2026-09-28: Refreshed extraction of raw codified data (observation_fact table) to include additional columns\n2026-09-24: Added descriptions for raw codified data from database, paths to extracted visit_dimension table\nData for this project comes from 3 overlapping sources.\nIBD_2020 database: a MSSQL database\nIBD_2019_2025_MART and IBD_2019_MART_EXTENDED: RPDR files\nMerged RPDR files\nIBD_2020\nDiagnosis\nMedication\nLab\nProcedure\nUnique patients\n40,679\n37,636\n34,902\n39,647\n39,850\nUnique codes\n37,267\n30,128\n106\n21,496\n126,476\nMin date\n1990-01-03\n1840-12-31\n1990-01-01\n1990-01-02\n1840-12-31\n25% date\n2017-01-23\n2015-11-09\n2015-03-25\n2015-09-17\n2008-06-06\nMedian date\n2020-08-05\n2019-12-05\n2019-12-30\n2019-10-31\n2014-01-31\n75% date\n2022-10-25\n2022-07-12\n2022-08-18\n2022-06-25\n2017-08-24\nMax date\n2025-03-09\n2026-07-22\n2025-03-09\n2028-09-27\n2101-08-27\nCodified data\n0. Raw Data\nIBD_2020 database\nAvailable on Partners MSSQL server MGBSQL0055.partners.org, database IBD_2020\nCodified data (observation_fact table) available in RData format in batches split by patients: //SMBgpa.partners.org/asw_mgb$/Sara/IBD/IBD_2020_codified/raw\nData extracted using script: \\\\SMBGPA.partners.org\\asw_mgb$\\Sara\\IBD\\IBD_2020_codified\\raw_extraction.R, extracts PATIENT_NUM, ENCOUNTER_NUM, MODIFIER_CD, START_DATE, END_DATE, CONCEPT_CD\nData containing just PATIENT_NUM, CONCEPT_CD, START_DATE (Generated May 2026) available in archive subfolder\nVisit dimension table available in RData format in batches split by patients: //SMBgpa.partners.org/asw_mgb$/Sara/IBD/IBD_2020_codified/visit_dimension_table/raw\nData extracted using script: //SMBgpa.partners.org/asw_mgb$/Sara/IBD/IBD_2020_codified/visit_dimension_table/visit_dimension_extraction.R\nRPDR sources\nAvailable on SFA: //SMBgpa.partners.org/asw_mgb$/SHARE/IBD_2019_MART_EXTENDED\n//SMBgpa.partners.org/asw_mgb$/SHARE/IBD_2019_2025_MART\nAvailable on Eris: /data/aws-eris/IBD_2019_MART_EXTENDED, IBD_2019_2025_MART\n1. Processed Data\nDay-level data (split into RPDR and database) can be accessed on Eris at /data/aws-eris/Sara/IBD/2026-03-16_Refresh/codified_daily. The merged data can be found in the same directory under merged_daily_data.RDS.\nUnique patients\n56,704\nUnique codes\n40,125\nMin date\n1840-12-31\n25% date\n2009-09-18\nMedian date\n2015-07-25\n75% date\n2019-06-14\nMax date\n2101-08-27\nA few details to note:\nFind the code I used to generate this data at /data/aws-eris/Sara/IBD/2026-03-16_Refresh/codified_rollup.R\nFind the dictionary I used to map at /data/aws-eris/Sara/IBD/2026-03-16_Refresh/codified_daily/dictionary_mapping_v3.4.tsv\nI aggregate using a variable called Rollup_Code. Where the local code mapped to a group code, Rollup_Code is set to be the group code. If no group code is available, Local_Ontology_Code is used, and if that is not available the local code is used. This means all codes are preserved in the monthly count, even if they did not have a mapping in the hierarchy.\n2. Monthly Count Data\nAvailable on Eris at /data/aws-eris/IBD_DATA_REAGGREGATED/codified_data_monthly.RData.\nFor the code used to generate this, please reference /data/aws-eris/Sara/IBD/2026-03-16_Refresh/codified_rollup.R\nNLP data\n0. Raw Data\nNotes are stored at the following paths:\n/data/aws-eris/IBD_2020_NOTES for the IBD_2020 database (notes were saved directly from the database and are grouped by patient number)\n/data/aws-eris/IBD_2019_2025_MART for RPDR\n/data/aws-eris/IBD_2019_MART_EXTENDED for RPDR\n1. NILE results\nAll files were run in NILE. However, some files are not clinical notes and are excluded during postprocessing. You can find the NILE results for the excluded documents at:\nIBD_2019_MART: /data/aws-eris/Sara/IBD_NLP_result/IBD_2019_MART/excluded\nIBD_2019_2025_MART: /data/aws-eris/Sara/IBD_NLP_result/IBD_2019_2025_MART/excluded\nYou can find the NILE results in the subdirectories of /data/aws-eris/Sara/IBD_NLP_result/vedo_acronym, where there is one directory per data source. This data contains “vedo” as an acronym, AB00vedo, which can then be combined with the main vedolizumab CUI by the analyst.\nThe dictionary used can be found at /data/aws-eris/Sara/refactored-nile-processing-main/NILE/2026-05-26_IBD_dict_w_vedo_acr.txt. It is the same as the dictionary 2026-03-10_IBD_dict_w_drugs_and_brands.txt with the exception of the first line for the vedo acronym CUI.\n2. Processed Data\nData breakdown per data source following NILE run\nIBD_2020\nIBD_2019_MART\nIBD_2019_2025_MART\nTotal\nUnique patients\n39,173\n20,999\n32,174\n55,436\nMinimum date\n1841-01-02\n2019-01-01\n1990-01-02\n1841-01-02\n25% date\n2011-07-06\n2020-02-11\n2019-01-17\n2015-07-06\nMedian date\n2015-12-31\n2021-08-20\n2021-08-04\n2019-07-23\n75% date\n2018-07-18\n2022-12-09\n2023-07-21\n2022-08-27\nMaximum date\n6466-05-01\n2024-04-02\n2025-04-15\n6466-05-01\n3. Monthly Count Data\nMonthly count data is stored at /data/aws-eris/IBD_DATA_REAGGREGATED/NLP_data_monthly.RData, with code used to process the data at /data/aws-eris/Sara/IBD/2026-03-16_Refresh/2026-03-16_NLP_Processing.R",
+  "html": "<h2>IBD Project Data</h2><p>Current as of 2026-09-28, created by SM Sweet</p><p>2026-09-28: Refreshed extraction of raw codified data (observation_fact table) to include additional columns</p><p>2026-09-24: Added descriptions for raw codified data from database, paths to extracted visit_dimension table</p><p>Data for this project comes from 3 overlapping sources.</p><p><strong>IBD_2020 database: a MSSQL database</strong></p><p><strong>IBD_2019_2025_MART and IBD_2019_MART_EXTENDED: RPDR files</strong></p><div class=\"table-scroll\"><table class=\"document-table\"><tr><td colspan=\"1\" rowspan=\"1\"></td><td colspan=\"4\" rowspan=\"1\"><p>Merged RPDR files</p></td><td colspan=\"1\" rowspan=\"2\"><p>IBD_2020</p></td></tr><tr><td colspan=\"1\" rowspan=\"1\"></td><td colspan=\"1\" rowspan=\"1\"><p>Diagnosis</p></td><td colspan=\"1\" rowspan=\"1\"><p>Medication</p></td><td colspan=\"1\" rowspan=\"1\"><p>Lab</p></td><td colspan=\"1\" rowspan=\"1\"><p>Procedure</p></td></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>Unique patients</p></td><td colspan=\"1\" rowspan=\"1\"><p>40,679</p></td><td colspan=\"1\" rowspan=\"1\"><p>37,636</p></td><td colspan=\"1\" rowspan=\"1\"><p>34,902</p></td><td colspan=\"1\" rowspan=\"1\"><p>39,647</p></td><td colspan=\"1\" rowspan=\"1\"><p>39,850</p></td></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>Unique codes</p></td><td colspan=\"1\" rowspan=\"1\"><p>37,267</p></td><td colspan=\"1\" rowspan=\"1\"><p>30,128</p></td><td colspan=\"1\" rowspan=\"1\"><p>106</p></td><td colspan=\"1\" rowspan=\"1\"><p>21,496</p></td><td colspan=\"1\" rowspan=\"1\"><p>126,476</p></td></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>Min date</p></td><td colspan=\"1\" rowspan=\"1\"><p>1990-01-03</p></td><td colspan=\"1\" rowspan=\"1\"><p>1840-12-31</p></td><td colspan=\"1\" rowspan=\"1\"><p>1990-01-01</p></td><td colspan=\"1\" rowspan=\"1\"><p>1990-01-02</p></td><td colspan=\"1\" rowspan=\"1\"><p>1840-12-31</p></td></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>25% date</p></td><td colspan=\"1\" rowspan=\"1\"><p>2017-01-23</p></td><td colspan=\"1\" rowspan=\"1\"><p>2015-11-09</p></td><td colspan=\"1\" rowspan=\"1\"><p>2015-03-25</p></td><td colspan=\"1\" rowspan=\"1\"><p>2015-09-17</p></td><td colspan=\"1\" rowspan=\"1\"><p>2008-06-06</p></td></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>Median date</p></td><td colspan=\"1\" rowspan=\"1\"><p>2020-08-05</p></td><td colspan=\"1\" rowspan=\"1\"><p>2019-12-05</p></td><td colspan=\"1\" rowspan=\"1\"><p>2019-12-30</p></td><td colspan=\"1\" rowspan=\"1\"><p>2019-10-31</p></td><td colspan=\"1\" rowspan=\"1\"><p>2014-01-31</p></td></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>75% date</p></td><td colspan=\"1\" rowspan=\"1\"><p>2022-10-25</p></td><td colspan=\"1\" rowspan=\"1\"><p>2022-07-12</p></td><td colspan=\"1\" rowspan=\"1\"><p>2022-08-18</p></td><td colspan=\"1\" rowspan=\"1\"><p>2022-06-25</p></td><td colspan=\"1\" rowspan=\"1\"><p>2017-08-24</p></td></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>Max date</p></td><td colspan=\"1\" rowspan=\"1\"><p>2025-03-09</p></td><td colspan=\"1\" rowspan=\"1\"><p>2026-07-22</p></td><td colspan=\"1\" rowspan=\"1\"><p>2025-03-09</p></td><td colspan=\"1\" rowspan=\"1\"><p>2028-09-27</p></td><td colspan=\"1\" rowspan=\"1\"><p>2101-08-27</p></td></tr></table></div><h3>Codified data</h3><h3>0. Raw Data</h3><p><strong>IBD_2020 database</strong></p><p><strong>• Available on Partners MSSQL server MGBSQL0055.partners.org, database IBD_2020</strong></p><p>• Codified data (observation_fact table) available in RData format in batches split by patients: <code class=\"doc-inline-path\">//SMBgpa.partners.org/asw_mgb$/Sara/IBD/IBD_2020_codified/raw</code></p><p>• Data extracted using script: <code class=\"doc-inline-path\">\\\\SMBGPA.partners.org\\asw_mgb$\\Sara\\IBD\\IBD_2020_codified\\raw_extraction.R</code>, extracts PATIENT_NUM, ENCOUNTER_NUM, MODIFIER_CD, START_DATE, END_DATE, CONCEPT_CD</p><p>• Data containing just PATIENT_NUM, CONCEPT_CD, START_DATE (Generated May 2026) available in archive subfolder</p><p>• Visit dimension table available in RData format in batches split by patients: <code class=\"doc-inline-path\">//SMBgpa.partners.org/asw_mgb$/Sara/IBD/IBD_2020_codified/visit_dimension_table/raw</code></p><p>• Data extracted using script: <code class=\"doc-inline-path\">//SMBgpa.partners.org/asw_mgb$/Sara/IBD/IBD_2020_codified/visit_dimension_table/visit_dimension_extraction.R</code></p><p><strong>RPDR sources</strong></p><p>• Available on SFA: <code class=\"doc-inline-path\">//SMBgpa.partners.org/asw_mgb$/SHARE/IBD_2019_MART_EXTENDED</code></p><p class=\"doc-path\"><code class=\"doc-inline-path\">//SMBgpa.partners.org/asw_mgb$/SHARE/IBD_2019_2025_MART</code></p><p>• Available on Eris: <code class=\"doc-inline-path\">/data/aws-eris/IBD_2019_MART_EXTENDED</code>, IBD_2019_2025_MART</p><h3>1. Processed Data</h3><p>Day-level data (split into RPDR and database) can be accessed on Eris at <code class=\"doc-inline-path\">/data/aws-eris/Sara/IBD/2026-03-16_Refresh/codified_daily.</code> The merged data can be found in the same directory under merged_daily_data.RDS.</p><div class=\"table-scroll\"><table class=\"document-table\"><tr><td colspan=\"1\" rowspan=\"1\"><p>Unique patients</p></td><td colspan=\"1\" rowspan=\"1\"><p>56,704</p></td></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>Unique codes</p></td><td colspan=\"1\" rowspan=\"1\"><p>40,125</p></td></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>Min date</p></td><td colspan=\"1\" rowspan=\"1\"><p>1840-12-31</p></td></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>25% date</p></td><td colspan=\"1\" rowspan=\"1\"><p>2009-09-18</p></td></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>Median date</p></td><td colspan=\"1\" rowspan=\"1\"><p>2015-07-25</p></td></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>75% date</p></td><td colspan=\"1\" rowspan=\"1\"><p>2019-06-14</p></td></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>Max date</p></td><td colspan=\"1\" rowspan=\"1\"><p>2101-08-27</p></td></tr></table></div><p>A few details to note:</p><p>• Find the code I used to generate this data at <code class=\"doc-inline-path\">/data/aws-eris/Sara/IBD/2026-03-16_Refresh/codified_rollup.R</code></p><p>• Find the dictionary I used to map at <code class=\"doc-inline-path\">/data/aws-eris/Sara/IBD/2026-03-16_Refresh/codified_daily/dictionary_mapping_v3.4.tsv</code></p><p>• I aggregate using a variable called Rollup_Code. Where the local code mapped to a group code, Rollup_Code is set to be the group code. If no group code is available, Local_Ontology_Code is used, and if that is not available the local code is used. This means all codes are preserved in the monthly count, even if they did not have a mapping in the hierarchy.</p><h3>2. Monthly Count Data</h3><p>Available on Eris at <code class=\"doc-inline-path\">/data/aws-eris/IBD_DATA_REAGGREGATED/codified_data_monthly.RData.</code></p><p>For the code used to generate this, please reference <code class=\"doc-inline-path\">/data/aws-eris/Sara/IBD/2026-03-16_Refresh/codified_rollup.R</code></p><h3>NLP data</h3><h3>0. Raw Data</h3><p>Notes are stored at the following paths:</p><p class=\"doc-path\"><code class=\"doc-inline-path\">/data/aws-eris/IBD_2020_NOTES</code> for the IBD_2020 database (notes were saved directly from the database and are grouped by patient number)</p><p class=\"doc-path\"><code class=\"doc-inline-path\">/data/aws-eris/IBD_2019_2025_MART</code> for RPDR</p><p class=\"doc-path\"><code class=\"doc-inline-path\">/data/aws-eris/IBD_2019_MART_EXTENDED</code> for RPDR</p><h3>1. NILE results</h3><p>All files were run in NILE. However, some files are not clinical notes and are excluded during postprocessing. You can find the NILE results for the excluded documents at:</p><p>IBD_2019_MART: <code class=\"doc-inline-path\">/data/aws-eris/Sara/IBD_NLP_result/IBD_2019_MART/excluded</code></p><p>IBD_2019_2025_MART: <code class=\"doc-inline-path\">/data/aws-eris/Sara/IBD_NLP_result/IBD_2019_2025_MART/excluded</code></p><p>You can find the NILE results in the subdirectories of <code class=\"doc-inline-path\">/data/aws-eris/Sara/IBD_NLP_result/vedo_acronym</code>, where there is one directory per data source. This data contains “vedo” as an acronym, AB00vedo, which can then be combined with the main vedolizumab CUI by the analyst.</p><p>The dictionary used can be found at <code class=\"doc-inline-path\">/data/aws-eris/Sara/refactored-nile-processing-main/NILE/2026-05-26_IBD_dict_w_vedo_acr.txt.</code> It is the same as the dictionary 2026-03-10_IBD_dict_w_drugs_and_brands.txt with the exception of the first line for the vedo acronym CUI.</p><h3>2. Processed Data</h3><p>Data breakdown per data source following NILE run</p><div class=\"table-scroll\"><table class=\"document-table\"><tr><td colspan=\"1\" rowspan=\"1\"></td><td colspan=\"1\" rowspan=\"1\"><p><strong>IBD_2020</strong></p></td><td colspan=\"1\" rowspan=\"1\"><p><strong>IBD_2019_MART</strong></p></td><td colspan=\"1\" rowspan=\"1\"><p><strong>IBD_2019_2025_MART</strong></p></td><td colspan=\"1\" rowspan=\"1\"><p><strong>Total</strong></p></td></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>Unique patients</p></td><td colspan=\"1\" rowspan=\"1\"><p>39,173</p></td><td colspan=\"1\" rowspan=\"1\"><p>20,999</p></td><td colspan=\"1\" rowspan=\"1\"><p>32,174</p></td><td colspan=\"1\" rowspan=\"1\"><p>55,436</p></td></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>Minimum date</p></td><td colspan=\"1\" rowspan=\"1\"><p>1841-01-02</p></td><td colspan=\"1\" rowspan=\"1\"><p>2019-01-01</p></td><td colspan=\"1\" rowspan=\"1\"><p>1990-01-02</p></td><td colspan=\"1\" rowspan=\"1\"><p>1841-01-02</p></td></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>25% date</p></td><td colspan=\"1\" rowspan=\"1\"><p>2011-07-06</p></td><td colspan=\"1\" rowspan=\"1\"><p>2020-02-11</p></td><td colspan=\"1\" rowspan=\"1\"><p>2019-01-17</p></td><td colspan=\"1\" rowspan=\"1\"><p>2015-07-06</p></td></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>Median date</p></td><td colspan=\"1\" rowspan=\"1\"><p>2015-12-31</p></td><td colspan=\"1\" rowspan=\"1\"><p>2021-08-20</p></td><td colspan=\"1\" rowspan=\"1\"><p>2021-08-04</p></td><td colspan=\"1\" rowspan=\"1\"><p>2019-07-23</p></td></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>75% date</p></td><td colspan=\"1\" rowspan=\"1\"><p>2018-07-18</p></td><td colspan=\"1\" rowspan=\"1\"><p>2022-12-09</p></td><td colspan=\"1\" rowspan=\"1\"><p>2023-07-21</p></td><td colspan=\"1\" rowspan=\"1\"><p>2022-08-27</p></td></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>Maximum date</p></td><td colspan=\"1\" rowspan=\"1\"><p>6466-05-01</p></td><td colspan=\"1\" rowspan=\"1\"><p>2024-04-02</p></td><td colspan=\"1\" rowspan=\"1\"><p>2025-04-15</p></td><td colspan=\"1\" rowspan=\"1\"><p>6466-05-01</p></td></tr></table></div><h3>3. Monthly Count Data</h3><p>Monthly count data is stored at <code class=\"doc-inline-path\">/data/aws-eris/IBD_DATA_REAGGREGATED/NLP_data_monthly.RData</code>, with code used to process the data at <code class=\"doc-inline-path\">/data/aws-eris/Sara/IBD/2026-03-16_Refresh/2026-03-16_NLP_Processing.R</code></p>",
+  "date_summaries": [
+    {
+      "name": "RPDR diagnosis",
+      "level": "Raw codified",
+      "table": 1,
+      "default": false,
+      "dates": {
+        "Minimum": "1990-01-03",
+        "25th percentile": "2017-01-23",
+        "Median": "2020-08-05",
+        "75th percentile": "2022-10-25",
+        "Maximum": "2025-03-09"
+      }
+    },
+    {
+      "name": "RPDR medication",
+      "level": "Raw codified",
+      "table": 1,
+      "default": false,
+      "dates": {
+        "Minimum": "1840-12-31",
+        "25th percentile": "2015-11-09",
+        "Median": "2019-12-05",
+        "75th percentile": "2022-07-12",
+        "Maximum": "2026-07-22"
+      }
+    },
+    {
+      "name": "RPDR lab",
+      "level": "Raw codified",
+      "table": 1,
+      "default": false,
+      "dates": {
+        "Minimum": "1990-01-01",
+        "25th percentile": "2015-03-25",
+        "Median": "2019-12-30",
+        "75th percentile": "2022-08-18",
+        "Maximum": "2025-03-09"
+      }
+    },
+    {
+      "name": "RPDR procedure",
+      "level": "Raw codified",
+      "table": 1,
+      "default": false,
+      "dates": {
+        "Minimum": "1990-01-02",
+        "25th percentile": "2015-09-17",
+        "Median": "2019-10-31",
+        "75th percentile": "2022-06-25",
+        "Maximum": "2028-09-27"
+      }
+    },
+    {
+      "name": "IBD_2020 codified",
+      "level": "Raw codified",
+      "table": 1,
+      "default": false,
+      "dates": {
+        "Minimum": "1840-12-31",
+        "25th percentile": "2008-06-06",
+        "Median": "2014-01-31",
+        "75th percentile": "2017-08-24",
+        "Maximum": "2101-08-27"
+      }
+    },
+    {
+      "name": "Processed codified",
+      "level": "Processed codified (merged daily data)",
+      "table": 2,
+      "default": true,
+      "dates": {
+        "Minimum": "1840-12-31",
+        "25th percentile": "2009-09-18",
+        "Median": "2015-07-25",
+        "75th percentile": "2019-06-14",
+        "Maximum": "2101-08-27"
+      }
+    },
+    {
+      "name": "IBD_2020 NLP",
+      "level": "Processed NLP",
+      "table": 3,
+      "default": false,
+      "dates": {
+        "Minimum": "1841-01-02",
+        "25th percentile": "2011-07-06",
+        "Median": "2015-12-31",
+        "75th percentile": "2018-07-18",
+        "Maximum": "6466-05-01"
+      }
+    },
+    {
+      "name": "IBD_2019_MART NLP",
+      "level": "Processed NLP",
+      "table": 3,
+      "default": false,
+      "dates": {
+        "Minimum": "2019-01-01",
+        "25th percentile": "2020-02-11",
+        "Median": "2021-08-20",
+        "75th percentile": "2022-12-09",
+        "Maximum": "2024-04-02"
+      }
+    },
+    {
+      "name": "IBD_2019_2025_MART NLP",
+      "level": "Processed NLP",
+      "table": 3,
+      "default": false,
+      "dates": {
+        "Minimum": "1990-01-02",
+        "25th percentile": "2019-01-17",
+        "Median": "2021-08-04",
+        "75th percentile": "2023-07-21",
+        "Maximum": "2025-04-15"
+      }
+    },
+    {
+      "name": "Processed NLP (Total)",
+      "level": "Processed NLP",
+      "table": 3,
+      "default": true,
+      "dates": {
+        "Minimum": "1841-01-02",
+        "25th percentile": "2015-07-06",
+        "Median": "2019-07-23",
+        "75th percentile": "2022-08-27",
+        "Maximum": "6466-05-01"
+      }
+    }
+  ],
+  "note": "Readable export of the original document body. Word review comments, attachments, and document metadata are not included."
+}

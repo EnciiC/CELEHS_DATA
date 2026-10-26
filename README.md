@@ -57,5 +57,3 @@ Publishing this repository does not deploy a working website. This version still
 An online version needs a hosted backend and model service, explicit allowed domains, HTTPS, request limits, a spending cap, and protected administrative operations. A hosted-model API adapter and deployment configuration are not configured in this release. Keep provider credentials in backend secrets, never in browser code or this repository. Do not expose an Ollama service directly to the internet.
 
 Review source-document permissions before redistributing them or sending them to a hosted model provider. Adding sign-in later does not retract copies already made from a public repository. Generated examples are for file-format and software testing only, not clinical inference or treatment advice.
-
-

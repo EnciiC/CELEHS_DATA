@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>CELEHS Dataset Finder</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <a class="brand" href="/" aria-label="CELEHS home"><span class="brand-mark">C</span><span>CELEHS<small>Dataset Finder</small></span></a>
+    <p class="nav-caption">WORKSPACE</p>
+    <nav aria-label="Main navigation">
+      <button class="nav-button active" id="nav-ask">Ask a question</button>
+      <button class="nav-button" id="nav-browse">Browse datasets</button>
+      <a class="nav-button" href="/docs" target="_blank" rel="noopener">Web API docs <span aria-hidden="true">↗</span></a>
+    </nav>
+    <p class="nav-caption">IN THIS DEMO</p>
+    <div id="sidebar-datasets"></div>
+    <div class="sidebar-bottom"><span class="status-dot" id="status-dot"></span><span id="model-status">Checking local model…</span><small>Runs on this computer</small></div>
+  </aside>
+  <main>
+    <header class="topbar"><span>Lab resources <span class="separator">/</span> <strong id="page-label">Search</strong></span><button class="quiet-button" id="reload">Reload local files</button></header>
+    <div class="content">
+      <section id="ask-view">
+        <div class="page-heading"><span class="eyebrow">LOCAL DEMO</span><h1>Search lab datasets</h1><p>Find source files, read documentation, and explore synthetic examples.</p></div>
+        <form id="question-form" class="question-box">
+          <label class="sr-only" for="question">Your dataset question</label>
+          <textarea id="question" rows="2" maxlength="1500" placeholder="Describe the dataset or research question you have in mind…" required></textarea>
+          <div class="question-footer single-action"><button class="primary-button" id="ask-button" type="submit">Search datasets <span aria-hidden="true">→</span></button></div>
+        </form>
+        <div class="examples"><span>Try a question</span><button data-query="I wanted to see IBD data, guide me and let me know where I can find it">Where can I find IBD data?</button><button data-query="I wanted to see AD, what we have now">What AD data do we have?</button><button data-query="Can you show me what IBD monthly count data look like?">IBD monthly structure</button><button data-query="Compare the monthly count columns for MGB AD and UPMC AD">Compare AD monthly columns</button><button data-query="Show IBD monthly lab columns">IBD monthly lab data</button><button data-query="What can we do with IBD data?">MAJOR IBD project aims</button></div>
+        <div id="conversation" aria-live="polite"></div>
+        <div id="initial-catalog"><div class="section-heading"><h2>Available in this demo</h2><span id="dataset-total">3 dataset groups</span></div><div class="dataset-grid" id="home-cards"></div></div>
+      </section>
+      <section id="browse-view" hidden><div class="page-heading"><span class="eyebrow">CURRENT INVENTORY</span><h1>Browse datasets</h1><p>These three groups have documentation and synthetic examples ready to inspect.</p></div><div class="dataset-grid" id="browse-cards"></div></section>
+      <section id="detail-view" hidden></section>
+      <footer class="page-footer">Real source data remain on O2 or MGB/Eris. Data-file previews and CSV downloads here are synthetic.</footer>
+    </div>
+  </main>
+  <dialog id="document-dialog"><div class="dialog-header"><div><h2 id="document-title"></h2><p id="document-scope"></p></div><button id="close-document" class="quiet-button" aria-label="Close document">Close ✕</button></div><div id="document-text" class="document-content"></div></dialog>
+  <div id="toast" role="status" hidden></div>
+</body>
+</html>

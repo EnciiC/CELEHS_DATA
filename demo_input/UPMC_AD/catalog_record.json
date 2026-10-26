@@ -1,0 +1,201 @@
+{
+  "dataset_id": "UPMC_AD",
+  "dataset_name": "UPMC Alzheimer’s disease data",
+  "site": "UPMC",
+  "contact": "Sara Morini",
+  "storage_platform": [
+    "O2"
+  ],
+  "has_o2_copy": true,
+  "description": "Monthly codified and NLP feature counts for the UPMC AD project. Raw and daily-level data are also documented in the original README.",
+  "sources": [
+    {
+      "kind": "Original documentation",
+      "path": "Local authoring path omitted from public metadata",
+      "local_copy": "README_original.docx"
+    },
+    {
+      "kind": "User-provided schema and clarification",
+      "date": "2026-10-06",
+      "note": "Only schema, object classes, dimensions and code formats retained. No source patient rows or patient identifiers copied."
+    }
+  ],
+  "files": [
+    {
+      "file": "Monthly_codified_fake_data.csv",
+      "synthetic": true,
+      "rows": 1000,
+      "unique_synthetic_patients": 200,
+      "columns": [
+        "patient_num",
+        "month",
+        "year",
+        "feature_id",
+        "Group_Code_Count"
+      ],
+      "source_r_classes": [
+        "integer64",
+        "character",
+        "character",
+        "character",
+        "integer"
+      ],
+      "source_object": "dat.monthly",
+      "source_object_class": [
+        "grouped_df",
+        "tbl_df",
+        "tbl",
+        "data.frame"
+      ],
+      "source_path": "/n/data1/hsph/biostat/celehs/lab/SHARE/MGB/MS-AD/Sara/Monthly_Counts/UPMC/Monthly_codified.RData",
+      "row_meaning": "One patient, calendar month/year, and codified feature count."
+    },
+    {
+      "file": "Monthly_NLP_fake_data.csv",
+      "synthetic": true,
+      "rows": 1000,
+      "unique_synthetic_patients": 200,
+      "columns": [
+        "patient_num",
+        "month",
+        "year",
+        "feature_id",
+        "N"
+      ],
+      "source_r_classes": [
+        "numeric",
+        "integer",
+        "integer",
+        "character",
+        "integer"
+      ],
+      "source_object": "dat.monthly",
+      "source_object_class": [
+        "data.table",
+        "data.frame"
+      ],
+      "source_path": "/n/data1/hsph/biostat/celehs/lab/SHARE/MGB/MS-AD/Sara/Monthly_Counts/UPMC/Monthly_NLP.RData",
+      "row_meaning": "One patient, calendar month/year, and NLP feature count."
+    }
+  ],
+  "source_file_dimensions": [
+    {
+      "source_path": "/n/data1/hsph/biostat/celehs/lab/SHARE/MGB/MS-AD/Sara/Monthly_Counts/UPMC/Monthly_codified.RData",
+      "rows": 126370653,
+      "columns": 5,
+      "note": "Source-file row count from the supplied output, not patient count."
+    },
+    {
+      "source_path": "/n/data1/hsph/biostat/celehs/lab/SHARE/MGB/MS-AD/Sara/Monthly_Counts/UPMC/Monthly_NLP.RData",
+      "rows": 723473066,
+      "columns": 5,
+      "note": "Source-file row count from the supplied output, not patient count."
+    }
+  ],
+  "source_patient_count": "Not documented for these files",
+  "source_date_range": "Not established from the head preview",
+  "column_dictionary": "column_dictionary.csv",
+  "schema_file": "schema.json",
+  "code_inventory": "demo_code_inventory.csv",
+  "resources": [
+    {
+      "name": "Codified monthly",
+      "kind": "Monthly data",
+      "location": "/n/data1/hsph/biostat/celehs/lab/SHARE/MGB/MS-AD/Sara/Monthly_Counts/UPMC/Monthly_codified.RData",
+      "object_name": "dat.monthly",
+      "description": "One patient, calendar month/year, and codified feature count.",
+      "demo_file": "Monthly_codified_fake_data.csv"
+    },
+    {
+      "name": "NLP monthly",
+      "kind": "Monthly data",
+      "location": "/n/data1/hsph/biostat/celehs/lab/SHARE/MGB/MS-AD/Sara/Monthly_Counts/UPMC/Monthly_NLP.RData",
+      "object_name": "dat.monthly",
+      "description": "One patient, calendar month/year, and NLP feature count.",
+      "demo_file": "Monthly_NLP_fake_data.csv"
+    },
+    {
+      "name": "Raw codified data",
+      "kind": "Raw data",
+      "location": "/n/data1/hsph/biostat/celehs/lab/SHARE/UPMC/AD/data_raw/data_codified",
+      "description": "Available according to Sara README. Raw fields are unnamed; meanings recorded as patient_num, common_ontology_code, date, group_code and local_code. No fake raw file created."
+    },
+    {
+      "name": "Raw NLP data",
+      "kind": "Raw data",
+      "location": "/n/data1/hsph/biostat/celehs/lab/SHARE/UPMC/AD/data_raw/data_NLP",
+      "description": "Available according to Sara README. See original documentation. No fake raw file created."
+    },
+    {
+      "name": "Daily codified data",
+      "kind": "Daily data",
+      "location": "/n/data1/hsph/biostat/celehs/lab/SHARE/UPMC/AD/data_table/data_processed/UPMC_AD_2004_to_2023_Codified_rolled_up_data_2023-10-06.csv",
+      "description": "Daily-level codified file recorded in Sara README. Columns: patient_num, start_date, feature_id. No fake daily file created."
+    },
+    {
+      "name": "Daily NLP data",
+      "kind": "Daily data",
+      "location": "/n/data1/hsph/biostat/celehs/lab/SHARE/UPMC/AD/data_table/data_processed/UPMC_AD_2011_to_2021_NLP_processed_data_2023-10-17.csv",
+      "description": "Daily-level NLP file recorded in Sara README. No fake daily file created."
+    },
+    {
+      "name": "Monthly processing code",
+      "kind": "Script",
+      "location": "/n/data1/hsph/biostat/celehs/lab/SHARE/MGB/MS-AD/Sara/2026-01-30_UPMC_monthly_count_generation.R",
+      "description": "Monthly count generation code recorded in Sara README."
+    }
+  ],
+  "dictionaries": [
+    {
+      "name": "UPMC AD codified mapping dictionary",
+      "kind": "Dictionary",
+      "location": null,
+      "status": "Not documented",
+      "description": "A separate dictionary path is not given in the supplied README. Ask the curator for feature_id definitions. The README states daily codified rollup uses feature_id/group codes present in raw data."
+    },
+    {
+      "name": "UPMC AD NLP dictionary",
+      "kind": "Dictionary",
+      "location": null,
+      "status": "Not documented",
+      "description": "A dictionary path for CUI and AB-prefixed concepts is not given in the supplied README. Ask the curator."
+    }
+  ],
+  "assumptions": {
+    "seed": 2026100602,
+    "rows_per_data_file": 1000,
+    "synthetic_patients": 200,
+    "synthetic_id_range": [
+      -9900000200,
+      -9900000001
+    ],
+    "demo_codified_years": [
+      2004,
+      2023
+    ],
+    "demo_nlp_years": [
+      2011,
+      2021
+    ],
+    "count_range": [
+      1,
+      20
+    ],
+    "missing_values": "None in these examples. Full source missingness is not established.",
+    "period_note": "Periods are chosen for demonstration and are not inferred monthly cohort coverage.",
+    "file_relationship": "Shared synthetic patient identifiers. Codified and NLP files generated independently. No patient-feature crosswalk or clinical correlations inferred.",
+    "formats": "Codified month and year are strings; NLP month and year are integers. Codified patient_num is represented as full decimal text in CSV for lossless integer64 conversion; NLP patient_num is numeric.",
+    "source_grouping": "The codified source has grouped_df class, but grouping columns were not supplied. CSV has no grouping attributes. The optional RData conversion creates a plain data.frame with the observed column types.",
+    "codes": "Generated format examples, not verified clinical codes or dictionary mappings."
+  },
+  "search_rules": [
+    "Provide monthly examples; raw and daily-level files are available according to the original README.",
+    "Preserve feature_id in both files.",
+    "Count column is Group_Code_Count for codified data and N for NLP data.",
+    "The source site is UPMC even though the monthly files are stored under the MGB/MS-AD path.",
+    "Dictionary paths are not documented; do not substitute MGB or IBD dictionaries.",
+    "NLP feature_id can contain AB-prefixed acronym concepts.",
+    "Use full decimal synthetic IDs. Do not reproduce the codified integer64 display artifact.",
+    "Do not use source row counts as patient counts or fake values as real distributions."
+  ]
+}

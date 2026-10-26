@@ -1,0 +1,221 @@
+{
+  "MGB_AD": {
+    "workbook": "CELEHS_Resource_Catalog.xlsx",
+    "sheet": "Datasets",
+    "row": 6,
+    "tracker_id": "DATA-001",
+    "fields": [
+      {
+        "name": "Dataset name",
+        "value": "MGB Alzheimer's disease data",
+        "cell": "B6"
+      },
+      {
+        "name": "Dataset type",
+        "value": "Clinical dataset",
+        "cell": "C6"
+      },
+      {
+        "name": "Disease / topic",
+        "value": "Alzheimer's disease multisite data",
+        "cell": "D6"
+      },
+      {
+        "name": "Storage platform",
+        "value": "O2",
+        "cell": "E6"
+      },
+      {
+        "name": "Main folder",
+        "value": "O2:/n/data1/hsph/biostat/celehs/lab/SHARE/MGB/MS-AD",
+        "cell": "F6"
+      },
+      {
+        "name": "Contact",
+        "value": "Sara Morini",
+        "cell": "G6"
+      },
+      {
+        "name": "Data type",
+        "value": "Mixed: codified EHR + NLP + utilization + outcomes; genetics available for some sites",
+        "cell": "H6"
+      },
+      {
+        "name": "Raw and processed files",
+        "value": "Raw codified combined_daily.RData\ndemographics CSV",
+        "cell": "I6"
+      },
+      {
+        "name": "Processing scripts",
+        "value": "2026-01-30_MGB_monthly_count_generation.R",
+        "cell": "J6"
+      },
+      {
+        "name": "Patient count",
+        "value": "Not documented",
+        "cell": "K6"
+      },
+      {
+        "name": "Date range",
+        "value": "Not documented",
+        "cell": "L6"
+      },
+      {
+        "name": "Access level",
+        "value": "Clinical EHR-derived data\u2014access rules not documented in source document",
+        "cell": "M6"
+      },
+      {
+        "name": "Related paper",
+        "value": "Not listed",
+        "cell": "N6"
+      }
+    ]
+  },
+  "UPMC_AD": {
+    "workbook": "CELEHS_Resource_Catalog.xlsx",
+    "sheet": "Datasets",
+    "row": 7,
+    "tracker_id": "DATA-002",
+    "fields": [
+      {
+        "name": "Dataset name",
+        "value": "UPMC Alzheimer's disease data",
+        "cell": "B7"
+      },
+      {
+        "name": "Dataset type",
+        "value": "Clinical dataset",
+        "cell": "C7"
+      },
+      {
+        "name": "Disease / topic",
+        "value": "Alzheimer's disease multisite data",
+        "cell": "D7"
+      },
+      {
+        "name": "Storage platform",
+        "value": "O2",
+        "cell": "E7"
+      },
+      {
+        "name": "Main folder",
+        "value": "O2:/n/data1/hsph/biostat/celehs/lab/SHARE/UPMC/AD",
+        "cell": "F7"
+      },
+      {
+        "name": "Contact",
+        "value": "Sara Morini",
+        "cell": "G7"
+      },
+      {
+        "name": "Data type",
+        "value": "Mixed: codified EHR + NLP + utilization + outcomes; genetics available for some sites",
+        "cell": "H7"
+      },
+      {
+        "name": "Raw and processed files",
+        "value": "Raw: data_raw/data_codified; data_raw/data_NLP; data_raw/ad_demographics.dsv\nProcessed: data_table/data_processed; monthly files under MGB/MS-AD/Sara/Monthly_Counts/UPMC",
+        "cell": "I7"
+      },
+      {
+        "name": "Processing scripts",
+        "value": "2026-01-30_UPMC_monthly_count_generation.R",
+        "cell": "J7"
+      },
+      {
+        "name": "Patient count",
+        "value": "Not documented",
+        "cell": "K7"
+      },
+      {
+        "name": "Date range",
+        "value": "2004\u20132023",
+        "cell": "L7"
+      },
+      {
+        "name": "Access level",
+        "value": "Clinical EHR-derived data\u2014access rules not documented in source document",
+        "cell": "M7"
+      },
+      {
+        "name": "Related paper",
+        "value": "Not listed",
+        "cell": "N7"
+      }
+    ]
+  },
+  "IBD": {
+    "workbook": "CELEHS_Resource_Catalog.xlsx",
+    "sheet": "Datasets",
+    "row": 9,
+    "tracker_id": "DATA-004",
+    "fields": [
+      {
+        "name": "Dataset name",
+        "value": "IBD Project Data",
+        "cell": "B9"
+      },
+      {
+        "name": "Dataset type",
+        "value": "Clinical dataset",
+        "cell": "C9"
+      },
+      {
+        "name": "Disease / topic",
+        "value": "Inflammatory bowel disease",
+        "cell": "D9"
+      },
+      {
+        "name": "Storage platform",
+        "value": "MGB SQL server, SFA, and Eris",
+        "cell": "E9"
+      },
+      {
+        "name": "Main folder",
+        "value": "MGB Windows: //SMBgpa.partners.org/asw_mgb$/Sara/IBD/\nEris: /data/aws-eris/Sara/IBD/",
+        "cell": "F9"
+      },
+      {
+        "name": "Contact",
+        "value": "Sara Morini",
+        "cell": "G9"
+      },
+      {
+        "name": "Data type",
+        "value": "Mixed: codified electronic health record (EHR) data, clinical notes, natural language processing (NLP) results, and monthly counts",
+        "cell": "H9"
+      },
+      {
+        "name": "Raw and processed files",
+        "value": "Raw codified: IBD_2020 observation_fact and visit_dimension batches; RPDR marts IBD_2019_MART_EXTENDED and IBD_2019_2025_MART\nRaw notes: IBD_2020_NOTES and RPDR note folders\nProcessed: codified_daily/merged_daily_data.RDS and NILE results under IBD_NLP_result/vedo_acronym\nMonthly: codified_data_monthly.RData and NLP_data_monthly.RData",
+        "cell": "I9"
+      },
+      {
+        "name": "Processing scripts",
+        "value": "raw_extraction.R; visit_dimension_extraction.R; codified_rollup.R; 2026-03-16_NLP_Processing.R\nDictionaries: dictionary_mapping_v3.4.tsv and 2026-05-26_IBD_dict_w_vedo_acr.txt",
+        "cell": "J9"
+      },
+      {
+        "name": "Patient count",
+        "value": "Codified data: 56,704 unique patients\nNLP data: 55,436 unique patients",
+        "cell": "K9"
+      },
+      {
+        "name": "Date range",
+        "value": "Codified data: 1840-12-31 to 2101-08-27\nNLP data: 1841-01-02 to 6466-05-01\nThe README includes implausible dates that require review.",
+        "cell": "L9"
+      },
+      {
+        "name": "Access level",
+        "value": "Not documented in README",
+        "cell": "M9"
+      },
+      {
+        "name": "Related paper",
+        "value": "Not listed",
+        "cell": "N9"
+      }
+    ]
+  }
+}

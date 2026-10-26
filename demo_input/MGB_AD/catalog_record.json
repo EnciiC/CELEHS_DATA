@@ -1,0 +1,245 @@
+{
+  "dataset_id": "MGB_AD",
+  "dataset_name": "MGB Alzheimer’s disease data",
+  "site": "MGB",
+  "contact": "Sara Morini",
+  "storage_platform": [
+    "O2"
+  ],
+  "has_o2_copy": true,
+  "description": "Daily local-code records, daily grouped codified records, monthly codified counts, and monthly NLP counts for the MGB AD project.",
+  "sources": [
+    {
+      "kind": "Original documentation",
+      "path": "Local authoring path omitted from public metadata",
+      "local_copy": "README_original.docx"
+    },
+    {
+      "kind": "User-provided schemas and clarification",
+      "date": "2026-10-06",
+      "note": "Only file-level schema, dimensions and format observations were retained. No source patient rows were copied into this demo."
+    }
+  ],
+  "files": [
+    {
+      "file": "NLP_monthly_fake_data.csv",
+      "synthetic": true,
+      "rows": 1000,
+      "unique_synthetic_patients": 200,
+      "columns": [
+        "patientnum",
+        "month",
+        "year",
+        "cui",
+        "N"
+      ],
+      "source_r_classes": [
+        "integer",
+        "integer",
+        "integer",
+        "character",
+        "integer"
+      ],
+      "source_path": "/n/data1/hsph/biostat/celehs/lab/SHARE/MGB/MS-AD/Sara/Monthly_Counts/MGB/NLP/",
+      "source_object": "dat.monthly",
+      "row_meaning": "One patient, calendar month, year, and NLP concept count."
+    },
+    {
+      "file": "combined_daily_fake_data.csv",
+      "synthetic": true,
+      "rows": 1000,
+      "unique_synthetic_patients": 200,
+      "columns": [
+        "PatientNum",
+        "Start_date",
+        "Local_Code",
+        "Local_Code_Description",
+        "Type"
+      ],
+      "source_r_classes": [
+        "integer",
+        "Date",
+        "character",
+        "character",
+        "character"
+      ],
+      "source_path": "/n/data1/hsph/biostat/celehs/lab/SHARE/MGB/MS-AD/From_OneDrive/Survival_Analysis_Paper/MGB/Raw_Data/combined_daily.RData",
+      "source_object": "combined_data",
+      "row_meaning": "One daily local-code occurrence. Each row contributes a count of 1; there is no N column."
+    },
+    {
+      "file": "Daily_codified_fake_data.csv",
+      "synthetic": true,
+      "rows": 1000,
+      "unique_synthetic_patients": 200,
+      "columns": [
+        "PatientNum",
+        "Start_date",
+        "Group_Code"
+      ],
+      "source_r_classes": [
+        "integer",
+        "Date",
+        "character"
+      ],
+      "source_path": "/n/data1/hsph/biostat/celehs/lab/SHARE/MGB/MS-AD/Sara/Monthly_Counts/MGB/Daily_codified.RData",
+      "source_object": "dat",
+      "row_meaning": "One daily group-code occurrence. Each row contributes a count of 1; there is no N column."
+    },
+    {
+      "file": "Monthly_codified_fake_data.csv",
+      "synthetic": true,
+      "rows": 1000,
+      "unique_synthetic_patients": 200,
+      "columns": [
+        "PatientNum",
+        "month",
+        "year",
+        "Group_Code",
+        "N"
+      ],
+      "source_r_classes": [
+        "integer",
+        "integer",
+        "integer",
+        "character",
+        "integer"
+      ],
+      "source_path": "/n/data1/hsph/biostat/celehs/lab/SHARE/MGB/MS-AD/Sara/Monthly_Counts/MGB/Monthly_codified.RData",
+      "source_object": "dat.monthly",
+      "row_meaning": "One patient, calendar month, year, and Group_Code count. N is the number of occurrences."
+    }
+  ],
+  "source_file_dimensions": [
+    {
+      "source_path": "/n/data1/hsph/biostat/celehs/lab/SHARE/MGB/MS-AD/Sara/Monthly_Counts/MGB/NLP/1_1501.RData",
+      "rows": 42016393,
+      "columns": 5,
+      "note": "Row count of the inspected source file, not patient count. NLP dimension is for 1_1501.RData only, not the whole folder."
+    },
+    {
+      "source_path": "/n/data1/hsph/biostat/celehs/lab/SHARE/MGB/MS-AD/From_OneDrive/Survival_Analysis_Paper/MGB/Raw_Data/combined_daily.RData",
+      "rows": 84086769,
+      "columns": 5,
+      "note": "Row count of the inspected source file, not patient count. NLP dimension is for 1_1501.RData only, not the whole folder."
+    },
+    {
+      "source_path": "/n/data1/hsph/biostat/celehs/lab/SHARE/MGB/MS-AD/Sara/Monthly_Counts/MGB/Daily_codified.RData",
+      "rows": 75713978,
+      "columns": 3,
+      "note": "Row count of the inspected source file, not patient count. NLP dimension is for 1_1501.RData only, not the whole folder."
+    },
+    {
+      "source_path": "/n/data1/hsph/biostat/celehs/lab/SHARE/MGB/MS-AD/Sara/Monthly_Counts/MGB/Monthly_codified.RData",
+      "rows": 53155206,
+      "columns": 5,
+      "note": "Row count of the inspected source file, not patient count. NLP dimension is for 1_1501.RData only, not the whole folder."
+    }
+  ],
+  "source_patient_count": "Not documented for these files",
+  "source_date_range": "Not established from the head preview",
+  "column_dictionary": "column_dictionary.csv",
+  "schema_file": "schema.json",
+  "code_inventory": "demo_code_inventory.csv",
+  "resources": [
+    {
+      "name": "NLP monthly",
+      "kind": "Data",
+      "location": "/n/data1/hsph/biostat/celehs/lab/SHARE/MGB/MS-AD/Sara/Monthly_Counts/MGB/NLP/",
+      "description": "One patient, calendar month, year, and NLP concept count.",
+      "object_name": "dat.monthly"
+    },
+    {
+      "name": "Combined daily",
+      "kind": "Data",
+      "location": "/n/data1/hsph/biostat/celehs/lab/SHARE/MGB/MS-AD/From_OneDrive/Survival_Analysis_Paper/MGB/Raw_Data/combined_daily.RData",
+      "description": "One daily local-code occurrence. Each row contributes a count of 1; there is no N column.",
+      "object_name": "combined_data"
+    },
+    {
+      "name": "Daily codified",
+      "kind": "Data",
+      "location": "/n/data1/hsph/biostat/celehs/lab/SHARE/MGB/MS-AD/Sara/Monthly_Counts/MGB/Daily_codified.RData",
+      "description": "One daily group-code occurrence. Each row contributes a count of 1; there is no N column.",
+      "object_name": "dat"
+    },
+    {
+      "name": "Monthly codified",
+      "kind": "Data",
+      "location": "/n/data1/hsph/biostat/celehs/lab/SHARE/MGB/MS-AD/Sara/Monthly_Counts/MGB/Monthly_codified.RData",
+      "description": "One patient, calendar month, year, and Group_Code count. N is the number of occurrences.",
+      "object_name": "dat.monthly"
+    },
+    {
+      "name": "Monthly count generation script",
+      "kind": "Script",
+      "location": "/n/data1/hsph/biostat/celehs/lab/SHARE/MGB/MS-AD/Sara/2026-01-30_MGB_monthly_count_generation.R",
+      "description": "MGB monthly processing script recorded in Sara documentation."
+    },
+    {
+      "name": "Daily NLP data",
+      "kind": "Data",
+      "location": "/n/data1/hsph/biostat/celehs/lab/SHARE/MGB/MS-AD/monthly_NLP/AD/daily_NLP",
+      "description": "Daily NLP folder recorded in Sara documentation. No fake file generated because its schema was not supplied."
+    },
+    {
+      "name": "Demographics",
+      "kind": "Data",
+      "location": "/n/data1/hsph/biostat/celehs/lab/SHARE/MGB/MS-AD/From_OneDrive/EHR_AD/EHR_Derived/20240703 Consolidated by SV/Demographics/MGB demographics deidentified.csv",
+      "description": "Demographic file recorded in Sara documentation. Schema not supplied for this demo."
+    },
+    {
+      "name": "Monthly utilization",
+      "kind": "Data",
+      "location": "/n/data1/hsph/biostat/celehs/lab/SHARE/MGB/MS-AD/Sara/Monthly_Counts/MGB/Monthly_utl.RData",
+      "description": "Monthly utilization resource recorded in Sara documentation. Schema not supplied for this demo."
+    }
+  ],
+  "dictionaries": [
+    {
+      "name": "MGB AD codified mapping dictionary",
+      "kind": "Dictionary",
+      "location": null,
+      "status": "Not documented",
+      "description": "Ask the curator for the dictionary or mapping used to produce Group_Code. No path provided in the AD document."
+    },
+    {
+      "name": "MGB AD NLP dictionary",
+      "kind": "Dictionary",
+      "location": null,
+      "status": "Not documented",
+      "description": "Ask the curator for the dictionary covering CUI and AB-prefixed acronym concepts. No path provided in the AD document."
+    }
+  ],
+  "assumptions": {
+    "seed": 20261006,
+    "rows_per_data_file": 1000,
+    "synthetic_patients": 200,
+    "date_range_for_demo": [
+      "1995-01-01",
+      "2025-12-28"
+    ],
+    "synthetic_patient_id_range": [
+      -900200,
+      -900001
+    ],
+    "monthly_count_range": [
+      1,
+      20
+    ],
+    "group_code_missing_probability": 0.03,
+    "source_types": "Based on column classes in the supplied output. CSV dates use ISO text; the conversion script restores R Date values.",
+    "file_relationship": "Shared synthetic patient identifiers only. The four examples are generated independently; monthly N does not aggregate these daily fake files.",
+    "mapping": "No clinical local-to-group or code-to-CUI mapping has been inferred.",
+    "code_validity": "Generated identifiers preserve observed code formats; clinical validity and meaning are not asserted."
+  },
+  "search_rules": [
+    "Return file locations, source object names, row meaning and dictionary status.",
+    "Do not add N to daily files; each row counts as one occurrence.",
+    "Preserve patientnum vs PatientNum and cui vs Group_Code names.",
+    "NLP includes custom acronym concepts; do not require every cui to start with C.",
+    "Dictionary paths are not documented; do not reuse IBD dictionary paths for AD.",
+    "Do not equate source rows with patients.",
+    "Do not infer cohort coverage or distributions from fake data or the first 50 source rows."
+  ]
+}

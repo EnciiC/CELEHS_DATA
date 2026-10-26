@@ -1,0 +1,120 @@
+{
+  "dataset_name": "UPMC Alzheimer’s disease data",
+  "synthetic": true,
+  "files": [
+    {
+      "name": "Monthly_codified_fake_data.csv",
+      "source_object": "dat.monthly",
+      "source_object_class": [
+        "grouped_df",
+        "tbl_df",
+        "tbl",
+        "data.frame"
+      ],
+      "row_meaning": "One patient, calendar month/year, and codified feature count.",
+      "columns": [
+        {
+          "name": "patient_num",
+          "meaning": "Patient identifier. Same synthetic patient across the two demo files. 患者编号。",
+          "source_r_class": "integer64",
+          "csv_representation": "Full decimal identifier",
+          "example": "-9900000200",
+          "missing": "None in demo",
+          "demo_rule": "Generated full decimal IDs from -9900000200 to -9900000001. Read from CSV as character, then convert using bit64::as.integer64. No source IDs reused."
+        },
+        {
+          "name": "month",
+          "meaning": "Calendar month of the feature occurrences. 发生月份。",
+          "source_r_class": "character",
+          "csv_representation": "Text",
+          "example": "02",
+          "missing": "None in demo",
+          "demo_rule": "Character month 01–12, including leading zero."
+        },
+        {
+          "name": "year",
+          "meaning": "Calendar year of the feature occurrences. 发生年份。",
+          "source_r_class": "character",
+          "csv_representation": "Text",
+          "example": "2011",
+          "missing": "None in demo",
+          "demo_rule": "Character year 2004–2023. Illustrative demo period, not established source coverage."
+        },
+        {
+          "name": "feature_id",
+          "meaning": "Grouped codified feature identifier. 分组后的codified代码。",
+          "source_r_class": "character",
+          "csv_representation": "Text",
+          "example": "PheCode:907.1",
+          "missing": "None in demo",
+          "demo_rule": "Generated PheCode, CCS-PCS, CPT4 and LOCAL|PX format examples. Clinical meaning and validity not asserted."
+        },
+        {
+          "name": "Group_Code_Count",
+          "meaning": "Number of occurrences of this feature for this patient in this calendar month. 该患者该月该特征的出现次数。",
+          "source_r_class": "integer",
+          "csv_representation": "Integer",
+          "example": 6,
+          "missing": "None in demo",
+          "demo_rule": "Positive integer 1–20. 75% of draws use 1–3. Demonstration rule, not a measured distribution."
+        }
+      ]
+    },
+    {
+      "name": "Monthly_NLP_fake_data.csv",
+      "source_object": "dat.monthly",
+      "source_object_class": [
+        "data.table",
+        "data.frame"
+      ],
+      "row_meaning": "One patient, calendar month/year, and NLP feature count.",
+      "columns": [
+        {
+          "name": "patient_num",
+          "meaning": "Patient identifier. Same synthetic patient across the two demo files. 患者编号。",
+          "source_r_class": "numeric",
+          "csv_representation": "Full decimal identifier",
+          "example": -9900000200,
+          "missing": "None in demo",
+          "demo_rule": "Generated numeric IDs from -9900000200 to -9900000001. No source IDs reused. Same logical IDs as the codified file."
+        },
+        {
+          "name": "month",
+          "meaning": "Calendar month of the feature occurrences. 发生月份。",
+          "source_r_class": "integer",
+          "csv_representation": "Integer",
+          "example": 1,
+          "missing": "None in demo",
+          "demo_rule": "Integer 1–12."
+        },
+        {
+          "name": "year",
+          "meaning": "Calendar year of the feature occurrences. 发生年份。",
+          "source_r_class": "integer",
+          "csv_representation": "Integer",
+          "example": 2011,
+          "missing": "None in demo",
+          "demo_rule": "Integer year 2011–2021. Illustrative demo period, not established source coverage."
+        },
+        {
+          "name": "feature_id",
+          "meaning": "NLP concept identifier, including CUI and AB-prefixed acronym concepts. NLP概念编号，可包含CUI和AB开头的缩写概念。",
+          "source_r_class": "character",
+          "csv_representation": "Text",
+          "example": "AB00T012",
+          "missing": "None in demo",
+          "demo_rule": "Generated C-plus-seven-digit and AB-prefixed examples. Clinical meaning and validity not asserted."
+        },
+        {
+          "name": "N",
+          "meaning": "Number of occurrences of this feature for this patient in this calendar month. 该患者该月该特征的出现次数。",
+          "source_r_class": "integer",
+          "csv_representation": "Integer",
+          "example": 2,
+          "missing": "None in demo",
+          "demo_rule": "Positive integer 1–20. 75% of draws use 1–3. Demonstration rule, not a measured distribution."
+        }
+      ]
+    }
+  ]
+}
