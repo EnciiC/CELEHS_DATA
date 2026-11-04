@@ -49,7 +49,7 @@ function renderInventory() {
     if (!clinical.length && !guides.length) {
       const message = el('div', null, 'panel-box empty-resources');
       message.append(el('h3', 'No model resources documented yet'),
-        el('p', 'No O2 model-checkpoint README is loaded. The local chat model is separate from the lab resource inventory.'));
+        el('p', 'No O2 model-checkpoint README is loaded. The model answering chat questions is separate from the lab resource inventory.'));
       node.append(message);
     }
   }
