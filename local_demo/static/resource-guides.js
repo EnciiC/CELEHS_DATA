@@ -19,26 +19,27 @@ function categoryDescription(id) {
 }
 function chooseResourceCategory(id) {
   state.category=id;renderInventory();show('browse');window.scrollTo({top:0,behavior:'smooth'});
-  for (const group of document.querySelectorAll('#sidebar-resources details')) group.open=group.dataset.category===id;
 }
 function renderResourceSidebar() {
   const sidebar=$('#sidebar-resources');sidebar.replaceChildren();
-  for (const category of ['datasets','derived','models']) {
-    const entries=[...(category==='datasets'?state.datasets.map(d=>({id:d.id,label:d.label,storage:d.platforms.join(' / '),clinical:true})):[]),
-      ...state.resources.filter(r=>r.category===category)];
-    const group=el('details',null,'sidebar-group');group.dataset.category=category;group.open=category===state.category;
-    const summary=el('summary');summary.append(el('span',resourceCategoryLabel(category)),el('span',String(entries.length),'resource-count'));group.append(summary);
-    group.append(smallButton('View this group',()=>chooseResourceCategory(category),'group-browse'));
-    const list=el('div',null,'sidebar-resource-list');
-    for(const resource of entries){
-      const button=el('button',resource.label,'dataset-nav');button.type='button';button.dataset.resource=resource.id;
-      button.append(el('small',resource.storage));
-      button.addEventListener('click',()=>{state.category=category;renderInventory();resource.clinical?openDataset(resource.id):openResource(resource.id);});list.append(button);
-    }
-    if(!entries.length)list.append(el('p','No model READMEs added yet.','sidebar-empty'));
-    group.append(list);sidebar.append(group);
-    group.addEventListener('toggle',()=>{if(group.open)for(const other of sidebar.querySelectorAll('details'))if(other!==group)other.open=false;});
+  for(const category of ['datasets','derived','models']){
+    const count=state.resources.filter(r=>r.category===category).length+(category==='datasets'?state.datasets.length:0);
+    const button=el('button',null,'resource-group-button');button.type='button';
+    button.append(el('span',resourceCategoryLabel(category)),el('span',String(count),'resource-count'));
+    button.classList.toggle('active',state.category===category);button.setAttribute('aria-pressed',String(state.category===category));
+    button.addEventListener('click',()=>chooseResourceCategory(category));sidebar.append(button);
   }
+  const category=state.category;
+  const entries=[...(category==='datasets'?state.datasets.map(d=>({id:d.id,label:d.label,storage:d.platforms.join(' / '),clinical:true})):[]),
+    ...state.resources.filter(r=>r.category===category)];
+  const list=el('div',null,'sidebar-resource-list');list.setAttribute('aria-label',resourceCategoryLabel(category)+' entries');
+  for(const resource of entries){
+    const button=el('button',resource.label,'dataset-nav');button.type='button';button.dataset.resource=resource.id;
+    button.append(el('small',resource.storage));
+    button.addEventListener('click',()=>resource.clinical?openDataset(resource.id):openResource(resource.id));list.append(button);
+  }
+  if(!entries.length)list.append(el('p','No model READMEs added yet.','sidebar-empty'));
+  sidebar.append(list);
 }
 function renderInventory() {
   for (const selector of ['#home-cards','#browse-cards']) {
@@ -64,6 +65,7 @@ function renderInventory() {
   }
   $('#dataset-total').textContent = `${state.datasets.length+state.resources.length} documented entries`;
   $('#category-description').textContent=categoryDescription(state.category);
+  renderResourceSidebar();
 }
 function resourceLocationView(resource) {
   const body = el('div');
@@ -128,7 +130,7 @@ function renderResourceResults(result, box) {
 }
 async function openResource(id) {
   try {
-    const record = await api(`/api/resources/${id}`); state.detail=record;state.previous=[id];state.pending=null;show('detail');
+    const record = await api(`/api/resources/${id}`); state.category=record.category;renderInventory();state.detail=record;state.previous=[id];state.pending=null;show('detail');
     const node = $('#detail-view'); node.replaceChildren(smallButton('← Back to resources', () => show('browse'), 'back-button'));
     const heading = el('div', null, 'page-heading');
     heading.append(el('span',resourceCategoryLabel(record.category).toUpperCase(),'eyebrow'),

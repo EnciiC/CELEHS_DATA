@@ -36,7 +36,6 @@ function datasetCard(dataset) {
 async function loadCatalog() {
   const data = await api('/api/inventory'); state.datasets = data.datasets;state.resources=data.resources;
   renderInventory();
-  renderResourceSidebar();
 }
 async function status() {
   try {
@@ -363,7 +362,7 @@ function dictionariesPanel(record) {
 }
 async function openDataset(id) {
   try {
-    const record = await api(`/api/datasets/${id}`); state.detail = record;
+    const record = await api(`/api/datasets/${id}`); state.category='datasets';renderInventory();state.detail = record;
     state.previous = [id]; state.pending = null; show('detail');
     const node = $('#detail-view'); node.replaceChildren();
     node.append(smallButton('← Back to datasets', () => show('browse'), 'back-button'));
