@@ -183,6 +183,13 @@ class ResourceLibrary:
         if kind:
             pattern=r'Clinical notes' if kind=='notes' else r'Relation tables?|regulatory mappings'
             matching=[e['id'] for e in self.entries.values() if re.search(pattern,e['resource_type'],re.I)]
+            # Keep a stated topic (for example breast cancer) when browsing a data type.
+            if not broad_kind_query(query):
+                generic=set('clinical medical patient information extraction evaluation reviewed archive derivative text note notes annotation annotations data dataset datasets relation relations pair pairs mapping mappings table tables'.split())
+                query_tokens=set(q.split())-generic
+                scores={i:len(query_tokens & (set(norm(' '.join(self.entries[i]['topics'])).split())-generic)) for i in matching}
+                best=max(scores.values(),default=0)
+                if best: matching=[i for i in matching if scores[i]==best]
             if previous and re.search(r'\b(?:these|those|their|them|its|this)\b',q):
                 focused=[i for i in previous if i in matching]
                 if focused: return focused

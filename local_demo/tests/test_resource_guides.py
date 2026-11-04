@@ -211,6 +211,12 @@ def test_note_discovery_retains_disease_specific_model_selection():
     assert [r['id'] for r in result['resources']]==['ZX_CORAL']
 
 
+def test_topic_qualified_notes_limit_candidates_to_documented_topic():
+    library=ResourceLibrary()
+    assert library.candidates('Do we have any notes for breast cancer?',[])==['ZX_CORAL']
+    assert set(library.candidates('Do we have any note data?',[]))=={'ZX_4CE','ZX_CORAL'}
+
+
 def test_access_and_start_content_remain_excerpts_of_the_original(client):
     library=client.app.state.catalog.library
     for entry in library.entries.values():
