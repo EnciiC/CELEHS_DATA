@@ -37,6 +37,7 @@ function renderResourceSidebar() {
     }
     if(!entries.length)list.append(el('p','No model READMEs added yet.','sidebar-empty'));
     group.append(list);sidebar.append(group);
+    group.addEventListener('toggle',()=>{if(group.open)for(const other of sidebar.querySelectorAll('details'))if(other!==group)other.open=false;});
   }
 }
 function renderInventory() {
