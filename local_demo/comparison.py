@@ -42,5 +42,5 @@ def comparison_summary(query, sections, records):
     summary = 'The monthly files use a similar structure: a patient, calendar month/year, code or concept, and occurrence count. '
     summary += 'Some column names differ.' if different else 'The documented patient, code/concept and count column names match.'
     return {'summary':summary, 'details':lines,
-            'caution':'Similar structure does not establish that code mappings or cohorts are interchangeable.',
+            'caution':'Compare code mappings and cohort definitions before combining files.',
             'sources':list({e['dataset_id']:e for e in evidence}.values())}

@@ -58,7 +58,7 @@ def load_tracker(project):
 
 def tracker_notes(source):
     lines = ['# Spreadsheet entry', '', f"Source: {source['workbook']}, {source['sheet']} row {source['row']} ({source['tracker_id']}).",
-             '', 'This is a tracker summary. Specific README and file-schema details remain separate.', '']
+             '']
     for field in source['fields']:
         lines.extend(['## ' + field['name'], '', field['value'], ''])
     return '\n'.join(lines)

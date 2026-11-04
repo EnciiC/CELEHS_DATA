@@ -78,7 +78,7 @@ def opening(query, previous, labels, pending=None, handle_pending=True):
         name = topic_name(topic) if topic else 'a new dataset'
         return guide('documentation_help', [f'To add {name}, collect the README, current contact, storage location, and a short description of the files.',
                      'For each file, include column names, column meanings and types, and what one row represents. Note any access restrictions.',
-                     'For a preview, provide generated fake rows—not real patient records. Adding documents is a separate preparation step; this chat does not upload or add them automatically.'],
+                     'Send the documentation to the resource maintainer. For a preview, provide synthetic sample rows.'],
                      choices(), previous, topic)
     if handle_pending and pending and not re.search(r'\bibd\b|\bad\b|alzheimer|inflammatory bowel', q) and re.search(r'\b(it|its|that|those|these|o2|eris|monthly|daily|rows|columns|where)\b|what about', q) and not mentioned_topic(query):
         return unavailable(query, topic=pending)
@@ -89,8 +89,8 @@ def unavailable(query, topic=None):
     topic = valid_topic(topic) or mentioned_topic(query)
     if topic:
         name = topic_name(topic)
-        return guide('unavailable', [f"I don't have documentation for {name} loaded yet, so I can't verify its file locations or recommend a cohort from it.",
-                     'It may exist elsewhere in the lab. Would you like a checklist for adding it, or would you like to explore the available AD and IBD examples?'],
+        return guide('unavailable', [f'Documentation for {name} has not been added.',
+                     'Would you like a checklist for adding it, or would you like to browse the documented resources?'],
                      [{'label':'What information should I collect?', 'query':f'What information do you need to add {name} as a dataset?'},
                       {'label':'Explore AD instead', 'query':'What AD data do we have?'},
                       {'label':'Explore IBD instead', 'query':'What IBD data do we have?'}], pending=topic)
@@ -104,7 +104,7 @@ def semantic_guidance(route, query):
     subject = route['subject'].strip(' .?') or 'the requested data'
     if route['mode'] == 'not_documented':
         pending = mentioned_topic(query) or valid_topic('query:' + subject)
-        paragraphs = [f"I can't confirm {subject} based on the documentation currently loaded. That doesn't mean the lab has no such data."]
+        paragraphs = [f'Documentation for {subject} has not been added.']
         paragraphs.append(route['clarification'] or 'Do you mean a dedicated cohort, or particular diagnoses, medications or measurements in EHR data?')
         actions = [{'label':'What should I collect?', 'query':f'What information do you need to add {subject} as a dataset?'},
                    {'label':'Browse current datasets', 'view':'browse'}]

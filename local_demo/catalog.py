@@ -34,6 +34,28 @@ def english_only(value):
     return value
 
 
+def resource_description(text):
+    """Display resource facts; preparation/review notes remain in catalog_record.json."""
+    internal_sentences = (
+        'Dictionary contents have not been copied or verified locally.',
+        'The export contents have not been loaded or verified locally.',
+        'Full file schemas have not been supplied.',
+        'No daily fake file was generated because its complete schema was not supplied.',
+        'No fake file generated because its schema was not supplied.',
+        'Schema not supplied for this demo.',
+        'No fake raw file created.',
+        'No fake daily file created.',
+        'Five columns in this demo.',
+        'User supplied the structure and occurrence-count meaning.',
+        'No path provided in the AD document.',
+        'A separate dictionary path is not given in the supplied README.',
+        'A dictionary path for CUI and AB-prefixed concepts is not given in the supplied README.',
+    )
+    for sentence in internal_sentences:
+        text = text.replace(sentence, '')
+    return re.sub(r'\s+', ' ', text).strip()
+
+
 def original_html(file: Path) -> str:
     """Preserve Word paragraph/table order and basic styles; escape every value."""
     if not file.exists():
@@ -129,7 +151,7 @@ def split_chunks(text: str, limit: int = 950) -> list[str]:
 class Catalog:
     def __init__(self, root: Path = INPUT, database: Path = DATABASE):
         self.root, self.database = root, database
-        # Resource-guide rollout is local only. Hosted deployments do not load it.
+        # The same README registrations support local and hosted resource discovery.
         self.library = ResourceLibrary()
         self.records: dict[str, dict] = {}
         self.documents: dict[str, dict] = {}
@@ -148,6 +170,9 @@ class Catalog:
         for folder in FOLDERS:
             directory = self.root / folder
             record = english_only(json.loads((directory / "catalog_record.json").read_text(encoding="utf-8")))
+            for item in [*record.get('resources', []), *record.get('dictionaries', [])]:
+                if item.get('description'):
+                    item['description'] = resource_description(item['description'])
             if record["dataset_id"] != folder:
                 raise ValueError("Catalog folder and dataset ID differ")
             record["schema"] = english_only(json.loads((directory / "schema.json").read_text(encoding="utf-8")))
@@ -256,27 +281,26 @@ class Catalog:
             add(f"schema_{i}", "columns", text)
             fake_patients = file.get("unique_synthetic_patients", r.get("assumptions", {}).get("synthetic_patients"))
             patient_note = f" {fake_patients:,} generated patients." if fake_patients is not None else ""
-            add(f"fake_{i}", "fake", f"Synthetic example {file['file']}: {file['rows']:,} generated rows.{patient_note} "
-                "It contains no sampled real patient records and is for software demonstration only.")
+            add(f"fake_{i}", "fake", f"Synthetic example {file['file']}: {file['rows']:,} generated rows.{patient_note}")
         if dataset_id == "IBD":
             counts = r["source_counts_from_readme"]
             add("patients", "statistics", f"Sara's original README reports {counts['codified_unique_patients']:,} unique codified patients "
                 f"and {counts['nlp_unique_patients']:,} unique NLP patients. The groups overlap; do not add these counts.", "original")
-            add("dates", "statistics", "The IBD README contains implausible date extremes. Full date coverage requires review.")
+            add("dates", "statistics", "The IBD README reports implausible minimum/maximum dates.")
         else:
-            add("patients", "statistics", "Patient count for these source files: Not documented. The source preview reports rows, not patients.")
-            add("dates", "statistics", "Full monthly cohort date coverage: Not established from the first-row preview. Synthetic date ranges are demo assumptions.")
+            add("patients", "statistics", "Patient count: not listed in the README.")
+            add("dates", "statistics", "Monthly-file date coverage: not listed in the README.")
         for i, summary in enumerate(r.get('date_summaries', [])):
             add(f'date_summary_{i}', 'dates', summary['name'] + ' (' + summary['level'] + '): ' +
-                '; '.join(f'{key}: {value}' for key,value in summary['dates'].items()) + '. Reported in README table ' + str(summary['table']) + '; not verified clean monthly-file coverage.', 'original')
+                '; '.join(f'{key}: {value}' for key,value in summary['dates'].items()) + '. Reported in README table ' + str(summary['table']) + '.', 'original')
         for i, field in enumerate((r.get('tracker_source') or {}).get('fields', [])):
             add(f'tracker_{i}', 'tracker', field['name'] + ': ' + field['value'], 'tracker')
             facts[-1]['source']['label'] = 'Spreadsheet (' + r['tracker_source']['sheet'] + '!' + field['cell'] + ')'
         add("downloads", "downloads", "This demo provides downloads of synthetic CSVs and documentation. "
             "Real source datasets remain on their documented servers; the website does not connect to or download them.")
-        add("access", "access", "Specific access approvals and license requirements are not documented in this demo catalog. Confirm access with the contact.")
-        add("microbiome", "uncertainty", "Microbiome availability is not documented in the supplied materials. "
-            "Confirm this with the contact before treating the dataset as suitable for a study requiring microbiome measurements.")
+        add("access", "access", f"Contact {r['contact']} for access requirements.")
+        add("microbiome", "uncertainty", "Microbiome availability is not documented. "
+            f"Contact {r['contact']} about microbiome measurements.")
         for i, text in enumerate(split_chunks(docs["original_section"])):
             digest = hashlib.sha1(text.encode()).hexdigest()[:8]
             add(f"original_{i}_{digest}", "original", text, "original")

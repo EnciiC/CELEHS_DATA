@@ -43,7 +43,7 @@ async function status() {
     const hosted = !data.local_only;
     const ready = data.model.reachable && data.model.installed;
     $('#status-dot').classList.toggle('ready', ready);
-    $('#model-status').textContent = ready ? 'gpt-oss-20b available' : hosted && data.model.enabled ? 'Hosted model configured · not yet verified' : 'Dataset search available';
+    $('#model-status').textContent = ready ? 'gpt-oss-20b available' : hosted && data.model.enabled ? 'Hosted chat configured' : 'Dataset search available';
     $('#deployment-label').textContent = hosted ? 'Hosted on Render · model by Cloudflare' : 'Runs on this computer';
     $('#deployment-heading').textContent = hosted ? 'DATASET FINDER' : 'LOCAL VERSION';
     $('#reload').hidden = hosted;
@@ -154,7 +154,7 @@ async function sampleRows(id, file, area, withColumns = false) {
   area.replaceChildren(el('p', 'Loading fake rows…', 'note'));
   try {
     const data = await api(`/api/datasets/${id}/files/${encodeURIComponent(file.file)}/preview?limit=5`);
-    area.replaceChildren(el('p', 'FAKE DATA · First 5 generated rows. These are not real patient records.', 'sample-note'), table(data.columns, data.rows, 'preview-table'));
+    area.replaceChildren(el('p', 'FAKE DATA · First 5 generated rows.', 'sample-note'), table(data.columns, data.rows, 'preview-table'));
     if (withColumns) {
       const record = state.detail?.dataset_id === id ? state.detail : await api(`/api/datasets/${id}`);
       area.append(el('h4', 'Column explanations'), columnTable(record, file));
@@ -175,7 +175,6 @@ function answerFile(section, file) {
   if (file.dictionaries?.length || file.file) links.append(dictionaryDisclosure(file.dictionaries || []));
   if (file.readme_kind) links.append(smallButton('Original laboratory README', () => openDocument(section.dataset.id, file.readme_kind)));
   card.append(links);
-  if (file.preview_available === false) card.append(el('p', 'Documentation only · No laboratory sample rows are loaded.', 'note'));
   if (file.file) {
     const preview = el('div', null, 'preview-area');
     const button = smallButton('Show 5 fake rows', () => {
@@ -292,7 +291,7 @@ function filesAndColumnsPanel(record) {
     const more = smallButton('Show 10 rows', async () => {
       try {
         const data = await api(`/api/datasets/${record.dataset_id}/files/${encodeURIComponent(file.file)}/preview?limit=10`);
-        preview.replaceChildren(el('p', 'FAKE DATA · First 10 generated rows, not real patient records.', 'sample-note'),
+        preview.replaceChildren(el('p', 'FAKE DATA · First 10 generated rows.', 'sample-note'),
           table(data.columns, data.rows, 'preview-table'), el('h4', 'Column explanations'), columnTable(record, file));
       } catch(error) { toast(error.message); }
     });
@@ -307,7 +306,7 @@ function filesAndColumnsPanel(record) {
     heading.append(el('h3', file.name), el('span', 'DOCUMENTATION ONLY', 'documented-label'));
     card.append(heading, el('p', file.description), el('p', file.row_meaning), el('p', 'Owner: ' + file.owner));
     for (const name of file.source_files) card.append(el('code', name, 'column-name'), document.createTextNode(' '));
-    card.append(pathDisclosure(file), el('p', 'No real laboratory records or fake laboratory examples are loaded. The source files stay on the documented server.', 'note'),
+    card.append(pathDisclosure(file),
       el('h4', 'Column explanations'), table(['Column','Meaning'], file.column_descriptions, 'field-table'),
       disclosure('Processing script', el('code', file.processing_script, 'source-location')),
       smallButton('Read original laboratory README', () => openDocument(record.dataset_id, file.readme_kind)));
@@ -357,7 +356,6 @@ function dictionariesPanel(record) {
     if (dictionary.status || !dictionary.location) card.append(el('p', dictionary.status || 'Not documented', 'note'));
     panel.append(card);
   }
-  panel.append(el('p', 'Generated code examples are not verified clinical dictionaries. Source dictionaries have not been copied into this demo.', 'note'));
   return panel;
 }
 async function openDataset(id) {

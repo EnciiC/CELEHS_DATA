@@ -314,13 +314,13 @@ class Agent:
                 availability = None
             elif purpose == 'project':
                 selected = []
-                availability = 'A project-level README is not loaded for ' + record['label'] + '. The available dataset documentation does not establish what prior project analyses were performed.'
+                availability = 'See the dataset README for ' + record['label'] + '. A summary of prior project analyses has not been added.'
             elif lab_question and purpose != 'storage':
                 selected = lab_answer_facts(record, query, purpose)
                 if purpose in {'preview', 'fake'}:
-                    availability = 'No fake laboratory rows have been prepared. The documented columns and source location are available; no real lab records are loaded into this tool.'
+                    availability = None
                 elif purpose in {'statistics', 'dates'}:
-                    availability = 'Counts and coverage are reported in the laboratory README, not recalculated here. Monthly rows, unique patients, and source measurements are different counts.'
+                    availability = 'Source: laboratory README. Counts are labeled as monthly rows, unique patients or source measurements.'
                 else:
                     availability = None
             elif purpose == 'overview' and record.get('ibd_project'):
@@ -331,10 +331,10 @@ class Agent:
                     selected = [f for f in self.catalog.facts[dataset_id] if f['category'] == 'dates' and any(f['text'].startswith(name + ' (') for name in dates['columns'][1:])]
                 else:
                     selected += [f for f in self.catalog.facts[dataset_id] if f['category'] == 'tracker' and f['text'].startswith('Date range:')]
-                    availability = 'The spreadsheet date range is a general summary, not verified coverage of a particular monthly file. Date percentiles are not documented in the loaded sources.'
+                    availability = 'Source: spreadsheet summary. Monthly-file date coverage and percentiles are not specified.'
             views = answer_views(record, query, purpose)
             if not views and purpose in {'columns', 'preview'}:
-                availability = "A column preview is not prepared for that file level. Please check the original README; this does not mean the source data are unavailable."
+                availability = 'See the original README for this file level.'
             if purpose == "fake" and scope(query) != (None, []):
                 selected = [f for f in selected if f['category'] != 'fake' or any(v.get('file', '') in f['text'] for v in views)]
             if purpose == "dictionary":
@@ -358,7 +358,7 @@ class Agent:
         if purpose == 'dates': intro = 'Here are the date summaries from the README.'
         if purpose == 'tracker': intro = 'Here is the spreadsheet entry for the requested dataset.'
         if is_lab_query(query) and any(self.catalog.records[i].get('lab_summary') for i in ids) and purpose in {'preview', 'fake'}:
-            intro = 'No laboratory sample rows are loaded. Here is the documented file structure.'
+            intro = 'A synthetic preview is not available for the laboratory file. Here are its columns and source location.'
         if purpose == 'storage':
             intro = direct_storage_answer([self.catalog.records[i] for i in ids], query)
         comparison = comparison_summary(query, sections, self.catalog.records) if purpose in {'columns','research'} else None

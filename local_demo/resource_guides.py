@@ -316,8 +316,8 @@ class ResourceLibrary:
                 warning = 'The model could not select a view. Showing the matching README guidance.'
         if not ids:
             return {'query':query,'engine':engine,'model':model if engine.endswith('_llm') else None,
-                    'intent':'not_documented','answer':'The requested resource is not established by the loaded README descriptions. Which source, resource name or relation type do you need?',
-                    'intro':'The requested resource is not established by the loaded README descriptions.',
+                    'intent':'not_documented','answer':'Documentation for this resource has not been added. Which source, resource name or relation type do you need?',
+                    'intro':'Documentation for this resource has not been added.',
                     'messages':['Which source, resource name or relation type do you need?'],
                     'datasets':[],'resources':[],'sources':[],'context_dataset_ids':[], 'pending_topic':None,
                     'warning':warning,'compact':True,'actions':[{'label':'Browse resources','view':'browse'}],

@@ -99,8 +99,8 @@ def test_lab_browse_metadata_has_columns_and_processing_but_no_fake_download(cli
 @pytest.mark.parametrize('query', ['Show sample rows for IBD labs', 'Show fake IBD laboratory data'])
 def test_no_lab_fake_rows_are_invented(client, query):
     result = ask(client, query)
-    assert 'No laboratory sample rows are loaded' in result['intro']
-    assert 'No fake laboratory rows have been prepared' in result['answer']
+    assert 'A synthetic preview is not available for the laboratory file' in result['intro']
+    assert result['datasets'][0]['additional_note'] is None
     assert not any(f.get('file') for s in result['datasets'] for f in s['files'])
     assert 'generated patients' not in result['answer']
 
@@ -115,7 +115,7 @@ def test_lab_count_units_are_preserved(client, query, expected, absent):
     result = ask(client, query)
     assert expected in result['answer'] and absent not in result['answer']
     assert result['sources'][0]['kind'] == 'ibd_lab'
-    assert 'not recalculated' in result['answer']
+    assert 'Source: laboratory README' in result['answer']
 
 
 def test_lab_dates_are_not_the_older_codified_date_table(client):
@@ -147,7 +147,7 @@ def test_ibd_project_is_not_substituted_for_an_ad_project_request(client):
     result = ask(client, 'What have we done with AD data?')
     assert {s['dataset']['id'] for s in result['datasets']} == {'MGB_AD', 'UPMC_AD'}
     assert 'MAJOR' not in result['answer']
-    assert 'project-level README is not loaded' in result['answer']
+    assert 'A summary of prior project analyses has not been added' in result['answer']
     assert result['sources'] == []
 
 
@@ -193,7 +193,8 @@ def test_new_project_readme_updates_old_unconfirmed_raw_concept_lookup(client):
     lookup = result['datasets'][0]['dictionaries'][0]
     assert lookup['location'].endswith('2026-10-05_concept_dimension_full_table.csv')
     assert 'visit_dimension' not in lookup['description']
-    assert 'not been loaded or verified' in lookup['description']
+    assert 'concept_path, concept_cd, and name_char' in lookup['description']
+    assert 'not been loaded or verified' not in lookup['description']
 
 
 def test_original_document_parser_rejects_internal_or_unsafe_registration(tmp_path):
@@ -223,4 +224,4 @@ def test_lab_fake_request_does_not_ask_the_model_to_select_nonexistent_examples(
     monkeypatch.setattr(client.app.state.agent, 'select', unnecessary)
     result = client.post('/api/chat', json={'query':'Show fake IBD laboratory data'}).json()
     assert result['warning'] is None and result['engine'] == 'local_llm'
-    assert 'No laboratory sample rows are loaded' in result['answer']
+    assert 'A synthetic preview is not available for the laboratory file' in result['answer']

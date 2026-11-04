@@ -178,7 +178,7 @@ def test_short_notes_are_scoped_and_technical_details_are_separate(client):
     assert '`patientnum`' in notes and '`Group_Code`' in notes
     assert 'daily' not in notes.lower()
     assert 'seed' not in notes.lower() and 'probability' not in notes.lower()
-    assert 'fake data' in notes and 'original README' in notes
+    assert 'fake data' in notes and 'File structure and column names.' in notes
     assert 'How the fake data were made' in client.get('/api/datasets/MGB_AD/readme/synthetic').json()['text']
     assert client.get('/api/datasets/MGB_AD/readme/notes?files=wrong.csv').status_code == 422
 
@@ -212,7 +212,7 @@ def test_ra_response_offers_next_steps_without_substituting_other_cohorts(client
     assert result['intent'] == 'unavailable'
     assert result['pending_topic'] == 'RA:MGB'
     assert 'rheumatoid arthritis (RA) from MGB' in result['answer']
-    assert "can't verify" in result['answer'] and 'may exist elsewhere in the lab' in result['answer']
+    assert 'Documentation for' in result['answer'] and 'has not been added' in result['answer']
     assert not result['datasets'] and not result['context_dataset_ids']
     assert all('location' not in action for action in result['actions'])
     assert result['actions'][0]['label'] == 'What information should I collect?'
@@ -226,7 +226,7 @@ def test_missing_topic_followup_does_not_silently_switch_to_available_data(clien
     follow = client.post('/api/chat', json={'query':result['actions'][0]['query'], 'pending_topic':result['pending_topic'], 'use_llm':False}).json()
     assert follow['intent'] == 'documentation_help'
     assert 'README' in follow['answer'] and 'column names' in follow['answer']
-    assert 'does not upload or add them automatically' in follow['answer']
+    assert 'Send the documentation to the resource maintainer' in follow['answer']
     switch = client.post('/api/chat', json={'query':'Show MGB AD monthly columns', 'pending_topic':'RA:MGB', 'use_llm':False}).json()
     assert [s['dataset']['id'] for s in switch['datasets']] == ['MGB_AD']
     assert switch['pending_topic'] is None
@@ -353,7 +353,7 @@ def test_model_interprets_any_undocumented_subject_before_retrieval(client, monk
     assert result['engine'] == 'local_llm' and result['interpretation'] == 'not_documented'
     assert result['pending_topic'] == 'query:cardiovascular data'
     assert not result['datasets'] and not result['sources']
-    assert 'cardiovascular features' in result['answer'] and "can't confirm" in result['answer']
+    assert 'cardiovascular features' in result['answer'] and 'Documentation for cardiovascular data has not been added' in result['answer']
     thanks = client.post('/api/chat', json={'query':'thanks','pending_topic':result['pending_topic']}).json()
     assert thanks['pending_topic'] == 'query:cardiovascular data'
 
@@ -429,7 +429,7 @@ def test_public_generation_notes_are_short_and_do_not_expose_internal_review(cli
     public = client.get(f'/api/datasets/{dataset_id}/readme/synthetic').json()['text']
     assert len(public.split()) < 220
     assert 'How the fake data were made' in public
-    assert 'No real patient rows were copied' in public
+    assert 'Synthetic examples generated locally from the supplied column structure' in public
     assert '200' in public and '1,000' in public
     assert 'Points to confirm' not in public
     assert '/data/' not in public and '/n/' not in public
@@ -517,8 +517,8 @@ def test_tracker_range_does_not_become_monthly_ad_coverage(client):
     result = ask(client,'What is the UPMC AD date distribution?')
     assert result['datasets'][0]['date_summary'] is None
     assert '2004' in result['answer'] and '2023' in result['answer']
-    assert 'not verified coverage of a particular monthly file' in result['answer']
-    assert 'Date percentiles are not documented' in result['answer']
+    assert 'Source: spreadsheet summary' in result['answer']
+    assert 'Monthly-file date coverage and percentiles are not specified' in result['answer']
 
 
 def test_research_request_names_relevant_monthly_files(client):
@@ -568,7 +568,7 @@ def test_comparison_has_a_conclusion_and_distinguishes_codified_from_nlp(client)
     assert conclusion['details'] == [
         'Codified: MGB AD uses `Group_Code` and `N`; UPMC AD uses `feature_id` and `Group_Code_Count`.',
         'NLP: MGB AD uses `cui` and `N`; UPMC AD uses `feature_id` and `N`.']
-    assert 'not establish' in conclusion['caution']
+    assert 'Compare code mappings and cohort definitions before combining files' in conclusion['caution']
     assert len(conclusion['sources']) == 2
     assert any(s['kind'] == 'schema' for s in result['sources'])
     assert result['answer'].index('column names differ') < result['answer'].index('patientnum, month')

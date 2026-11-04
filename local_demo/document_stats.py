@@ -64,4 +64,4 @@ def date_view(record, query):
     return {'columns':['Statistic', *(s['name'] for s in selected)],
             'rows':[{'Statistic':metric, **{s['name']:s['dates'][metric] for s in selected}} for metric in METRICS],
             'note':'Reported in the original README for processed codified (merged daily) and processed NLP data.' if all(s['default'] for s in selected) else 'Reported in the original README for the source groups shown.',
-            'warning':'Reported minimum/maximum dates include implausible values. These are not a verified clean date range. The README does not separately establish monthly-file coverage or specify the unit used for the percentiles.'}
+            'warning':'The README reports implausible minimum/maximum dates; monthly-file coverage and the percentile unit are unspecified.'}

@@ -65,6 +65,8 @@ subject: a short English noun phrase describing the request, not a claim; retain
 clarification: one short question for not_documented/clarify, e.g. cohort versus features, or which disease/site.
 Never put paths, contacts, counts, treatment advice, lab availability claims or URLs in subject/clarification.
 short_answer: ONLY for explain; use source facts, no invented columns/numbers/paths. All other modes use an empty string.
+Use short, direct English for short_answer and clarification. Describe the requested facts or ask one specific question.
+Leave internal checking, preparation history and repeated scope caveats out of the answer.
 evidence_ids: source IDs supporting selected datasets or explanation. Empty for not_documented/clarify/out_of_scope.
 For explain, include the dataset IDs owning the cited evidence, even when the user didn't name a dataset.
 For not_documented, always include a useful clarification question about the intended cohort or variables.

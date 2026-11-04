@@ -12,9 +12,9 @@
 <tr><td>GET</td><td>/api/health</td><td>Service and model status. Does not call hosted inference.</td></tr>
 <tr><td>GET</td><td>/api/datasets?q=AD</td><td>List or filter datasets.</td></tr>
 <tr><td>GET</td><td>/api/inventory</td><td>Clinical examples and README resource guides, grouped as datasets, derived data resources, and models.</td></tr>
-<tr><td>GET</td><td>/api/resources</td><td>List the local README-only resources and their IDs. These are separate from clinical example files.</td></tr>
-<tr><td>GET</td><td>/api/resources/{id}</td><td>Resource type, actual storage, starting steps, documented files, access, code and limitations.</td></tr>
-<tr><td>GET</td><td>/api/resources/{id}/readme</td><td>Unchanged original Markdown documentation. No source data are opened.</td></tr>
+<tr><td>GET</td><td>/api/resources</td><td>List resource guides and their IDs.</td></tr>
+<tr><td>GET</td><td>/api/resources/{id}</td><td>Resource type, storage, starting steps, files, columns, access and code.</td></tr>
+<tr><td>GET</td><td>/api/resources/{id}/readme</td><td>Original README text and display format.</td></tr>
 <tr><td>GET</td><td>/api/datasets/{id}</td><td>Dataset information and file references.</td></tr>
 <tr><td>GET</td><td>/api/datasets/{id}/schema</td><td>Column descriptions and types.</td></tr>
 <tr><td>GET</td><td>/api/datasets/{id}/readme/{kind}</td><td>Documents. kind: notes (short file guide), synthetic (how the fake data were made), tracker (matching spreadsheet entry), original, original_section. catalog is a compatibility alias for synthetic. Optional files parameter scopes the short guide to selected fake-data filenames.</td></tr>

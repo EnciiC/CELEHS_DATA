@@ -15,7 +15,7 @@ function resourceCategoryLabel(id) {
 function categoryDescription(id) {
   return {datasets:'Clinical datasets, notes and annotations, and guides to external datasets.',
     derived:'Relation tables, matrices, knowledge graphs and terminology files. Public reference releases are included here.',
-    models:'Saved model weights and checkpoints, with instructions for using them. No model entries have been documented yet.'}[id];
+    models:'Model weights, checkpoints and instructions for using them.'}[id];
 }
 function chooseResourceCategory(id) {
   state.category=id;renderInventory();show('browse');window.scrollTo({top:0,behavior:'smooth'});
@@ -38,7 +38,6 @@ function renderResourceSidebar() {
     button.append(el('small',resource.storage));
     button.addEventListener('click',()=>resource.clinical?openDataset(resource.id):openResource(resource.id));list.append(button);
   }
-  if(!entries.length)list.append(el('p','No model READMEs added yet.','sidebar-empty'));
   sidebar.append(list);
 }
 function renderInventory() {
