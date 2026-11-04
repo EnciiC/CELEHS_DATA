@@ -15,6 +15,8 @@ from .notes import fake_data_notes
 from .document_stats import ibd_date_summaries
 from .tracker import load_tracker, tracker_notes
 from .readme_resources import prepare_readmes, extra_facts
+from .resource_guides import ResourceLibrary
+from .hosting import provider
 
 PROJECT = Path(__file__).resolve().parents[1]
 INPUT = PROJECT / "demo_input"
@@ -127,6 +129,8 @@ def split_chunks(text: str, limit: int = 950) -> list[str]:
 class Catalog:
     def __init__(self, root: Path = INPUT, database: Path = DATABASE):
         self.root, self.database = root, database
+        # Resource-guide rollout is local only. Hosted deployments do not load it.
+        self.library = ResourceLibrary()
         self.records: dict[str, dict] = {}
         self.documents: dict[str, dict] = {}
         self.facts: dict[str, list[dict]] = {}
@@ -292,6 +296,7 @@ class Catalog:
     @staticmethod
     def summary(r):
         return {"id": r["dataset_id"], "name": r["dataset_name"], "label": r["label"],
+                'category':'datasets', 'entry_kind':'clinical_dataset',
                 "site": r["site"], "description": r["description"],
                 "platforms": r["storage_platform"], "contact": r["contact"],
                 "fake_files": len(r["files"]), "synthetic_rows": sum(f["rows"] for f in r["files"]),

@@ -65,7 +65,49 @@ def record(request, dataset_id):
 async def health(request: Request):
     status = await request.app.state.agent.status()
     return {"status": "ok", "datasets": len(request.app.state.catalog.records), "local_only": not request.app.state.hosting.public,
-            "model": status}
+            "model": status, 'resource_guides':len(request.app.state.catalog.library.entries)}
+
+
+@app.get('/api/inventory')
+def inventory(request: Request):
+    catalog = request.app.state.catalog
+    return {'datasets':catalog.summaries(), 'resources':catalog.library.summaries(),
+            'categories':[{'id':'datasets','label':'Datasets'},
+                          {'id':'derived','label':'Derived & reference data'}, {'id':'models','label':'Models'}]}
+
+
+def resource_record(request, resource_id):
+    entry = request.app.state.catalog.library.entries.get(resource_id)
+    if entry is None: raise HTTPException(404, 'Unknown resource')
+    return entry
+
+
+@app.get('/api/resources')
+def resources(request: Request):
+    return {'resources':request.app.state.catalog.library.summaries()}
+
+
+@app.get('/api/resources/{resource_id}')
+def resource_detail(resource_id: str, request: Request):
+    entry = resource_record(request, resource_id)
+    library = request.app.state.catalog.library
+    return {**library.summary(entry), 'locations':entry['locations'],
+            'views':{key:library.view(entry, key, '')['blocks'] for key in
+                     ['overview','start','files','access','code','limitations','columns','samples']},
+            'source':library.source(entry), 'sha256':entry['sha256'], 'documentation_only':True}
+
+
+@app.get('/api/resources/{resource_id}/readme')
+def resource_readme(resource_id: str, request: Request):
+    entry = resource_record(request, resource_id)
+    return {'text':entry['original'], 'html':None, 'title':entry['original_filename'],
+            'scope_note':"Original README supplied by Zongxin Yang. Its server/version checks are historical statements; this tool has not inspected the source payloads."}
+
+
+@app.get('/api/resources/{resource_id}/download/readme')
+def resource_download(resource_id: str, request: Request):
+    entry = resource_record(request, resource_id)
+    return FileResponse(entry['source_path'], filename=entry['original_filename'], media_type='text/markdown; charset=utf-8')
 
 
 @app.get("/docs", include_in_schema=False)
@@ -183,6 +225,8 @@ def reload_catalog(request: Request):
     if request.app.state.hosting.public:
         raise HTTPException(403, "Update the source repository and redeploy to refresh public documentation")
     request.app.state.catalog.rebuild()
+    from .resource_guides import ResourceLibrary
+    request.app.state.catalog.library = ResourceLibrary()
     return {"datasets": request.app.state.catalog.summaries(), "status": "reloaded"}
 
 

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>CELEHS Dataset Finder</title>
   <link rel="stylesheet" href="/style.css">
+  <script src="/resource-guides.js" defer></script>
   <script src="/app.js" defer></script>
 </head>
 <body>
@@ -13,31 +14,33 @@
     <p class="nav-caption">WORKSPACE</p>
     <nav aria-label="Main navigation">
       <button class="nav-button active" id="nav-ask">Ask a question</button>
-      <button class="nav-button" id="nav-browse">Browse datasets</button>
+      <button class="nav-button" id="new-chat">New conversation</button>
+      <button class="nav-button" id="nav-browse">Browse resources</button>
       <a class="nav-button" href="/docs" target="_blank" rel="noopener">Web API docs <span aria-hidden="true">↗</span></a>
     </nav>
-    <p class="nav-caption">IN THIS DEMO</p>
-    <div id="sidebar-datasets"></div>
+    <p class="nav-caption resource-caption">RESOURCES</p>
+    <nav id="sidebar-resources" aria-label="Resource groups"></nav>
     <div class="sidebar-bottom"><span class="status-dot" id="status-dot"></span><span id="model-status">Checking model…</span><small id="deployment-label">Runs on this computer</small></div>
   </aside>
   <main>
     <header class="topbar"><span>Lab resources <span class="separator">/</span> <strong id="page-label">Search</strong></span><button class="quiet-button" id="reload">Reload local files</button></header>
     <div class="content">
       <section id="ask-view">
-        <div class="page-heading"><span class="eyebrow" id="deployment-heading">DATASET FINDER</span><h1>Search lab datasets</h1><p>Find source files, read documentation, and explore synthetic examples.</p></div>
+        <div class="page-heading"><span class="eyebrow" id="deployment-heading">DATASET FINDER</span><h1>Search lab resources</h1><p>Find datasets, access guides, derived data resources, and their documentation.</p></div>
         <form id="question-form" class="question-box">
-          <label class="sr-only" for="question">Your dataset question</label>
+          <label class="sr-only" for="question">Your resource question</label>
           <textarea id="question" rows="2" maxlength="1500" placeholder="Describe the dataset or research question you have in mind…" required></textarea>
-          <div class="question-footer single-action"><button class="primary-button" id="ask-button" type="submit">Search datasets <span aria-hidden="true">→</span></button></div>
+          <div class="question-footer single-action"><button class="primary-button" id="ask-button" type="submit">Search resources <span aria-hidden="true">→</span></button></div>
         </form>
         <p id="hosted-notice" class="page-footer" hidden>Powered by GPT-OSS-20B, hosted by Cloudflare. Do not enter real patient information.</p>
         <div class="examples"><span>Try a question</span><button data-query="I wanted to see IBD data, guide me and let me know where I can find it">Where can I find IBD data?</button><button data-query="I wanted to see AD, what we have now">What AD data do we have?</button><button data-query="Can you show me what IBD monthly count data look like?">IBD monthly structure</button><button data-query="Compare the monthly count columns for MGB AD and UPMC AD">Compare AD monthly columns</button><button data-query="Show IBD monthly lab columns">IBD monthly lab data</button><button data-query="What can we do with IBD data?">MAJOR IBD project aims</button></div>
         <div id="conversation" aria-live="polite"></div>
-        <div id="initial-catalog"><div class="section-heading"><h2>Available in this demo</h2><span id="dataset-total">3 dataset groups</span></div><div class="dataset-grid" id="home-cards"></div></div>
+        <div class="examples"><button data-query="How do I get started with All of Us?">All of Us access</button><button data-query="Compare the FAS UKB matrix with the O2 CRAFT matrix">FAS versus CRAFT</button><button data-query="What gene-disease relation resources do we have?">Gene-disease resources</button></div>
+        <div id="initial-catalog"><div class="section-heading"><h2>Documented resources</h2><span id="dataset-total"></span></div><nav id="home-categories" class="resource-categories" aria-label="Resource categories"></nav><div class="dataset-grid" id="home-cards"></div></div>
       </section>
-      <section id="browse-view" hidden><div class="page-heading"><span class="eyebrow">CURRENT INVENTORY</span><h1>Browse datasets</h1><p>These three groups have documentation and synthetic examples ready to inspect.</p></div><div class="dataset-grid" id="browse-cards"></div></section>
+      <section id="browse-view" hidden><div class="page-heading"><h1>Browse resources</h1><p>Choose a group to find documented resources and access instructions.</p></div><nav id="browse-categories" class="resource-categories" aria-label="Browse categories"></nav><p id="category-description" class="category-description"></p><div class="dataset-grid" id="browse-cards"></div></section>
       <section id="detail-view" hidden></section>
-      <footer class="page-footer">Real source data remain on O2 or MGB/Eris. Data-file previews and CSV downloads here are synthetic.</footer>
+      <footer class="page-footer">Source data remain on their documented platforms. This tool serves documentation and explicitly labeled fake examples; it does not open source-server payloads.</footer>
     </div>
   </main>
   <dialog id="document-dialog"><div class="dialog-header"><div><h2 id="document-title"></h2><p id="document-scope"></p></div><button id="close-document" class="quiet-button" aria-label="Close document">Close ✕</button></div><div id="document-text" class="document-content"></div></dialog>

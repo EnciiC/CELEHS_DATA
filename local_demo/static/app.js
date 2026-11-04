@@ -1,5 +1,5 @@
 const $ = selector => document.querySelector(selector);
-const state = {datasets: [], previous: [], pending: null, detail: null, busy: false};
+const state = {datasets: [], resources: [], category:'datasets', previous: [], pending: null, detail: null, busy: false};
 
 function el(tag, text, cls) {
   const node = document.createElement(tag);
@@ -20,7 +20,7 @@ function show(view) {
   for (const name of ['ask', 'browse', 'detail']) $(`#${name}-view`).hidden = view !== name;
   $('#nav-ask').classList.toggle('active', view === 'ask');
   $('#nav-browse').classList.toggle('active', view !== 'ask');
-  $('#page-label').textContent = view === 'ask' ? 'Search' : view === 'browse' ? 'Datasets' : state.detail?.label || 'Dataset';
+  $('#page-label').textContent = view === 'ask' ? 'Search' : view === 'browse' ? resourceCategoryLabel(state.category) : state.detail?.label || 'Resource';
 }
 function datasetCard(dataset) {
   const card = el('button', null, 'dataset-card');
@@ -34,16 +34,9 @@ function datasetCard(dataset) {
   return card;
 }
 async function loadCatalog() {
-  const data = await api('/api/datasets'); state.datasets = data.datasets;
-  for (const selector of ['#home-cards', '#browse-cards']) {
-    const node = $(selector); node.replaceChildren(...state.datasets.map(datasetCard));
-  }
-  $('#dataset-total').textContent = `${state.datasets.length} dataset groups`;
-  $('#sidebar-datasets').replaceChildren(...state.datasets.map(d => {
-    const b = el('button', d.label, 'dataset-nav');
-    b.append(el('small', d.platforms.join(' / ')));
-    b.addEventListener('click', () => openDataset(d.id)); return b;
-  }));
+  const data = await api('/api/inventory'); state.datasets = data.datasets;state.resources=data.resources;
+  renderInventory();
+  renderResourceSidebar();
 }
 async function status() {
   try {
@@ -53,7 +46,7 @@ async function status() {
     $('#status-dot').classList.toggle('ready', ready);
     $('#model-status').textContent = ready ? 'gpt-oss-20b available' : hosted && data.model.enabled ? 'Hosted model configured · not yet verified' : 'Dataset search available';
     $('#deployment-label').textContent = hosted ? 'Hosted on Render · model by Cloudflare' : 'Runs on this computer';
-    $('#deployment-heading').textContent = hosted ? 'DATASET FINDER' : 'LOCAL DEMO';
+    $('#deployment-heading').textContent = hosted ? 'DATASET FINDER' : 'LOCAL VERSION';
     $('#reload').hidden = hosted;
     $('#hosted-notice').hidden = !hosted;
   } catch { $('#model-status').textContent = 'Server unavailable'; }
@@ -221,6 +214,7 @@ function renderAnswer(result, box) {
   box.append(header);
   if (result.warning) box.append(el('p', result.warning, 'answer-warning'));
   box.append(el('p', result.intro || result.answer, 'answer-intro'));
+  renderResourceResults(result, box);
   if (result.comparison) {
     const summary = el('div', null, 'comparison-summary');
     for (const line of result.comparison.details) summary.append(markdownDocument(line));
@@ -282,7 +276,7 @@ async function ask(query) {
     state.pending = result.pending_topic || null;
     renderAnswer(result, box); await status();
   } catch(error) { box.replaceChildren(el('p', error.message, 'answer-warning')); }
-  finally { state.busy = false; $('#ask-button').disabled = false; $('#ask-button').textContent = 'Search datasets →'; }
+  finally { state.busy = false; $('#ask-button').disabled = false; $('#ask-button').textContent = 'Search resources →'; }
 }
 function filesAndColumnsPanel(record) {
   const panel = el('div'), picker = el('div', null, 'file-picker'), area = el('div');
@@ -390,6 +384,10 @@ $('#question-form').addEventListener('submit', event => {event.preventDefault();
 $('#question').addEventListener('keydown', event => {if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {event.preventDefault();ask(event.target.value);}});
 document.querySelectorAll('[data-query]').forEach(button => button.addEventListener('click', () => {$('#question').value = button.dataset.query; ask(button.dataset.query);}));
 $('#nav-ask').addEventListener('click', () => show('ask'));
+$('#new-chat').addEventListener('click', () => {
+  state.previous=[];state.pending=null;$('#conversation').replaceChildren();
+  $('#initial-catalog').hidden=false;$('#question').value='';show('ask');$('#question').focus();
+});
 $('#nav-browse').addEventListener('click', () => show('browse'));
 $('#close-document').addEventListener('click', () => $('#document-dialog').close());
 $('#reload').addEventListener('click', async () => {try {await api('/api/catalog/reload',{method:'POST'});await loadCatalog();toast('Dataset information refreshed');}catch(error){toast(error.message);}});

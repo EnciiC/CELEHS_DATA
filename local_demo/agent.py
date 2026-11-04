@@ -166,10 +166,25 @@ class Agent:
 
     async def answer(self, query, previous=None, use_llm=True, pending_topic=None):
         started = time.monotonic()
+        if re.search(r'download|export|see|show|view', query, re.I) and re.search(r'real (?:patient |clinical )?(?:data|records|notes)|actual patient',query,re.I):
+            intro='This website provides documentation and clearly labeled fake examples. Real patient data must be accessed through the documented source platform with the required permission.'
+            return {'query':query,'engine':'guide','model':None,'intent':'data_access',
+                    'intro':intro,'answer':intro,'datasets':[],'resources':[],'sources':[],
+                    'context_dataset_ids':previous or [],'pending_topic':None,'warning':None,'compact':True,
+                    'actions':[{'label':'Browse resources','view':'browse'}],'elapsed_seconds':0}
+        resource_result = await self.catalog.library.maybe_answer(
+            query, previous or [], self.catalog, self.structured, use_llm, self.model)
+        if resource_result is not None:
+            self.last_result = {'engine':resource_result['engine'], 'error':None if not resource_result.get('warning') else 'ResourceRoutingError'}
+            return resource_result
         previous = [i for i in previous or [] if i in self.catalog.records]
         labels = {i:r['label'] for i,r in self.catalog.records.items()}
         welcome = opening(query, previous, labels, pending_topic, handle_pending=not use_llm)
         if welcome:
+            if self.catalog.library.entries and welcome['intent'] in {'greeting','help'}:
+                welcome['intro'] = 'Hi! What would you like to explore—clinical datasets, derived data resources, or model resources?' if welcome['intent'] == 'greeting' else welcome['intro']
+                welcome['answer'] = welcome['intro'] + '\n\nBrowse resources for external dataset guides, clinical annotations, matrices, relation tables and terminology.'
+                welcome['messages'] = ['Zongxin’s README guides are available under Browse resources.']
             self.last_result = {'engine':'guide', 'error':None}
             return {**welcome, 'query':query, 'elapsed_seconds':round(time.monotonic()-started, 2)}
         if all(re.search(pattern, query, re.I) for pattern in [r'\bmonthly\b',r'exact|precise',r'medication|treatment',r'start|stop|end',r'date']):

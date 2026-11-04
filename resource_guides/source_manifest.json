@@ -1,0 +1,105 @@
+{
+  "readme_contact": "Zongxin Yang",
+  "snapshot_date": "2026-11-03",
+  "source_document_date": "2026-08-17",
+  "entries": [
+    {
+      "id": "ZX_4CE",
+      "original_filename": "4CE.md",
+      "snapshot": "zongxin/ZX_4CE/README_original.md",
+      "sha256": "5731984482813bdec3dff88bdc82b9c3b4dfc6c1c67965c37271fffe32908fb2",
+      "bytes": 3705
+    },
+    {
+      "id": "ZX_AOU",
+      "original_filename": "All of Us Research Program data.md",
+      "snapshot": "zongxin/ZX_AOU/README_original.md",
+      "sha256": "fbaaa2144d81c2c1079ca8358de5a9746dd6faf5a22c18cdafa67934b8d1c5ca",
+      "bytes": 3841
+    },
+    {
+      "id": "ZX_CORAL",
+      "original_filename": "CORAL (Breast + PDAC).md",
+      "snapshot": "zongxin/ZX_CORAL/README_original.md",
+      "sha256": "b74bddb3b93926ce3d5f80152eed6ace6a6fd97bc157eb627b033aadeb45c13e",
+      "bytes": 3577
+    },
+    {
+      "id": "ZX_EQTL",
+      "original_filename": "ARICGTEx-derived eQTL gene–SNP–tissue data.md",
+      "snapshot": "zongxin/ZX_EQTL/README_original.md",
+      "sha256": "92174eb31700dee156d97eb829c09080e5abe99548b93a4e5eb7a997d41b0e01",
+      "bytes": 3226
+    },
+    {
+      "id": "ZX_RELATIONS",
+      "original_filename": "Biomedical relation datasets (indication→drug; indication→gene; disease→gene; pathway→gene).md",
+      "snapshot": "zongxin/ZX_RELATIONS/README_original.md",
+      "sha256": "b67510a763b730a2303e41f7a0d3c5ea67ff017e58de878b99f574d08b2b9f3d",
+      "bytes": 3730
+    },
+    {
+      "id": "ZX_CRAFT",
+      "original_filename": "CRAFT UKB signed-correlation matrix.md",
+      "snapshot": "zongxin/ZX_CRAFT/README_original.md",
+      "sha256": "30812407918461e754eff1c232c8b29fe19102063874f16d3473e08681e83e47",
+      "bytes": 3335
+    },
+    {
+      "id": "ZX_FAS",
+      "original_filename": "FAS UKB variant–phenotype matrix.md",
+      "snapshot": "zongxin/ZX_FAS/README_original.md",
+      "sha256": "d27ea7c1cc94280678b7c4be49ff364abf44a7a7e5a5e2769deb6c2fc057db65",
+      "bytes": 3502
+    },
+    {
+      "id": "ZX_FAVOR_GENE",
+      "original_filename": "FAVOR geneprotein–disease relations.md",
+      "snapshot": "zongxin/ZX_FAVOR_GENE/README_original.md",
+      "sha256": "eb93cbefc65a01b2f9a616df9e348dd8ca435c077cf733f2121ab14ba966ca1a",
+      "bytes": 3274
+    },
+    {
+      "id": "ZX_FAVOR_VARIANT",
+      "original_filename": "FAVOR SNPvariant→gene regulatory relations.md",
+      "snapshot": "zongxin/ZX_FAVOR_VARIANT/README_original.md",
+      "sha256": "f46b5e5bc892a8a00457fb894e5568f789573caa09ec909ff6dc805f44add5b1",
+      "bytes": 3345
+    },
+    {
+      "id": "ZX_MVP_LEGACY",
+      "original_filename": "Legacy MVP HAREPheWAS summary-statistics benchmark.md",
+      "snapshot": "zongxin/ZX_MVP_LEGACY/README_original.md",
+      "sha256": "ec2c4c2d3858fc237fe46515e002e9be3ab0fc7263650f0ad7847208369b7f4a",
+      "bytes": 3069
+    },
+    {
+      "id": "ZX_MVP_MULTI",
+      "original_filename": "MVP multi-ancestry variant–phenotype matrices (AFRAMREASEUR).md",
+      "snapshot": "zongxin/ZX_MVP_MULTI/README_original.md",
+      "sha256": "42d48da6435476c03f4164cd8cda040f8af537dd270c2f4eff58fd8c59e32e86",
+      "bytes": 3670
+    },
+    {
+      "id": "ZX_GWAS",
+      "original_filename": "NHGRI–EBI GWAS Catalog association releases (e109e110).md",
+      "snapshot": "zongxin/ZX_GWAS/README_original.md",
+      "sha256": "e04c850f5ea6cfb7a2359765432212f6b7b54f0f16b8fb3d9b536c0861eb2aa8",
+      "bytes": 3276
+    },
+    {
+      "id": "ZX_PRIMEKG",
+      "original_filename": "PrimeKG v2.1 biomedical knowledge graph.md",
+      "snapshot": "zongxin/ZX_PRIMEKG/README_original.md",
+      "sha256": "9a3958c07894d9c95e94d123b0cf1f812101ede73234af08b4664d584eb9c4ed",
+      "bytes": 3066
+    },
+    {
+      "id": "ZX_UMLS",
+      "original_filename": "UMLS terminology (2020) and derived dictionary (2021).md",
+      "snapshot": "zongxin/ZX_UMLS/README_original.md",
+      "sha256": "488f4dd3af0284654d6827d5cfe0f031820cd842079f0fb35f46ddf8cf8eb80b",
+      "bytes": 3444
+    }
+  ]
+}

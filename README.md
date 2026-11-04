@@ -2,7 +2,7 @@
 
 Find documented dataset locations, read original documentation, inspect columns, and preview generated example rows.
 
-This repository contains the application and a selected documentation snapshot for MGB IBD, MGB AD, and UPMC AD. It includes the IBD monthly laboratory README and the five-aim MAJOR IBD project README. Source-server paths are references, not public download links or access grants. Real patient data remain on their approved servers.
+This repository contains the application and a selected documentation snapshot for MGB IBD, MGB AD, and UPMC AD. It also includes 14 README guides for clinical annotations, external dataset access, relation tables, matrices, public references and terminology, organized under Datasets, Derived & reference data, and Models. No model-resource README has been registered yet. It includes the IBD monthly laboratory README and the five-aim MAJOR IBD project README. Source-server paths are references, not public download links or access grants. Real patient data remain on their approved servers.
 
 ## What is included
 
