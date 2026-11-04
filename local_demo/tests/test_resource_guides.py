@@ -49,6 +49,19 @@ def test_hosted_guides_use_same_sources_and_correct_engine(monkeypatch):
     assert 'no O2 participant-level copy' in result['answer']
 
 
+def test_general_overview_does_not_become_access_instructions():
+    import asyncio
+    from local_demo.agent import Agent
+    from local_demo.catalog import Catalog
+    agent=Agent(Catalog())
+    async def overinterpret(system,context,schema):
+        return {'resource_ids':['ZX_FAVOR_VARIANT'],'intent':'access'}
+    agent.structured=overinterpret
+    result=asyncio.run(agent.answer('Tell me about FAVOR variant regulatory relations.'))
+    assert result['intent']=='resource_overview'
+    assert '295,763 rsIDs' in result['answer']
+
+
 def test_all_readmes_are_registered_unmodified_and_not_payloads(client):
     library=client.app.state.catalog.library
     assert len(library.entries)==14

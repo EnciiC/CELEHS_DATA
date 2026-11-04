@@ -247,7 +247,8 @@ class ResourceLibrary:
                 # Exact named resources cannot be discarded by a model; facts are source-controlled.
                 anchors = named or [i for i in previous or [] if i in ids]
                 ids = list(dict.fromkeys([*anchors,*selected]))[:4] if anchors else selected
-                if requested == 'overview': requested = plan['intent']
+                overview_request=re.search(r'\btell me about\b|\bwhat is\b|\bdescribe\b|\b(?:give|show) me (?:an? )?overview\b',query,re.I)
+                if requested == 'overview' and not overview_request: requested = plan['intent']
                 engine = 'hosted_llm' if model.startswith('@cf/') else 'local_llm'
             except (httpx.HTTPError, ValueError, KeyError, TypeError):
                 warning = 'The model could not select a view. Showing the matching README guidance.'
