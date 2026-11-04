@@ -1,19 +1,361 @@
 {
   "scope": "Documentation snapshot for local and hosted resource discovery. No source payloads or model weights are included.",
   "entries": [
-    {"id":"ZX_4CE","source_prefix":"4CE.md","label":"4CE clinical notes and annotations","category":"datasets","resource_type":"Clinical notes and annotations","storage":"Restricted data on O2","aliases":["4ce"],"topics":["clinical information extraction","clinical notes","annotations","reviewed archive","evaluation derivative"]},
-    {"id":"ZX_AOU","source_prefix":"All of Us","label":"All of Us access guide","category":"datasets","resource_type":"External dataset access guide","storage":"Researcher Workbench; O2 introduction only. No O2 participant-level copy.","aliases":["all of us","aou","researcher workbench"],"topics":["external cohort","OMOP","EHR","genomic","workspace access"]},
-    {"id":"ZX_CORAL","source_prefix":"CORAL","label":"CORAL breast and PDAC notes","category":"datasets","resource_type":"Clinical notes and annotations","storage":"Restricted data on O2","aliases":["coral","breast cancer notes","pancreatic annotations","pdac"],"topics":["breast cancer","pancreatic ductal adenocarcinoma","clinical extraction","annotation","evaluation"]},
-    {"id":"ZX_EQTL","source_prefix":"ARICGTEx","label":"ARIC/GTEx gene-SNP-tissue data","category":"derived","resource_type":"eQTL table","storage":"O2","aliases":["aric","gtex","eqtl","gene snp tissue"],"topics":["gene SNP tissue","expression quantitative trait loci","mixed source masterfile","MayoBrain"]},
-    {"id":"ZX_RELATIONS","source_prefix":"Biomedical relation","label":"Biomedical relation datasets","category":"derived","resource_type":"Relation tables and evaluation files","storage":"O2","aliases":["biomedical relation","indication drug","indication gene","pathway gene"],"topics":["indication to drug","indication to gene","disease to gene","pathway to gene","relation pairs"]},
-    {"id":"ZX_CRAFT","source_prefix":"CRAFT","label":"CRAFT UKB signed-correlation matrix","category":"derived","resource_type":"Signed-correlation matrix","storage":"O2","aliases":["craft","signed correlation","ukb sign"],"topics":["UK Biobank","UKB","correlation matrix","historical evaluation","Parquet"]},
-    {"id":"ZX_FAS","source_prefix":"FAS","label":"FAS UKB variant-phenotype matrix","category":"derived","resource_type":"Variant-phenotype matrix","storage":"FAS only; no O2 copy","aliases":["fas","first version ukb","first version matrix"],"topics":["UK Biobank","UKB","variant phenotype","correlation matrix","first_version"]},
-    {"id":"ZX_FAVOR_GENE","source_prefix":"FAVOR geneprotein","label":"FAVOR gene/protein-disease relations","category":"derived","resource_type":"Gene/protein-disease relation table","storage":"O2; collaborator-derived package","aliases":["favor gene","favor protein","gene disease not in primekg"],"topics":["FAVOR","gene disease","protein disease","relation pairs","collaborator export"]},
-    {"id":"ZX_FAVOR_VARIANT","source_prefix":"FAVOR SNPvariant","label":"FAVOR variant-gene relations","category":"derived","resource_type":"Variant-gene regulatory mappings","storage":"O2; collaborator-derived package","aliases":["favor variant","favor snp","regulatory relations"],"topics":["FAVOR","rsID","variant gene","promoter","enhancer","L2G","QTL","PPI"]},
-    {"id":"ZX_MVP_LEGACY","source_prefix":"Legacy MVP","label":"Legacy MVP HARE/PheWAS benchmark","category":"derived","resource_type":"Summary statistics and phenotype mapping","storage":"O2","aliases":["legacy mvp","hare","phewas"],"topics":["MVP","historical benchmark","Merged_PheCodes.csv","phenotype mapping","summary statistics"]},
-    {"id":"ZX_MVP_MULTI","source_prefix":"MVP multi","label":"MVP multi-ancestry matrices","category":"derived","resource_type":"Variant-phenotype matrices and summaries","storage":"O2","aliases":["mvp multi","multi ancestry","aframreaseur"],"topics":["MVP","AFR","AMR","EAS","EUR","variant phenotype","variant lab","ancestry"]},
-    {"id":"ZX_GWAS","source_prefix":"NHGRI","label":"GWAS Catalog e109/e110 releases","category":"derived","resource_type":"Public association reference tables","storage":"Public reference releases copied to O2","aliases":["gwas catalog","nhgri","ebi","e109","e110"],"topics":["GWAS","association releases","genetic associations","release identity"]},
-    {"id":"ZX_PRIMEKG","source_prefix":"PrimeKG","label":"PrimeKG v2.1 knowledge graph","category":"derived","resource_type":"Biomedical knowledge graph","storage":"Public reference release copied to O2","aliases":["primekg","knowledge graph"],"topics":["biomedical knowledge graph","kg.csv","gene disease","public reference","v2.1"]},
-    {"id":"ZX_UMLS","source_prefix":"UMLS","label":"UMLS terminology and dictionary","category":"derived","resource_type":"Terminology files and derived dictionary","storage":"O2; individual UMLS licence required","aliases":["umls","mrconso","mrrel","terminology","cui mapping"],"topics":["concept names","concept relations","dictionary","NLM licence","2020","2021"]}
+    {
+      "id": "ZX_4CE",
+      "source_prefix": "4CE.md",
+      "label": "4CE clinical notes and annotations",
+      "category": "datasets",
+      "resource_type": "Clinical notes and annotations",
+      "storage": "Restricted data on O2",
+      "aliases": [
+        "4ce"
+      ],
+      "topics": [
+        "clinical information extraction",
+        "clinical notes",
+        "annotations",
+        "reviewed archive",
+        "evaluation derivative"
+      ]
+    },
+    {
+      "id": "ZX_AOU",
+      "source_prefix": "All of Us",
+      "label": "All of Us access guide",
+      "category": "datasets",
+      "resource_type": "External dataset access guide",
+      "storage": "Researcher Workbench; O2 introduction only. No O2 participant-level copy.",
+      "aliases": [
+        "all of us",
+        "aou",
+        "researcher workbench"
+      ],
+      "topics": [
+        "external cohort",
+        "OMOP",
+        "EHR",
+        "genomic",
+        "workspace access"
+      ]
+    },
+    {
+      "id": "ZX_CORAL",
+      "source_prefix": "CORAL",
+      "label": "CORAL breast and PDAC notes",
+      "category": "datasets",
+      "resource_type": "Clinical notes and annotations",
+      "storage": "Restricted data on O2",
+      "aliases": [
+        "coral",
+        "breast cancer notes",
+        "pancreatic annotations",
+        "pdac"
+      ],
+      "topics": [
+        "breast cancer",
+        "pancreatic ductal adenocarcinoma",
+        "clinical extraction",
+        "annotation",
+        "evaluation"
+      ]
+    },
+    {
+      "id": "ZX_EQTL",
+      "source_prefix": "ARICGTEx",
+      "label": "ARIC/GTEx gene-SNP-tissue data",
+      "category": "derived",
+      "resource_type": "eQTL table",
+      "storage": "O2",
+      "aliases": [
+        "aric",
+        "gtex",
+        "eqtl",
+        "gene snp tissue"
+      ],
+      "topics": [
+        "gene SNP tissue",
+        "expression quantitative trait loci",
+        "mixed source masterfile",
+        "MayoBrain"
+      ]
+    },
+    {
+      "id": "ZX_RELATIONS",
+      "source_prefix": "Biomedical relation",
+      "label": "Biomedical relation datasets",
+      "category": "derived",
+      "resource_type": "Relation tables and evaluation files",
+      "storage": "O2",
+      "aliases": [
+        "biomedical relation",
+        "indication drug",
+        "indication gene",
+        "pathway gene"
+      ],
+      "topics": [
+        "indication to drug",
+        "indication to gene",
+        "disease to gene",
+        "pathway to gene",
+        "relation pairs"
+      ]
+    },
+    {
+      "id": "ZX_CRAFT",
+      "source_prefix": "CRAFT",
+      "label": "CRAFT UKB signed-correlation matrix",
+      "category": "derived",
+      "resource_type": "Signed-correlation matrix",
+      "storage": "O2",
+      "aliases": [
+        "craft",
+        "signed correlation",
+        "ukb sign"
+      ],
+      "topics": [
+        "UK Biobank",
+        "UKB",
+        "correlation matrix",
+        "historical evaluation",
+        "Parquet"
+      ]
+    },
+    {
+      "id": "ZX_FAS",
+      "source_prefix": "FAS",
+      "label": "FAS UKB variant-phenotype matrix",
+      "category": "derived",
+      "resource_type": "Variant-phenotype matrix",
+      "storage": "FAS only; no O2 copy",
+      "aliases": [
+        "fas",
+        "first version ukb",
+        "first version matrix"
+      ],
+      "topics": [
+        "UK Biobank",
+        "UKB",
+        "variant phenotype",
+        "correlation matrix",
+        "first_version"
+      ]
+    },
+    {
+      "id": "ZX_FAVOR_GENE",
+      "source_prefix": "FAVOR geneprotein",
+      "label": "FAVOR gene/protein-disease relations",
+      "category": "derived",
+      "resource_type": "Gene/protein-disease relation table",
+      "storage": "O2; collaborator-derived package",
+      "aliases": [
+        "favor gene",
+        "favor protein",
+        "gene disease not in primekg"
+      ],
+      "topics": [
+        "FAVOR",
+        "gene disease",
+        "protein disease",
+        "relation pairs",
+        "collaborator export"
+      ]
+    },
+    {
+      "id": "ZX_FAVOR_VARIANT",
+      "source_prefix": "FAVOR SNPvariant",
+      "label": "FAVOR variant-gene relations",
+      "category": "derived",
+      "resource_type": "Variant-gene regulatory mappings",
+      "storage": "O2; collaborator-derived package",
+      "aliases": [
+        "favor variant",
+        "favor snp",
+        "regulatory relations"
+      ],
+      "topics": [
+        "FAVOR",
+        "rsID",
+        "variant gene",
+        "promoter",
+        "enhancer",
+        "L2G",
+        "QTL",
+        "PPI"
+      ]
+    },
+    {
+      "id": "ZX_MVP_LEGACY",
+      "source_prefix": "Legacy MVP",
+      "label": "Legacy MVP HARE/PheWAS benchmark",
+      "category": "derived",
+      "resource_type": "Summary statistics and phenotype mapping",
+      "storage": "O2",
+      "aliases": [
+        "legacy mvp",
+        "hare",
+        "phewas"
+      ],
+      "topics": [
+        "MVP",
+        "historical benchmark",
+        "Merged_PheCodes.csv",
+        "phenotype mapping",
+        "summary statistics"
+      ]
+    },
+    {
+      "id": "ZX_MVP_MULTI",
+      "source_prefix": "MVP multi",
+      "label": "MVP multi-ancestry matrices",
+      "category": "derived",
+      "resource_type": "Variant-phenotype matrices and summaries",
+      "storage": "O2",
+      "aliases": [
+        "mvp multi",
+        "multi ancestry",
+        "aframreaseur"
+      ],
+      "topics": [
+        "MVP",
+        "AFR",
+        "AMR",
+        "EAS",
+        "EUR",
+        "variant phenotype",
+        "variant lab",
+        "ancestry"
+      ]
+    },
+    {
+      "id": "ZX_GWAS",
+      "source_prefix": "NHGRI",
+      "label": "GWAS Catalog e109/e110 releases",
+      "category": "derived",
+      "resource_type": "Public association reference tables",
+      "storage": "Public reference releases copied to O2",
+      "aliases": [
+        "gwas catalog",
+        "nhgri",
+        "ebi",
+        "e109",
+        "e110"
+      ],
+      "topics": [
+        "GWAS",
+        "association releases",
+        "genetic associations",
+        "release identity"
+      ]
+    },
+    {
+      "id": "ZX_PRIMEKG",
+      "source_prefix": "PrimeKG",
+      "label": "PrimeKG v2.1 knowledge graph",
+      "category": "derived",
+      "resource_type": "Biomedical knowledge graph",
+      "storage": "Public reference release copied to O2",
+      "aliases": [
+        "primekg",
+        "knowledge graph"
+      ],
+      "topics": [
+        "biomedical knowledge graph",
+        "kg.csv",
+        "gene disease",
+        "public reference",
+        "v2.1"
+      ]
+    },
+    {
+      "id": "ZX_UMLS",
+      "source_prefix": "UMLS",
+      "label": "UMLS terminology and dictionary",
+      "category": "derived",
+      "resource_type": "Terminology files and derived dictionary",
+      "storage": "O2; individual UMLS licence required",
+      "aliases": [
+        "umls",
+        "mrconso",
+        "mrrel",
+        "terminology",
+        "cui mapping"
+      ],
+      "topics": [
+        "concept names",
+        "concept relations",
+        "dictionary",
+        "NLM licence",
+        "2020",
+        "2021"
+      ]
+    },
+    {
+      "id": "KIM_WEST_SA",
+      "source_prefix": "WEST - Severe Asthma (BCH) README.txt",
+      "source_group": "kim_greco",
+      "source_adapter": "west_txt",
+      "label": "WEST severe asthma (BCH)",
+      "category": "datasets",
+      "resource_type": "EHR phenotyping data and labels",
+      "storage": "BCH E3 server",
+      "location_label": "Raw data source",
+      "contact": "Kim Greco",
+      "aliases": [
+        "west severe asthma",
+        "severe asthma",
+        "asthma",
+        "west",
+        "bch",
+        "kim greco"
+      ],
+      "topics": [
+        "severe asthma phenotyping",
+        "BCH",
+        "gold and silver labels",
+        "KOMAP",
+        "longitudinal EHR",
+        "Transformer training"
+      ],
+      "family_aliases": [
+        "west",
+        "bch",
+        "kim greco"
+      ]
+    },
+    {
+      "id": "KIM_WEST_PH",
+      "source_prefix": "WEST - Pulmonary Hypertension (BCH) README.txt",
+      "source_group": "kim_greco",
+      "source_adapter": "west_txt",
+      "label": "WEST pulmonary hypertension (BCH)",
+      "category": "datasets",
+      "resource_type": "EHR phenotyping data and labels",
+      "storage": "BCH MAPS server",
+      "location_label": "Raw data source",
+      "contact": "Kim Greco",
+      "aliases": [
+        "west pulmonary hypertension",
+        "pulmonary hypertension",
+        "pah",
+        "west",
+        "bch",
+        "kim greco"
+      ],
+      "topics": [
+        "pulmonary hypertension phenotyping",
+        "BCH",
+        "gold and silver labels",
+        "PheCode 415.2",
+        "KOMAP",
+        "longitudinal EHR",
+        "Transformer training"
+      ],
+      "family_aliases": [
+        "west",
+        "bch",
+        "kim greco"
+      ]
+    }
   ]
 }

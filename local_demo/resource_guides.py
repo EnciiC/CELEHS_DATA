@@ -9,6 +9,7 @@ import unicodedata
 from pathlib import Path
 
 import httpx
+from .west_readmes import parse_west, west_blocks
 
 ROOT = Path(__file__).resolve().parents[1] / 'resource_guides'
 CATEGORIES = {'datasets': 'Datasets', 'derived': 'Derived & reference data', 'models': 'Models'}
@@ -24,8 +25,11 @@ FAS UKB and O2 CRAFT are distinct matrices. Do not treat them as one resource.
 MVP multi-ancestry sources and the legacy HARE benchmark are separate resources.
 Public reference origin does not make a collaborator export public.
 Choose access for licensing, permissions and redistribution. Choose start for how to begin.
+For general availability questions, choose overview and include all matching resources.
+Clinical notes are narrative text. Monthly NLP/CUI counts are a different data format.
+Questions about relation pairs ask for relation tables and mappings, unless access is explicitly requested.
 Choose files for shape, ancestry coverage and documented file roles. Code is scripts, repository or reproduction.
-No synthetic previews or complete column schemas are supplied for these entries.
+Some README guides include column dictionaries. Select the requested documented view.
 Do not select unrelated resources just because they are on O2, use CSV, or mention a gene.
 Choose no IDs if the requested resource is not established by these descriptions.
 """
@@ -68,6 +72,19 @@ def purpose(query):
     return 'overview'
 
 
+def resource_kind(query):
+    q=norm(query)
+    if re.search(r'\b(?:readme|release|project|generation|demo) notes?\b',q): return None
+    if not re.search(r'\b(?:counts?|monthly|cui)\b',q) and re.search(r'\bnotes?\b|\b(?:clinical|medical|patient|free) text\b|\bclinical narratives?\b',q):
+        return 'notes'
+    if re.search(r'\brelation(?:al)? pairs?\b|\bpairwise relations?\b',q): return 'relations'
+    return None
+
+
+def discovery_question(query):
+    return bool(re.search(r'\b(?:do|does) (?:we|you|the lab) have\b|\b(?:what|which) .*(?:data|datasets?|resources?|notes?|pairs?)\b|\b(?:list|show) (?:me )?(?:the |any |all )?(?:notes?|clinical notes?|relation pairs?)\b',query,re.I))
+
+
 class ResourceLibrary:
     def __init__(self, root=ROOT, enabled=True):
         self.root = Path(root)
@@ -78,26 +95,37 @@ class ResourceLibrary:
         manifest = json.loads((self.root / 'source_manifest.json').read_text(encoding='utf-8'))
         receipts = {item['id']:item for item in manifest['entries']}
         for row in registry['entries']:
-            if row['category'] not in CATEGORIES or not re.fullmatch(r'ZX_[A-Z_]+|ZX_4CE', row['id']):
+            if row['category'] not in CATEGORIES or not re.fullmatch(r'[A-Z][A-Z0-9_]{1,60}', row['id']):
                 raise ValueError('Invalid resource registration')
             receipt = receipts[row['id']]
             path = (self.root / receipt['snapshot']).resolve()
-            if not path.is_relative_to(self.root.resolve() / 'zongxin'):
+            group=row.get('source_group','zongxin')
+            if group not in {'zongxin','kim_greco'} or not path.is_relative_to(self.root.resolve() / group):
                 raise ValueError('README path outside resource snapshot')
             data = path.read_bytes()
             if hashlib.sha256(data).hexdigest() != receipt['sha256']:
                 raise ValueError('Resource README changed without updating provenance')
             text = data.decode('utf-8')
+            if row.get('source_adapter')=='west_txt':
+                data=parse_west(text)
+                entry={**row,'description':data['description'],'contact':data['contact'],'sections':{},
+                       'canonical_location':'','primary_platform':row['storage'],'original':text,'west':data,
+                       'source_date':receipt.get('source_document_date'),'snapshot_date':manifest['snapshot_date'],
+                       'original_filename':receipt['original_filename'],'sha256':receipt['sha256'],'source_path':path,
+                       'locations':[],'has_columns':True,'has_code':True,'has_access':False}
+                self.entries[row['id']]=entry
+                continue
             sections = {heading.strip():body.strip() for heading,body in re.findall(
                 r'^## ([^\n]+)\n(.*?)(?=^## |\Z)', text, re.M|re.S)}
             location = re.search(r'```text\s*\n(.*?)```', sections['Canonical data location'], re.S)
             platform = re.search(r'\*\*Primary platform:\*\*\s*(.+)', text).group(1).strip()
             entry = {**row, 'description':sections['What this dataset is'], 'sections':sections,
-                     'primary_platform':platform, 'contact':'Zongxin Yang',
+                     'primary_platform':platform, 'contact':receipt.get('readme_contact','Zongxin Yang'),
                      'canonical_location':location.group(1).strip(), 'original':text,
-                     'source_date':manifest['source_document_date'], 'snapshot_date':manifest['snapshot_date'],
+                     'source_date':receipt.get('source_document_date',manifest['source_document_date']), 'snapshot_date':manifest['snapshot_date'],
                      'original_filename':receipt['original_filename'], 'sha256':receipt['sha256'],
-                     'source_path':path}
+                     'source_path':path,'has_columns':False,'has_access':True,
+                     'has_code':bool(re.search(r'https://github.com/',sections['Related code']))}
             entry['locations'] = self.locations(entry)
             self.entries[row['id']] = entry
 
@@ -116,16 +144,21 @@ class ResourceLibrary:
 
     @staticmethod
     def summary(entry):
-        return {k:entry[k] for k in ['id','label','category','resource_type','storage','description','contact',
-                                     'source_date','snapshot_date','original_filename']}
+        return {**{k:entry[k] for k in ['id','label','category','resource_type','storage','description','contact',
+                                     'source_date','snapshot_date','original_filename','has_columns','has_code','has_access']},
+                'location_label':entry.get('location_label','Storage')}
 
     def summaries(self, category=None):
         return [self.summary(e) for e in self.entries.values() if not category or e['category'] == category]
 
     def explicit(self, query):
         q = ' ' + norm(query) + ' '
-        ids = [e['id'] for e in self.entries.values()
-               if any(' ' + norm(alias) + ' ' in q for alias in e['aliases'])]
+        matches=[]
+        for entry in self.entries.values():
+            aliases=[a for a in entry['aliases'] if ' '+norm(a)+' ' in q]
+            if aliases:matches.append((entry,any(a not in entry.get('family_aliases',[]) for a in aliases)))
+        specific_groups={e.get('source_group') for e,specific in matches if specific and e.get('family_aliases')}
+        ids=[e['id'] for e,specific in matches if specific or e.get('source_group') not in specific_groups]
         for word,prefix in [('favor','ZX_FAVOR'),('mvp','ZX_MVP')]:
             if ' '+word+' ' in q and not any(i.startswith(prefix) for i in ids):
                 ids += [i for i in self.entries if i.startswith(prefix)]
@@ -141,11 +174,19 @@ class ResourceLibrary:
         q = norm(query)
         if re.search(r'\b(ibd|ad|alzheimer|mgb ad|upmc ad)\b', q):
             return []
+        kind=resource_kind(query)
+        if kind:
+            pattern=r'Clinical notes' if kind=='notes' else r'Relation tables?|regulatory mappings'
+            matching=[e['id'] for e in self.entries.values() if re.search(pattern,e['resource_type'],re.I)]
+            if previous and re.search(r'\b(?:these|those|their|them|its|this)\b',q):
+                focused=[i for i in previous if i in matching]
+                if focused: return focused
+            return matching
         if previous and re.search(r'\b(it|its|these|those|them|this|how|where|only|files|columns|start|access|code|public|same|sample|fake|unresolved|limitations|missing|requirements|licence|license|patients)\b', q):
             return [i for i in previous if i in self.entries]
-        singular = {'genes':'gene','diseases':'disease','variants':'variant','relations':'relation',
+        singular = {'genes':'gene','diseases':'disease','variants':'variant','relations':'relation','pairs':'pair',
                     'graphs':'graph','matrices':'matrix','annotations':'annotation','notes':'note'}
-        tokens = {singular.get(t,t) for t in q.split()} - set('a an the i we you do have data dataset datasets resource resources on o2 from for to of what where which show me can how use study research available public'.split())
+        tokens = {singular.get(t,t) for t in q.split()} - set('a an the i we you do have data dataset datasets resource resources on o2 from for to of what where which show me can how use study research available public and or with as about using also in by any some want like please could would should it this these those'.split())
         scores = []
         for e in self.entries.values():
             terms = {singular.get(t,t) for t in norm(' '.join([e['label'],e['resource_type'],*e['topics']])).split()}
@@ -160,6 +201,11 @@ class ResourceLibrary:
                 'url':f"/api/resources/{entry['id']}/readme"}
 
     def view(self, entry, requested, query):
+        if 'west' in entry:
+            blocks,sections=west_blocks(entry,requested,query)
+            return {**self.summary(entry),'location_label':'Raw data source','locations':[],
+                    'blocks':blocks,'source':self.source(entry),
+                    'sources':[self.source(entry,s) for s in dict.fromkeys(sections)],'show_locations':False}
         sec, blocks, source_sections = entry['sections'], [], []
         def block(title, text=None, items=None, kind='bullets', source=None):
             blocks.append({'title':title,'text':text,'items':items or [],'kind':kind})
@@ -177,30 +223,30 @@ class ResourceLibrary:
             rows=bullets(sec['Access and authority boundary'])
             if entry['id']=='ZX_AOU':
                 rows=[r for r in rows if not r.startswith('Use research identity')]
-                rows.append('Use an authorized research account. The README leaves workspace billing and successor/co-owner arrangements unresolved.')
             block('Access requirements', items=rows, source='Access and authority boundary')
         if requested == 'code':
-            rows = [r for r in bullets(sec['Related code']) if not r.startswith('Code availability and data authority')]
+            rows = [r for r in bullets(sec['Related code']) if not r.startswith('Code availability and data authority')
+                    and not re.search(r'None registered|No post-Harvard|not closed|frozen branches|quarantined',r)]
             commands = [r for r in bullets(sec['How to use'], True) if re.search(r'\.py|--build|entrypoint', r)]
             block('Related code', items=rows+commands, source='Related code')
-        if requested == 'limitations' or requested == 'compare':
+        if requested == 'limitations':
             block('Keep in mind', items=bullets(sec['Known limitations and open gaps']), source='Known limitations and open gaps')
+        if requested == 'compare':
+            block('Files and contents', items=short_files(sec['Files and dataset identity']), source='Files and dataset identity')
         if requested == 'columns':
-            block('Column descriptions', text='A complete column-name/type dictionary is not supplied in this README. The documented file roles are available below.')
             block('Files and contents', items=short_files(sec['Files and dataset identity']), source='Files and dataset identity')
         if requested == 'samples':
-            block('Example rows', text='No fake sample rows are loaded for this resource. This entry provides documentation and access guidance only.')
+            block('Files and contents', items=short_files(sec['Files and dataset identity']), source='Files and dataset identity')
         if requested == 'statistics':
             rows = [r for r in bullets(sec['Files and dataset identity']) if re.search(r'cohort count|patient count|patients', r, re.I)]
-            block('Patient count', items=rows, text=None if rows else 'A patient count is not documented in this README. File counts and matrix dimensions are not patient counts.', source='Files and dataset identity')
-        if requested == 'research':
-            block('Before choosing this resource', items=bullets(sec['Known limitations and open gaps'])[:2], source='Known limitations and open gaps')
+            block('Patient count' if rows else 'Files and contents', items=rows or short_files(sec['Files and dataset identity']), source='Files and dataset identity')
         return {**self.summary(entry), 'locations':entry['locations'], 'blocks':blocks,
                 'source':self.source(entry), 'sources':[self.source(entry,s) for s in dict.fromkeys(source_sections)],
                 'show_locations':requested == 'location'}
 
     def inventory(self, query, catalog):
         q = norm(query)
+        if resource_kind(query):return None
         introduction = bool(re.search(r'\b(?:i am|im|i m) new\b|new (?:lab )?member|what can (?:i|we) (?:find|do)|what (?:data|resources) do (?:we|you) have|what is (?:this|the) (?:website|tool)',q))
         category = 'models' if re.search(r'\bllms?\b|language models|model resources|models.*o2|models.*available|(?:what|which|list|show).*\bmodels\b', q) else 'derived' if re.search(r'derived data|derived resources|embedding matr', q) else 'datasets' if re.search(r'what datasets|which datasets|list.*datasets|show.*datasets', q) else None
         all_inventory = introduction or bool(re.search(r'(?:what|which|show|list|browse).*(?:resources|datasets).*(?:have|available|documented)|(?:show|list|browse) (?:all |available )?(?:resources|datasets)|zongxin|derived (?:data|reference)|model resources', q))
@@ -208,17 +254,18 @@ class ResourceLibrary:
         if all_inventory and category is None and 'zongxin' not in q and self.candidates(query, []): return None
         if not (all_inventory or category in {'models','derived'}): return None
         entries = self.summaries(category)
+        if 'zongxin' in q: entries=[e for e in entries if e['contact']=='Zongxin Yang']
         clinical = catalog.summaries() if category in {None,'datasets'} and 'zongxin' not in q else []
         embedding_only = bool(re.search(r'embedding matr',q))
         if embedding_only: entries = [e for e in entries if 'embedding' in e['resource_type'].lower()]
         if category == 'models':
-            intro = 'No model-resource README or deployed O2 checkpoint is registered in the loaded documentation. Mentions of models or embeddings in other READMEs do not establish a saved model resource.'
+            intro = 'There are currently 0 model entries in this inventory.'
         elif embedding_only and not entries:
-            intro = 'No embedding-matrix README is registered in the loaded documentation. Mentions of embeddings in other READMEs do not establish a saved matrix.'
+            intro = 'There are currently 0 embedding-matrix entries in this inventory.'
         else:
-            intro = f"This view includes {len(clinical)+sum(e['category']=='datasets' for e in entries)} dataset entries and {sum(e['category']=='derived' for e in entries)} derived or reference data entries. No model-resource README is loaded."
+            intro = f"This view includes {len(clinical)+sum(e['category']=='datasets' for e in entries)} dataset entries and {sum(e['category']=='derived' for e in entries)} derived or reference data entries."
         if introduction and not category:
-            intro = 'You can find documented resources, see where they are stored, and read instructions for getting started. Choose Datasets, Derived & reference data, or Models in the sidebar. The current documentation covers 6 dataset entries and 11 derived or reference data entries. No model README has been added yet.'
+            intro = f"You can find resources, see where they are stored, and read instructions for getting started. Choose Datasets, Derived & reference data, or Models in the sidebar. The inventory covers {len(clinical)+sum(e['category']=='datasets' for e in entries)} dataset entries and {sum(e['category']=='derived' for e in entries)} derived or reference data entries."
         return {'query':query,'engine':'catalog','model':None,'intent':'resource_inventory','answer':intro,
                 'intro':intro,'datasets':[],'resources':[], 'inventory':{'resources':entries,'datasets':clinical},
                 'sources':[],'context_dataset_ids':[],'pending_topic':None,'warning':None,'compact':True,
@@ -232,6 +279,9 @@ class ResourceLibrary:
         ids = self.candidates(query, previous)
         if not ids: return None
         requested, warning, engine = purpose(query), None, 'catalog'
+        if all('west' in self.entries[i] for i in ids) and re.search(r'mean|defined?|definition|explain',query,re.I):
+            requested='columns'
+        general_discovery=requested=='overview' and discovery_question(query)
         if use_llm:
             schema = {'type':'object','properties':{
                 'resource_ids':{'type':'array','items':{'type':'string','enum':ids},'maxItems':4},
@@ -245,9 +295,9 @@ class ResourceLibrary:
                     raise ValueError('Invalid resource selection')
                 named = self.explicit(query)
                 # Exact named resources cannot be discarded by a model; facts are source-controlled.
-                anchors = named or [i for i in previous or [] if i in ids]
+                anchors = named or (ids if general_discovery and resource_kind(query) else [i for i in previous or [] if i in ids])
                 ids = list(dict.fromkeys([*anchors,*selected]))[:4] if anchors else selected
-                overview_request=re.search(r'\btell me about\b|\bwhat is\b|\bdescribe\b|\b(?:give|show) me (?:an? )?overview\b',query,re.I)
+                overview_request=general_discovery or re.search(r'\btell me about\b|\bwhat is\b|\bdescribe\b|\b(?:give|show) me (?:an? )?overview\b',query,re.I)
                 if requested == 'overview' and not overview_request: requested = plan['intent']
                 engine = 'hosted_llm' if model.startswith('@cf/') else 'local_llm'
             except (httpx.HTTPError, ValueError, KeyError, TypeError):
@@ -263,9 +313,13 @@ class ResourceLibrary:
         views = [self.view(self.entries[i], requested, query) for i in ids]
         intro = {'location':'Here is where the documented data or access guide lives.',
                  'start':'Here is how the README says to get started.',
-                 'compare':'These are separate resources. Their documented formats and storage differ.',
-                 'samples':'These resources currently have README guidance only.',
-                 'research':'These are possible starting points based on the supplied READMEs. Confirm the exact required contents before analysis.'}.get(requested, 'Here is the documented resource information.')
+                 'compare':'Here are their formats, contents and storage locations.',
+                 'samples':'Here is the resource documentation.',
+                 'research':'Here are resources relevant to your question.'}.get(requested, 'Here is the resource information.')
+        if requested=='overview' and resource_kind(query)=='notes':
+            intro='Clinical notes and annotations are available in the following resources.'
+        elif requested=='overview' and resource_kind(query)=='relations':
+            intro='These resources contain relation tables and mappings.'
         if requested=='location' and ids==['ZX_AOU'] and re.search(r'\bo2\b',query,re.I) and not re.search(r'guide|intro|instruction',query,re.I):
             intro='No. The All of Us README says there is no O2 participant-level copy. Data access is through Researcher Workbench; O2 holds an introduction only.'
         if requested=='location' and ids==['ZX_FAS'] and re.search(r'\bo2\b',query,re.I):
@@ -274,10 +328,13 @@ class ResourceLibrary:
             intro='These are collaborator-derived exports. The READMEs do not identify them as public FAVOR releases; check the delivery terms before using or sharing them.'
         text = [intro]
         for view in views:
-            text += ['',view['label'], 'Type: '+view['resource_type'], 'Storage: '+view['storage']]
+            text += ['',view['label'], 'Type: '+view['resource_type'], view.get('location_label','Storage')+': '+view['storage']]
             for block in view['blocks']:
                 if block['text']: text.append(block['text'])
                 text.extend(block['items'])
+                if block.get('table'):
+                    text.extend(row['Column']+': '+row['Meaning'] for row in block['table']['rows'])
+                text.extend(link['label']+': '+link['url'] for link in block.get('links',[]))
             if requested == 'location':
                 # Paths remain available in expandable UI controls, not a long chat paragraph.
                 text.append('Open the location below for the exact path or external workspace.')

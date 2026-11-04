@@ -304,14 +304,14 @@ class Agent:
                 "fake", "dictionary", "processing", "original", "uncertainty", "downloads", "access"])}
             selected.sort(key=lambda f: category_order.get(f["category"], 99))
             if dataset_id == "UPMC_AD" and purpose == "overview":
-                availability = "Raw and daily-level UPMC AD data are also available according to Sara's original README. This demo supplies monthly examples only."
+                availability = "Sara's README also describes raw and daily-level UPMC AD data."
             else:
                 availability = None
             record = self.catalog.records[dataset_id]
             lab_question = is_lab_query(query) and bool(record.get('lab_summary'))
             if purpose == 'project' and record.get('ibd_project'):
                 selected = project_answer_facts(record, query)
-                availability = 'These are analyses documented in the MAJOR project README, not analyses run by this tool. Check the original README for the full study settings and limitations.'
+                availability = None
             elif purpose == 'project':
                 selected = []
                 availability = 'A project-level README is not loaded for ' + record['label'] + '. The available dataset documentation does not establish what prior project analyses were performed.'
@@ -354,8 +354,8 @@ class Agent:
                  "fake": "These are generated examples, not real patient records.",
                  "project": "Here is the project documentation available for this request."}.get(purpose, "Here is the documented information.")
         if purpose == "research":
-            intro = "These are possible starting points based on the documented topic and files. Check the missing information before choosing a dataset."
-        if purpose == 'dates': intro = 'Here are the date summaries reported in the documentation. They are not calculated from the fake rows.'
+            intro = "Here are resources relevant to your question."
+        if purpose == 'dates': intro = 'Here are the date summaries from the README.'
         if purpose == 'tracker': intro = 'Here is the spreadsheet entry for the requested dataset.'
         if is_lab_query(query) and any(self.catalog.records[i].get('lab_summary') for i in ids) and purpose in {'preview', 'fake'}:
             intro = 'No laboratory sample rows are loaded. Here is the documented file structure.'

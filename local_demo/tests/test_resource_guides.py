@@ -23,7 +23,7 @@ def ask(client, query, previous=None):
 def test_new_member_and_real_data_download_scope(client):
     result=ask(client,'I am new. What can I find here?')
     assert result['intent']=='resource_inventory'
-    assert len(result['inventory']['resources'])==14
+    assert len(result['inventory']['resources'])==16
     assert len(result['inventory']['datasets'])==3
     result=ask(client,'Can I download the real patient notes from here?')
     assert result['intent']=='data_access' and not result['resources'] and not result['datasets']
@@ -38,7 +38,7 @@ def test_hosted_guides_use_same_sources_and_correct_engine(monkeypatch):
     from local_demo.catalog import Catalog
     monkeypatch.setenv('CATALOG_PROVIDER','cloudflare')
     catalog=Catalog()
-    assert len(catalog.library.entries)==14
+    assert len(catalog.library.entries)==16
     agent=Agent(catalog)
     async def select(system,context,schema):
         return {'resource_ids':['ZX_AOU'],'intent':'location'}
@@ -64,8 +64,8 @@ def test_general_overview_does_not_become_access_instructions():
 
 def test_all_readmes_are_registered_unmodified_and_not_payloads(client):
     library=client.app.state.catalog.library
-    assert len(library.entries)==14
-    assert len(library.summaries('datasets'))==3
+    assert len(library.entries)==16
+    assert len(library.summaries('datasets'))==5
     assert len(library.summaries('derived'))==11
     assert library.summaries('models')==[]
     manifest=json.loads((ROOT/'source_manifest.json').read_text(encoding='utf8'))
@@ -102,7 +102,8 @@ def test_distinct_matrix_sources_and_ancestry_scope(client):
     assert {r['id'] for r in result['resources']}=={'ZX_FAS','ZX_CRAFT'}
     assert 'FAS only; no O2 copy' in result['answer']
     assert 'Storage: O2' in result['answer']
-    assert 'not original matrix generation' in result['answer']
+    assert all(any(b['title']=='Files and contents' for b in r['blocks']) for r in result['resources'])
+    assert 'Keep in mind' not in result['answer']
     result=ask(client,'Which files and ancestries are included in MVP multi-ancestry data?')
     assert 'AFR, AMR, EAS, and EUR' in result['answer']
     assert 'every preserved CRAFT runtime' in result['answer']
@@ -136,7 +137,8 @@ def test_readme_contact_is_not_inferred_owner_and_licence_is_not_assumed(client)
 def test_no_clinical_schema_or_rows_are_invented(client,query):
     result=ask(client,query)
     assert not result['datasets']
-    assert 'not supplied' in result['answer'] or 'No fake sample rows' in result['answer']
+    assert all(any(b['title']=='Files and contents' for b in r['blocks']) for r in result['resources'])
+    assert all('files' not in r and 'rows' not in r and 'columns' not in r for r in result['resources'])
     assert 'EMPI, month' not in result['answer']
 
 
@@ -156,10 +158,10 @@ def test_followups_keep_external_resource_and_allow_new_named_resource(client):
 
 def test_empty_models_and_embeddings_not_inferred_from_project_names(client):
     result=ask(client,'What LLM models are stored on O2?')
-    assert 'No model-resource README' in result['answer']
+    assert '0 model entries' in result['answer']
     assert result['inventory']['resources']==[]
     result=ask(client,'Do we have an embedding matrix?')
-    assert 'No embedding-matrix README' in result['answer']
+    assert '0 embedding-matrix entries' in result['answer']
 
 
 def test_discovery_does_not_substitute_missing_disease_cohort(client):
@@ -167,6 +169,60 @@ def test_discovery_does_not_substitute_missing_disease_cohort(client):
     assert not result['datasets'] and not result.get('resources')
     result=ask(client,'Which resources connect genes to diseases?')
     assert any(r['id']=='ZX_FAVOR_GENE' for r in result['resources'])
+
+
+@pytest.mark.parametrize('query',[
+    'Do we have any note data?', 'Do we have clinical notes?',
+    'What clinical text data do we have?', 'Show me clinical notes',
+])
+def test_note_discovery_returns_note_resources_not_count_examples(client,query):
+    result=ask(client,query)
+    assert {r['id'] for r in result['resources']}=={'ZX_4CE','ZX_CORAL'}
+    assert not result['datasets']
+    assert result['intent']=='resource_overview'
+    assert all([b['title'] for b in r['blocks']]==['What it is'] for r in result['resources'])
+
+
+def test_broad_discovery_keeps_overview_even_when_model_picks_access():
+    import asyncio
+    from local_demo.agent import Agent
+    from local_demo.catalog import Catalog
+    agent=Agent(Catalog())
+    async def access_plan(system,context,schema):
+        return {'resource_ids':[context['candidates'][0]['id']],'intent':'access'}
+    agent.structured=access_plan
+    for query,expected in [('Do we have any note data?',{'ZX_4CE','ZX_CORAL'}),
+                           ('Do we have any relation pairs?',{'ZX_RELATIONS','ZX_FAVOR_GENE','ZX_FAVOR_VARIANT'})]:
+        result=asyncio.run(agent.answer(query))
+        assert result['intent']=='resource_overview'
+        assert {r['id'] for r in result['resources']}==expected
+        assert 'Access requirements' not in result['answer']
+
+
+def test_access_and_start_content_remain_excerpts_of_the_original(client):
+    library=client.app.state.catalog.library
+    for entry in library.entries.values():
+        for view in ['start','access','files','code']:
+            result=library.view(entry,view,'')
+            for block in result['blocks']:
+                if 'west' in entry:
+                    if block.get('text'):assert block['text'] in entry['original']
+                    continue
+                for row in block['items']:
+                    # Files-and-contents excerpts may remove byte-size text for readability.
+                    if view!='files': assert row in entry['original']
+    for resource_id in ['ZX_RELATIONS','ZX_FAVOR_GENE']:
+        result=ask(client,'What access requirements apply to '+library.entries[resource_id]['label']+'?')
+        assert all(row in library.entries[resource_id]['original'] for row in result['resources'][0]['blocks'][0]['items'])
+
+
+def test_public_resource_views_do_not_append_internal_review_notes(client):
+    resource=client.get('/api/resources/ZX_AOU').json()
+    assert 'limitations' not in resource['views']
+    original=client.get('/api/resources/ZX_AOU/readme').json()
+    assert original['scope_note']=='Original README supplied by Zongxin Yang.'
+    result=ask(client,'Which resources connect genes to diseases?')
+    assert all(b['title'] not in {'Before choosing this resource','Keep in mind'} for r in result['resources'] for b in r['blocks'])
 
 
 def test_corrupt_snapshot_is_rejected(tmp_path):

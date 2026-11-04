@@ -38,7 +38,7 @@ def test_ibd_location_and_dictionaries(client):
 def test_ad_inventory_and_site_filter(client):
     result = ask(client, 'I wanted to see AD, what we have now')
     assert {s['dataset']['id'] for s in result['datasets']} == {'MGB_AD', 'UPMC_AD'}
-    assert 'Raw and daily-level UPMC AD data are also available' in result['answer']
+    assert 'raw and daily-level UPMC AD data' in result['answer']
     mgb = next(s for s in result['datasets'] if s['dataset']['id'] == 'MGB_AD')
     assert any('/Monthly_Counts/MGB/Monthly_codified.RData' in f['location'] for f in mgb['files'])
     assert len(mgb['files']) == 2

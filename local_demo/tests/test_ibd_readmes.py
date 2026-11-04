@@ -137,7 +137,8 @@ def test_project_questions_show_five_documented_aims_not_fake_data(client, query
     assert result['intent'] == 'project'
     for aim in range(1, 6):
         assert f'Aim {aim}' in result['answer']
-    assert 'MAJOR' in result['answer'] and 'not analyses run by this tool' in result['answer']
+    assert 'MAJOR' in result['answer']
+    assert result['datasets'][0]['additional_note'] is None
     assert result['datasets'][0]['files'] == []
     assert all(s['kind'] == 'ibd_project' for s in result['sources'])
 

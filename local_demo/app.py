@@ -93,7 +93,7 @@ def resource_detail(resource_id: str, request: Request):
     library = request.app.state.catalog.library
     return {**library.summary(entry), 'locations':entry['locations'],
             'views':{key:library.view(entry, key, '')['blocks'] for key in
-                     ['overview','start','files','access','code','limitations','columns','samples']},
+                     ['overview','start','files','access','code','columns','samples']},
             'source':library.source(entry), 'sha256':entry['sha256'], 'documentation_only':True}
 
 
@@ -101,7 +101,8 @@ def resource_detail(resource_id: str, request: Request):
 def resource_readme(resource_id: str, request: Request):
     entry = resource_record(request, resource_id)
     return {'text':entry['original'], 'html':None, 'title':entry['original_filename'],
-            'scope_note':"Original README supplied by Zongxin Yang. Its server/version checks are historical statements; this tool has not inspected the source payloads."}
+            'display_format':'west_txt' if 'west' in entry else 'markdown',
+            'scope_note':f"Original README supplied by {entry['contact']}."}
 
 
 @app.get('/api/resources/{resource_id}/download/readme')
@@ -150,9 +151,7 @@ def readme(dataset_id: str, kind: str, request: Request, files: str = Query(defa
             "text": request.app.state.catalog.documents[dataset_id][kind],
             "html": original_html(INPUT / dataset_id / "README_original.docx") if kind == "original" else None,
             "title": next((doc['label'] for doc in r.get('original_documents', []) if doc['kind'] == kind), None),
-            "scope_note": "The original AD document also covers other sites; only the selected MGB or UPMC section is indexed for this demo." if dataset_id != "IBD" and kind == "original" else
-                'Original project documentation. Reported analyses and results have not been independently verified by this tool.' if kind == 'ibd_project' else
-                'Original laboratory documentation. Counts and coverage are reported in this README, not calculated by this tool.' if kind == 'ibd_lab' else None}
+            "scope_note": None}
 
 
 @app.get("/api/datasets/{dataset_id}/schema")

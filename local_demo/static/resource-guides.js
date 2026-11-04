@@ -49,8 +49,8 @@ function renderInventory() {
     node.replaceChildren(...clinical, ...guides);
     if (!clinical.length && !guides.length) {
       const message = el('div', null, 'panel-box empty-resources');
-      message.append(el('h3', 'No model resources documented yet'),
-        el('p', 'No O2 model-checkpoint README is loaded. The model answering chat questions is separate from the lab resource inventory.'));
+      message.append(el('h3', 'Model resources'),
+        el('p', 'Model weights, versions and setup instructions.'));
       node.append(message);
     }
   }
@@ -68,6 +68,7 @@ function renderInventory() {
   renderResourceSidebar();
 }
 function resourceLocationView(resource) {
+  if(!resource.locations?.length)return document.createDocumentFragment();
   const body = el('div');
   for (const location of resource.locations || []) {
     const row = el('div', null, 'resource-location'); row.append(el('strong', location.label));
@@ -88,6 +89,12 @@ function resourceBlocks(blocks) {
       for (const text of block.items) {const item=el('li');item.append(markdownDocument(text));list.append(item);}
       body.append(list);
     }
+    if(block.table){
+      const grid=table(block.table.columns,block.table.rows,'field-table');
+      for(const cell of grid.querySelectorAll('tbody td:first-child')){const value=cell.textContent;cell.replaceChildren(el('code',value,'column-name'));}
+      body.append(grid);
+    }
+    for(const item of block.links||[]){const a=link(item.label,item.url);a.target='_blank';a.rel='noopener';body.append(a);}
   }
   return body;
 }
@@ -95,8 +102,9 @@ async function openResourceReadme(id) {
   try {
     const doc = await api(`/api/resources/${id}/readme`);
     $('#document-title').textContent = doc.title;
-    $('#document-scope').textContent = doc.scope_note;
-    $('#document-text').replaceChildren(markdownDocument(doc.text));
+    $('#document-scope').textContent = doc.scope_note || '';
+    const text=doc.display_format==='west_txt'?doc.text.replace(/^# ([A-Za-z0-9_]+) - (.+)$/gm,'- **$1**: $2'):doc.text;
+    $('#document-text').replaceChildren(markdownDocument(text));
     $('#document-dialog').showModal();
   } catch(error) {toast(error.message);}
 }
@@ -107,8 +115,11 @@ function resourceFollowups(resource) {
     ['Files and contents', `What files are included in ${resource.label}?`],
     ['Access requirements', `What access requirements apply to ${resource.label}?`],
     ['Related code', `What code is documented for ${resource.label}?`]]) {
+    if(label==='Access requirements' && resource.has_access===false)continue;
+    if(label==='Related code' && resource.has_code===false)continue;
     actions.append(smallButton(label, () => ask(question), ''));
   }
+  if(resource.has_columns)actions.append(smallButton('Columns',()=>ask(`Show the columns for ${resource.label}`),''));
   actions.append(smallButton('Original README', () => openResourceReadme(resource.id), ''));
   return actions;
 }
@@ -122,7 +133,7 @@ function renderResourceResults(result, box) {
   for (const resource of result.resources || []) {
     const section = el('section', null, 'answer-section resource-answer');
     const heading = el('h3', resource.label); heading.append(smallButton('View resource', () => openResource(resource.id)));
-    const storage = el('p', null, 'resource-storage'); storage.append(el('strong','Storage: '), document.createTextNode(resource.storage));
+    const storage = el('p', null, 'resource-storage'); storage.append(el('strong',(resource.location_label||'Storage')+': '), document.createTextNode(resource.storage));
     section.append(heading, el('span',resource.resource_type,'site-label'), storage, resourceBlocks(resource.blocks),
       resourceLocationView(resource), resourceFollowups(resource));
     box.append(section);
@@ -136,13 +147,14 @@ async function openResource(id) {
     heading.append(el('span',resourceCategoryLabel(record.category).toUpperCase(),'eyebrow'),
       el('h1',record.label));
     const meta = el('div',null,'detail-meta');
-    for (const [name,value] of [['Type',record.resource_type],['Storage',record.storage],['README contact',record.contact]]) {
+    for (const [name,value] of [['Type',record.resource_type],[record.location_label||'Storage',record.storage],['README contact',record.contact]]) {
       const cell=el('div');cell.append(el('small',name),el('span',value));meta.append(cell);
     }
     heading.append(meta);node.append(heading);
     const nav=el('nav',null,'detail-tabs resource-tabs');nav.setAttribute('aria-label','Resource information');
     const area=el('div');
-    const views={'Overview':'overview','How to start':'start','Files and contents':'files','Access':'access','Code':'code','Limitations':'limitations'};
+    const views={'Overview':'overview','How to start':'start','Files and contents':'files',
+      ...(record.has_columns?{'Columns':'columns'}:{}),...(record.has_access!==false?{'Access':'access'}:{}),...(record.has_code!==false?{'Code':'code'}:{})};
     function select(label) {
       [...nav.children].forEach(b=>b.classList.toggle('active',b.textContent===label));
       const panel=el('div',null,'panel-box resource-guide'); panel.append(resourceBlocks(record.views[views[label]]));
@@ -152,8 +164,7 @@ async function openResource(id) {
         for (const url of [...new Set(urls)]) panel.append(link('Open registered repository',url));
       }
       panel.append(smallButton('Read original README',()=>openResourceReadme(id)),
-        link('Download original README',`/api/resources/${id}/download/readme`),
-        el('p',`README dated ${record.source_date}. Server paths and contents have not been rechecked by this tool. No data payloads or generated example rows are loaded.`,'note'));
+        link('Download original README',`/api/resources/${id}/download/readme`));
       area.replaceChildren(panel);
     }
     for(const label of Object.keys(views))nav.append(smallButton(label,()=>select(label),''));
