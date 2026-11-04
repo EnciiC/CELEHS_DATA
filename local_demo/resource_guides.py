@@ -82,7 +82,12 @@ def resource_kind(query):
 
 
 def discovery_question(query):
-    return bool(re.search(r'\b(?:do|does) (?:we|you|the lab) have\b|\b(?:what|which) .*(?:data|datasets?|resources?|notes?|pairs?)\b|\b(?:list|show) (?:me )?(?:the |any |all )?(?:notes?|clinical notes?|relation pairs?)\b',query,re.I))
+    return bool(re.search(r'\b(?:do|does) (?:we|you|the lab) have\b|\b(?:are|is) there\b|\bhave we got\b|\b(?:what|which) .*(?:data|datasets?|resources?|notes?|pairs?)\b|\b(?:list|show) (?:me )?(?:the |any |all )?(?:notes?|clinical notes?|relation pairs?)\b',query,re.I))
+
+
+def broad_kind_query(query):
+    generic=set('do does we you the lab have has are is there any all some what which kind kinds of our available availability show list me please data dataset datasets resource resources note notes clinical medical patient free text narrative narratives relation relational relations pair pairs pairwise on o2 in from can find get see got here'.split())
+    return bool(resource_kind(query)) and not (set(norm(query).split())-generic)
 
 
 class ResourceLibrary:
@@ -295,7 +300,7 @@ class ResourceLibrary:
                     raise ValueError('Invalid resource selection')
                 named = self.explicit(query)
                 # Exact named resources cannot be discarded by a model; facts are source-controlled.
-                anchors = named or (ids if general_discovery and resource_kind(query) else [i for i in previous or [] if i in ids])
+                anchors = named or (ids if general_discovery and broad_kind_query(query) else [i for i in previous or [] if i in ids])
                 ids = list(dict.fromkeys([*anchors,*selected]))[:4] if anchors else selected
                 overview_request=general_discovery or re.search(r'\btell me about\b|\bwhat is\b|\bdescribe\b|\b(?:give|show) me (?:an? )?overview\b',query,re.I)
                 if requested == 'overview' and not overview_request: requested = plan['intent']
@@ -316,7 +321,7 @@ class ResourceLibrary:
                  'compare':'Here are their formats, contents and storage locations.',
                  'samples':'Here is the resource documentation.',
                  'research':'Here are resources relevant to your question.'}.get(requested, 'Here is the resource information.')
-        if requested=='overview' and resource_kind(query)=='notes':
+        if requested=='overview' and resource_kind(query)=='notes' and all('Clinical notes' in v['resource_type'] for v in views):
             intro='Clinical notes and annotations are available in the following resources.'
         elif requested=='overview' and resource_kind(query)=='relations':
             intro='These resources contain relation tables and mappings.'

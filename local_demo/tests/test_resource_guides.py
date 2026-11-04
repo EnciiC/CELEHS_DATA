@@ -199,6 +199,18 @@ def test_broad_discovery_keeps_overview_even_when_model_picks_access():
         assert 'Access requirements' not in result['answer']
 
 
+def test_note_discovery_retains_disease_specific_model_selection():
+    import asyncio
+    from local_demo.agent import Agent
+    from local_demo.catalog import Catalog
+    agent=Agent(Catalog())
+    async def breast_only(system,context,schema):
+        return {'resource_ids':['ZX_CORAL'],'intent':'overview'}
+    agent.structured=breast_only
+    result=asyncio.run(agent.answer('Do we have any notes for breast cancer?'))
+    assert [r['id'] for r in result['resources']]==['ZX_CORAL']
+
+
 def test_access_and_start_content_remain_excerpts_of_the_original(client):
     library=client.app.state.catalog.library
     for entry in library.entries.values():
