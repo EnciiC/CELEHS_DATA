@@ -97,6 +97,57 @@ def test_access_guide_and_workbench_open_questions_are_source_based(client):
     assert 'billing' in result['answer'] and 'successor' in result['answer']
 
 
+@pytest.mark.parametrize('query,previous,expected',[
+    ('How do I get started with Biomedical relation datasets?', [], 'ZX_RELATIONS'),
+    ('How can I begin using biomedical relation datasets?', [], 'ZX_RELATIONS'),
+    ('How do I get started with All of Us?', [], 'ZX_AOU'),
+    ('How do I get started?', ['ZX_AOU'], 'ZX_AOU'),
+    ('Show getting started instructions for PrimeKG', [], 'ZX_PRIMEKG'),
+])
+def test_plain_resource_start_lookup_never_needs_model(monkeypatch,query,previous,expected):
+    import asyncio
+    from local_demo.agent import Agent
+    from local_demo.catalog import Catalog
+    agent=Agent(Catalog())
+    async def must_not_call_model(*args, **kwargs):
+        pytest.fail('A direct README start lookup must not call the model')
+    agent.structured=must_not_call_model
+    result=asyncio.run(agent.answer(query,previous=previous,use_llm=True))
+    assert result['interpretation']=='verified_resource_start'
+    assert result['intent']=='resource_start' and result['engine']=='catalog'
+    assert result['warning'] is None
+    assert [r['id'] for r in result['resources']]==[expected]
+    assert result['resources'][0]['blocks'][0]['items']
+    for item in result['resources'][0]['blocks'][0]['items']:
+        assert item in agent.catalog.library.entries[expected]['original']
+
+
+@pytest.mark.parametrize('query,previous',[
+    ('How do I get started with Biomedical relation datasets for pediatric rheumatoid arthritis?', []),
+    ('How do I get started with Biomedical relation datasets without a licence?', []),
+    ('How do I get started with an undocumented resource?', ['ZX_AOU']),
+    ('How do I get started?', ['ZX_AOU','ZX_CRAFT']),
+    ('How do I get started?', []),
+])
+def test_resource_start_shortcut_rejects_new_topics_and_ambiguous_context(query,previous):
+    assert ResourceLibrary().direct_start_request(query,previous)==[]
+
+
+def test_topic_qualified_start_still_uses_model():
+    import asyncio
+    from local_demo.agent import Agent
+    from local_demo.catalog import Catalog
+    agent=Agent(Catalog())
+    calls=[]
+    async def select(system,context,schema):
+        calls.append(context)
+        return {'resource_ids':['ZX_RELATIONS'],'intent':'start'}
+    agent.structured=select
+    result=asyncio.run(agent.answer('How do I get started with Biomedical relation datasets for a gene study?'))
+    assert len(calls)==1
+    assert result['interpretation']=='resource_model'
+
+
 def test_distinct_matrix_sources_and_ancestry_scope(client):
     result=ask(client,'Compare FAS UKB and CRAFT')
     assert {r['id'] for r in result['resources']}=={'ZX_FAS','ZX_CRAFT'}

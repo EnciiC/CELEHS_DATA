@@ -207,6 +207,25 @@ class ResourceLibrary:
                 scores.append((score,e['id']))
         return [i for _,i in sorted(scores, reverse=True)[:6]]
 
+    def direct_start_request(self, query, previous):
+        """Recognize a plain named-resource lookup without swallowing extra topics."""
+        if purpose(query) != 'start':
+            return []
+        named = self.explicit(query)
+        ids = named or [i for i in previous or [] if i in self.entries]
+        if not ids or len(ids) > 4 or (not named and len(ids) != 1):
+            return []
+        remaining = ' ' + norm(query) + ' '
+        aliases = {norm(alias) for i in ids for alias in
+                   [self.entries[i]['label'], *self.entries[i]['aliases']]}
+        for alias in sorted(aliases, key=len, reverse=True):
+            remaining = remaining.replace(' ' + alias + ' ', ' ')
+        wrappers = set('how do can should i we get started start begin use using with on the a an '
+                       'please me show give instructions guide to for data dataset datasets '
+                       'resource resources access walkthrough getting'.split())
+        # A new subgroup, task or condition must still go through interpretation.
+        return ids if not (set(remaining.split()) - wrappers) else []
+
     def source(self, entry, section=None):
         return {'kind':'resource_original','resource_id':entry['id'],
                 'label':entry['original_filename'] + (' — '+section if section else ''),
@@ -294,7 +313,10 @@ class ResourceLibrary:
         if all('west' in self.entries[i] for i in ids) and re.search(r'mean|defined?|definition|explain',query,re.I):
             requested='columns'
         general_discovery=requested=='overview' and discovery_question(query)
-        if use_llm:
+        direct_start_ids = self.direct_start_request(query, previous)
+        if direct_start_ids:
+            ids = direct_start_ids
+        if use_llm and not direct_start_ids:
             schema = {'type':'object','properties':{
                 'resource_ids':{'type':'array','items':{'type':'string','enum':ids},'maxItems':4},
                 'intent':{'type':'string','enum':INTENTS}},'required':['resource_ids','intent'], 'additionalProperties':False}
@@ -352,6 +374,7 @@ class ResourceLibrary:
                 text.append('Open the location below for the exact path or external workspace.')
         return {'query':query,'engine':engine,'model':model if engine.endswith('_llm') else None,
                 'intent':'resource_'+requested,'answer':'\n\n'.join(text),'intro':intro,
+                'interpretation':'verified_resource_start' if direct_start_ids else 'resource_model' if engine.endswith('_llm') else 'resource_search',
                 'datasets':[],'resources':views,'sources':[s for v in views for s in (v['sources'] or [v['source']])],
                 'context_dataset_ids':ids[:3],'pending_topic':None,'warning':warning,'compact':False,
                 'actions':[],'elapsed_seconds':round(time.monotonic()-started,2)}
