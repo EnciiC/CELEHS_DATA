@@ -222,6 +222,18 @@ def test_discovery_does_not_substitute_missing_disease_cohort(client):
     assert any(r['id']=='ZX_FAVOR_GENE' for r in result['resources'])
 
 
+def test_gene_disease_search_does_not_infer_primekg_edge_types(client):
+    library=client.app.state.catalog.library
+    query='What gene-disease relation resources do we have?'
+    assert 'ZX_PRIMEKG' not in library.candidates(query,[])
+    result=ask(client,query)
+    ids={r['id'] for r in result['resources']}
+    assert {'ZX_RELATIONS','ZX_FAVOR_GENE'} <= ids
+    assert 'ZX_PRIMEKG' not in ids
+    assert library.candidates('Tell me about PrimeKG',[])==['ZX_PRIMEKG']
+    assert 'ZX_PRIMEKG' in library.candidates('What biomedical knowledge graphs do we have?',[])
+
+
 @pytest.mark.parametrize('query',[
     'Do we have any note data?', 'Do we have clinical notes?',
     'What clinical text data do we have?', 'Show me clinical notes',
