@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 import os
 import re
 import time
@@ -136,7 +137,12 @@ class Agent:
     async def interpret(self, query, previous, pending):
         context, evidence = routing_context(self.catalog, query, previous, valid_topic(pending))
         route = await self.structured(ROUTER_SYSTEM, context, route_schema(list(self.catalog.records), list(evidence)))
-        return validate_route(route, self.catalog.records, evidence), evidence
+        try:
+            return validate_route(route, self.catalog.records, evidence), evidence
+        except ValueError as error:
+            # validate_route uses fixed diagnostic messages, never source or question text.
+            logging.getLogger(__name__).warning('Question route validation failed: %s', error)
+            raise
 
     async def select(self, query, dataset_ids, facts):
         fact_ids = [f["id"] for f in facts]
@@ -201,6 +207,7 @@ class Agent:
                         'actions':[{'label':'Show monthly columns','query':f"Show {names([self.catalog.records[i] for i in ids])} monthly columns"}],
                         'elapsed_seconds':round(time.monotonic()-started,2)}
         interpretation, route_evidence, route_warning = None, {}, None
+        preferred = intent(query)
         # Explicit, simple storage lookups already have a source-backed answer.
         # Do not make that answer depend on a model interpreting a negative
         # storage fact correctly. The vocabulary guard rejects extra subgroups
@@ -208,15 +215,22 @@ class Agent:
         verified_storage_ids = self.catalog.find(query) if (
             is_storage_question(query) and direct_document_request(query, self.catalog.records)
         ) else []
+        verified_file_ids = self.catalog.find(query) if (
+            preferred in {'columns', 'preview', 'fake', 'dictionary'}
+            and direct_document_request(query, self.catalog.records)
+            and not re.search(r'\b(?:mean|means|meaning|explain|definition)\b', query, re.I)
+        ) else []
         if verified_storage_ids:
             interpretation = {'mode':'retrieve', 'dataset_ids':verified_storage_ids, 'intent':'storage',
+                              'short_answer':'', 'evidence_ids':[]}
+        elif verified_file_ids:
+            interpretation = {'mode':'retrieve', 'dataset_ids':verified_file_ids, 'intent':preferred,
                               'short_answer':'', 'evidence_ids':[]}
         elif use_llm:
             try:
                 interpretation, route_evidence = await self.interpret(query, previous, pending_topic)
             except (httpx.HTTPError, ValueError, KeyError, TypeError):
                 route_warning = 'The model could not interpret this question. Using conservative document search.'
-        preferred = intent(query)
         if interpretation:
             if direct_document_request(query, self.catalog.records) and not re.search(r'\b(?:mean|means|meaning|explain)\b', query.lower()):
                 documented_ids = self.catalog.find(query, previous)
@@ -281,7 +295,7 @@ class Agent:
         )
         if source_view and use_llm and interpretation:
             engine = 'local_llm'
-        if use_llm and not verified_storage_ids and not source_view:
+        if use_llm and not verified_storage_ids and not verified_file_ids and not source_view:
             try:
                 plan = await self.select(query, ids, available)
                 engine = "local_llm"
@@ -380,7 +394,7 @@ class Agent:
         sources = list({(f["dataset_id"], f["source"]["kind"]):
                         {**f["source"], "dataset_id": f["dataset_id"]} for f in cited}.values())
         if comparison: sources.extend(comparison['sources'])
-        if engine == "local_llm" or verified_storage_ids:
+        if engine == "local_llm" or verified_storage_ids or verified_file_ids:
             self.last_result = {"engine": engine, "error": None}
         compact = purpose == 'storage'
         actions = []
@@ -391,7 +405,7 @@ class Agent:
         return {"query": query, "engine": engine, "model": self.model if engine == "local_llm" else None,
                 "answer": intro if compact else "\n\n".join(lines), "intro": intro, "intent": purpose, "datasets": sections, "sources": sources,
                 "compact":compact, "actions":actions, 'comparison':comparison,
-                "interpretation":'verified_storage' if verified_storage_ids else interpretation['mode'] if interpretation else 'lexical_fallback',
+                "interpretation":'verified_storage' if verified_storage_ids else 'verified_file_metadata' if verified_file_ids else interpretation['mode'] if interpretation else 'lexical_fallback',
                 "context_dataset_ids":ids, "pending_topic":None,
                 "warning": warning, "elapsed_seconds": round(time.monotonic()-started, 2)}
 

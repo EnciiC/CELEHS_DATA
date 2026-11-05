@@ -28,7 +28,7 @@ def test_hosted_agent_uses_validated_evidence_and_preserves_local_default(monkey
                               request=httpx.Request('POST', url))
     monkeypatch.setattr(httpx.AsyncClient, 'post', post)
     agent = Agent(Catalog())
-    result = asyncio.run(agent.answer('Show UPMC AD monthly columns'))
+    result = asyncio.run(agent.answer('Which UPMC AD files would support an analysis of monthly feature counts?'))
     assert len(calls) == 2 and result['warning'] is None
     assert result['model'] == '@cf/openai/gpt-oss-20b'
     text = json.dumps(result)

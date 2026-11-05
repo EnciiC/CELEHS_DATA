@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 import re
 
@@ -20,6 +21,7 @@ class CloudflareModel:
         self.enabled = os.environ.get("CATALOG_CHAT_ENABLED", "false").lower() == "true"
         self.limits_confirmed = os.environ.get("CATALOG_CLOUD_LIMITS_CONFIRMED", "false").lower() == "true"
         self.last_success = False
+        self.last_failure = None
 
     @property
     def configured(self):
@@ -48,22 +50,35 @@ class CloudflareModel:
         headers = {"Authorization": "Bearer " + self._token, "cf-aig-gateway-id": self.gateway,
                    "cf-aig-collect-log": "true", "cf-aig-collect-log-payload": "false",
                    "cf-aig-max-attempts": "1"}
+        stage = 'request'
         try:
             async with httpx.AsyncClient(trust_env=False, follow_redirects=False,
                                          timeout=httpx.Timeout(90, connect=5)) as client:
                 response = await client.post(url, json=body, headers=headers)
                 response.raise_for_status()
+            stage = 'provider_response'
             payload = response.json()
             if payload.get("success") is False:
                 raise ValueError("Provider rejected the request")
             result = payload.get("result", payload)
+            stage = 'assistant_output'
             value = parse_result(result)
+            stage = 'schema_validation'
             Draft202012Validator(schema).validate(value)
-        except (httpx.HTTPError, ValueError, KeyError, TypeError, IndexError, ValidationError):
+        except (httpx.HTTPError, ValueError, KeyError, TypeError, IndexError, ValidationError) as error:
             self.last_success = False
+            self.last_failure = {'stage': stage, 'error': type(error).__name__}
+            known = {'Invalid provider response', 'Truncated response', 'Incomplete response',
+                     'No assistant response', 'Provider rejected the request'}
+            if isinstance(error, ValueError) and str(error) in known:
+                self.last_failure['reason'] = str(error)
+            if isinstance(error, httpx.HTTPStatusError):
+                self.last_failure['http_status'] = error.response.status_code
+            logging.getLogger(__name__).warning('Hosted inference failure: %s', self.last_failure)
             # Do not propagate remote bodies, headers, credentials or account details.
             raise ValueError("Hosted model unavailable or returned invalid JSON") from None
         self.last_success = True
+        self.last_failure = None
         return value
 
 

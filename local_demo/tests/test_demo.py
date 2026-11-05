@@ -391,6 +391,26 @@ def test_direct_source_fields_do_not_override_undocumented_subgroups(client):
     assert not direct_document_request('Do MGB AD patients have kidney function measurements?', records)
 
 
+@pytest.mark.parametrize('query,ids,files',[
+    ('What do the IBD monthly files look like?', ['IBD'], 2),
+    ('Show IBD monthly NLP count columns.', ['IBD'], 1),
+    ('Can you show me what IBD monthly count data look like?', ['IBD'], 2),
+    ('Show UPMC AD monthly columns', ['UPMC_AD'], 2),
+    ('Show sample rows for MGB AD monthly NLP', ['MGB_AD'], 1),
+])
+def test_explicit_file_requests_work_without_model_interpretation_or_selection(client, monkeypatch, query, ids, files):
+    async def must_not_call(*args):
+        raise AssertionError('An explicit documented file request does not require inference')
+    monkeypatch.setattr(client.app.state.agent, 'interpret', must_not_call)
+    monkeypatch.setattr(client.app.state.agent, 'select', must_not_call)
+    result=client.post('/api/chat',json={'query':query}).json()
+    assert result['interpretation']=='verified_file_metadata'
+    assert result['warning'] is None and result['engine']=='catalog'
+    assert [s['dataset']['id'] for s in result['datasets']]==ids
+    assert sum(len(s['files']) for s in result['datasets'])==files
+    assert all(f.get('columns') for s in result['datasets'] for f in s['files'])
+
+
 def test_wrong_monthly_row_grain_is_rejected(client):
     from local_demo.semantic import routing_context, validate_route
     catalog = client.app.state.catalog
