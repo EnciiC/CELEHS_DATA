@@ -90,6 +90,14 @@ def broad_kind_query(query):
     return bool(resource_kind(query)) and not (set(norm(query).split())-generic)
 
 
+def relation_endpoints(text):
+    aliases = {'genes':'gene','proteins':'protein','variants':'variant','snps':'variant','snp':'variant',
+               'diseases':'disease','phenotypes':'phenotype','drugs':'drug','indications':'indication',
+               'pathways':'pathway','tissues':'tissue'}
+    kinds = {'gene','protein','variant','disease','phenotype','drug','indication','pathway','tissue'}
+    return {aliases.get(t,t) for t in norm(text).split()} & kinds
+
+
 class ResourceLibrary:
     def __init__(self, root=ROOT, enabled=True):
         self.root = Path(root)
@@ -180,9 +188,15 @@ class ResourceLibrary:
         if re.search(r'\b(ibd|ad|alzheimer|mgb ad|upmc ad)\b', q):
             return []
         kind=resource_kind(query)
+        endpoints = relation_endpoints(query) if re.search(r'relation|mapping|connect|link|associat',query,re.I) else set()
+        def documented_endpoints(resource_id):
+            entry=self.entries[resource_id]
+            documented=' '.join([entry['label'],entry['resource_type'],entry['description'],*entry['topics']])
+            return len(endpoints)<2 or endpoints <= relation_endpoints(documented)
         if kind:
             pattern=r'Clinical notes' if kind=='notes' else r'Relation tables?|regulatory mappings'
-            matching=[e['id'] for e in self.entries.values() if re.search(pattern,e['resource_type'],re.I)]
+            matching=[e['id'] for e in self.entries.values() if re.search(pattern,e['resource_type'],re.I)
+                      and documented_endpoints(e['id'])]
             # Keep a stated topic (for example breast cancer) when browsing a data type.
             if not broad_kind_query(query):
                 generic=set('clinical medical patient information extraction evaluation reviewed archive derivative text note notes annotation annotations data dataset datasets relation relations pair pairs mapping mappings table tables'.split())
@@ -195,12 +209,15 @@ class ResourceLibrary:
                 if focused: return focused
             return matching
         if previous and re.search(r'\b(it|its|these|those|them|this|how|where|only|files|columns|start|access|code|public|same|sample|fake|unresolved|limitations|missing|requirements|licence|license|patients)\b', q):
-            return [i for i in previous if i in self.entries]
+            focused=[i for i in previous if i in self.entries and documented_endpoints(i)]
+            if focused: return focused
         singular = {'genes':'gene','diseases':'disease','variants':'variant','relations':'relation','pairs':'pair',
                     'graphs':'graph','matrices':'matrix','annotations':'annotation','notes':'note'}
         tokens = {singular.get(t,t) for t in q.split()} - set('a an the i we you do have data dataset datasets resource resources on o2 from for to of what where which show me can how use study research available public and or with as about using also in by any some want like please could would should it this these those'.split())
         scores = []
         for e in self.entries.values():
+            if not documented_endpoints(e['id']):
+                continue
             terms = {singular.get(t,t) for t in norm(' '.join([e['label'],e['resource_type'],*e['topics']])).split()}
             score = len(tokens & terms)
             if score >= 2 or any(term in tokens & terms for term in ['favor','mvp','genomic','terminology','annotation','matrix','embeddings']):

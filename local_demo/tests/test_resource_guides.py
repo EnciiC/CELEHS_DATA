@@ -235,6 +235,27 @@ def test_gene_disease_search_does_not_infer_primekg_edge_types(client):
 
 
 @pytest.mark.parametrize('query',[
+    'What gene-disease relation resources do we have?',
+    'Which resources connect genes to diseases?',
+    'Do we have gene disease relation pairs?',
+])
+def test_relation_discovery_requires_both_documented_entity_types(client,query):
+    library=client.app.state.catalog.library
+    expected={'ZX_RELATIONS','ZX_FAVOR_GENE'}
+    assert set(library.candidates(query,[]))==expected
+    result=ask(client,query)
+    assert {r['id'] for r in result['resources']}==expected
+
+
+def test_variant_gene_discovery_remains_available_without_disease_inference(client):
+    library=client.app.state.catalog.library
+    assert library.candidates('Which resources connect variants to genes?',[])==['ZX_FAVOR_VARIANT']
+    assert set(library.candidates('Do we have any relation pairs?',[]))=={'ZX_RELATIONS','ZX_FAVOR_GENE','ZX_FAVOR_VARIANT'}
+    assert library.explicit('Tell me about FAVOR variant-gene relations')==['ZX_FAVOR_VARIANT']
+    assert set(library.candidates('How can I find gene-disease relation resources?', ['ZX_FAVOR_VARIANT']))=={'ZX_RELATIONS','ZX_FAVOR_GENE'}
+
+
+@pytest.mark.parametrize('query',[
     'Do we have any note data?', 'Do we have clinical notes?',
     'What clinical text data do we have?', 'Show me clinical notes',
 ])
