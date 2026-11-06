@@ -278,7 +278,9 @@ async function ask(query) {
 }
 function filesAndColumnsPanel(record) {
   const panel = el('div'), picker = el('div', null, 'file-picker'), area = el('div');
+  const dictionaryDownload = link('Download full column dictionary', `/api/datasets/${record.dataset_id}/download/column_dictionary.csv`);
   function select(file) {
+    dictionaryDownload.hidden = false;
     [...picker.children].forEach(button => button.classList.toggle('active', button.dataset.file === file.file));
     const detail = record.file_details.find(item => item.file === file.file);
     const card = el('div', null, 'panel-box'), header = el('div', null, 'file-heading');
@@ -301,6 +303,7 @@ function filesAndColumnsPanel(record) {
     sampleRows(record.dataset_id, file, preview, true).finally(() => { more.disabled = false; });
   }
   function selectDocumented(file) {
+    dictionaryDownload.hidden = true;
     [...picker.children].forEach(button => button.classList.toggle('active', button.dataset.file === file.id));
     const card = el('div', null, 'panel-box'), heading = el('div', null, 'file-heading');
     heading.append(el('h3', file.name), el('span', 'DOCUMENTATION ONLY', 'documented-label'));
@@ -325,7 +328,7 @@ function filesAndColumnsPanel(record) {
   for (const file of record.documented_files || []) {
     const button = smallButton(file.name, () => selectDocumented(file), ''); button.dataset.file = file.id; picker.append(button);
   }
-  panel.append(picker, area, link('Download full column dictionary', `/api/datasets/${record.dataset_id}/download/column_dictionary.csv`));
+  panel.append(picker, area, dictionaryDownload);
   const sources = el('div', null, 'panel-box'); sources.append(el('h3', 'Source locations and processing code'));
   const shownPaths = new Set(record.file_details.map(file => file.location));
   record.resources.filter(r => r.location && !shownPaths.has(r.location)).forEach(r => {
