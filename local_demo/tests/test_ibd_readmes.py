@@ -45,7 +45,9 @@ def test_inventory_includes_laboratory_data_and_project_documentation(client):
     assert 'monthly laboratory' in result['answer'].lower()
     assert 'MAJOR IBD project' in result['answer']
     files = result['datasets'][0]['files']
-    assert len(files) == 3
+    assert len(files) == 5  # Monthly counts, lab summary and the two registry cohorts.
+    assert sum(f.get('topic_id') == 'ibd_registry' for f in files) == 2
+    assert 'registry remission outcomes' in result['answer']
     lab = next(f for f in files if f.get('id') == 'ibd_lab_monthly')
     assert lab['file'] is None and lab['preview_available'] is False
     assert lab['source_files'] == ['IBD_lab_monthly_summary.rds', 'IBD_lab_monthly_summary.csv']
@@ -65,7 +67,7 @@ def test_lab_as_an_organization_is_not_a_lab_measurement_filter(client):
     assert not is_lab_query('Show lab resources')
     assert is_lab_query('Show IBD lab data')
     result = ask(client, 'What IBD data do we have in the lab?')
-    assert len(result['datasets'][0]['files']) == 3
+    assert len(result['datasets'][0]['files']) == 5
 
 
 @pytest.mark.parametrize('query', [

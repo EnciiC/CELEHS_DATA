@@ -31,6 +31,8 @@ For an EHR-and-gut-microbiome research request, IBD can be a possible EHR starti
 Raw/daily UPMC AD files are documented; only monthly fake examples are prepared. Do not mark raw/daily files absent.
 IBD monthly laboratory summaries are documented separately from monthly code/concept counts.
 They contain lab values and measurement counts by patient, lab, unit, and calendar month; not just code occurrence counts.
+Project README topics can describe additional inputs such as registry labels and documented linkage methods.
+Use their supplied evidence for registry/remission or EHR-linkage questions, not monthly code-count schemas.
 The MAJOR IBD project README documents five aims and prior analyses. Use intent project for questions about
 what has been done, the aims, analysis settings, or what work the IBD data have supported. This retrieves documentation,
 not a promise that this website can perform analyses. Do not turn documented project results into treatment advice.
@@ -77,7 +79,8 @@ Never offer to evaluate clinical effectiveness from synthetic examples. Fake row
 
 def routing_context(catalog, query, previous, pending):
     facts = [f for items in catalog.facts.values() for f in items
-             if f['category'] in {'overview','location','columns','file','statistics','dates','tracker','dictionary','uncertainty','fake','lab','project'}]
+             if f['category'] in {'overview','location','columns','file','statistics','dates','tracker','dictionary','uncertainty','fake','lab','project'}
+             or (f['category']=='readme_topic' and f['id'].endswith('_overview'))]
     facts += catalog.retrieve_original(query, list(catalog.records))
     context = {'question':query, 'previous_dataset_ids':previous, 'pending_undocumented_topic':pending,
                'datasets':catalog.summaries(), 'evidence':[{

@@ -173,7 +173,7 @@ function answerFile(section, file) {
   const links = el('div', null, 'resource-links'); const path = pathDisclosure(file);
   if (path) links.append(path);
   if (file.dictionaries?.length || file.file) links.append(dictionaryDisclosure(file.dictionaries || []));
-  if (file.readme_kind) links.append(smallButton('Original laboratory README', () => openDocument(section.dataset.id, file.readme_kind)));
+  if (file.readme_kind) links.append(smallButton('Original README', () => openDocument(section.dataset.id, file.readme_kind)));
   card.append(links);
   if (file.file) {
     const preview = el('div', null, 'preview-area');
@@ -304,12 +304,18 @@ function filesAndColumnsPanel(record) {
     [...picker.children].forEach(button => button.classList.toggle('active', button.dataset.file === file.id));
     const card = el('div', null, 'panel-box'), heading = el('div', null, 'file-heading');
     heading.append(el('h3', file.name), el('span', 'DOCUMENTATION ONLY', 'documented-label'));
-    card.append(heading, el('p', file.description), el('p', file.row_meaning), el('p', 'Owner: ' + file.owner));
+    card.append(heading, el('p', file.description));
+    if (file.row_meaning) card.append(el('p', file.row_meaning));
+    if (file.owner) card.append(el('p', 'Owner: ' + file.owner));
     for (const name of file.source_files) card.append(el('code', name, 'column-name'), document.createTextNode(' '));
-    card.append(pathDisclosure(file),
-      el('h4', 'Column explanations'), table(['Column','Meaning'], file.column_descriptions, 'field-table'),
-      disclosure('Processing script', el('code', file.processing_script, 'source-location')),
-      smallButton('Read original laboratory README', () => openDocument(record.dataset_id, file.readme_kind)));
+    card.append(pathDisclosure(file));
+    if (file.column_descriptions?.length) card.append(el('h4', 'Column explanations'), table(['Column','Meaning'], file.column_descriptions, 'field-table'));
+    if (file.processing_script) card.append(disclosure('Processing script', el('code', file.processing_script, 'source-location')));
+    if (file.topic_id) {
+      const target = file.link_target ? ` with ${file.link_target}` : '';
+      card.append(smallButton('How to link' + target, () => ask(`How do I link ${file.name.split(' — ')[0]}${target}?`)));
+    }
+    card.append(smallButton('Read original README', () => openDocument(record.dataset_id, file.readme_kind)));
     area.replaceChildren(card);
   }
   for (const file of record.files) {

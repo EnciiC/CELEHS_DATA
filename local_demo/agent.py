@@ -20,6 +20,7 @@ from .semantic import ROUTER_SYSTEM, routing_context, route_schema, validate_rou
 from .document_stats import date_view
 from .comparison import comparison_summary
 from .readme_resources import is_lab_query, is_project_query, lab_answer_facts, project_answer_facts
+from .readme_topics import topic_answer
 from .hosting import provider
 from .hosted import CloudflareModel, MODEL as CLOUD_MODEL
 
@@ -178,6 +179,10 @@ class Agent:
                     'intro':intro,'answer':intro,'datasets':[],'resources':[],'sources':[],
                     'context_dataset_ids':previous or [],'pending_topic':None,'warning':None,'compact':True,
                     'actions':[{'label':'Browse resources','view':'browse'}],'elapsed_seconds':0}
+        documented_topic = topic_answer(self.catalog, query, previous or [])
+        if documented_topic is not None:
+            self.last_result = {'engine':'catalog', 'error':None}
+            return documented_topic
         resource_result = await self.catalog.library.maybe_answer(
             query, previous or [], self.catalog, self.structured, use_llm, self.model)
         if resource_result is not None:
@@ -220,11 +225,17 @@ class Agent:
             and direct_document_request(query, self.catalog.records)
             and not re.search(r'\b(?:mean|means|meaning|explain|definition)\b', query, re.I)
         ) else []
+        verified_overview_ids = self.catalog.find(query) if (
+            preferred == 'overview' and direct_document_request(query, self.catalog.records)
+        ) else []
         if verified_storage_ids:
             interpretation = {'mode':'retrieve', 'dataset_ids':verified_storage_ids, 'intent':'storage',
                               'short_answer':'', 'evidence_ids':[]}
         elif verified_file_ids:
             interpretation = {'mode':'retrieve', 'dataset_ids':verified_file_ids, 'intent':preferred,
+                              'short_answer':'', 'evidence_ids':[]}
+        elif verified_overview_ids:
+            interpretation = {'mode':'retrieve', 'dataset_ids':verified_overview_ids, 'intent':'overview',
                               'short_answer':'', 'evidence_ids':[]}
         elif use_llm:
             try:
@@ -295,7 +306,7 @@ class Agent:
         )
         if source_view and use_llm and interpretation:
             engine = 'local_llm'
-        if use_llm and not verified_storage_ids and not verified_file_ids and not source_view:
+        if use_llm and not verified_storage_ids and not verified_file_ids and not verified_overview_ids and not source_view:
             try:
                 plan = await self.select(query, ids, available)
                 engine = "local_llm"
@@ -394,7 +405,7 @@ class Agent:
         sources = list({(f["dataset_id"], f["source"]["kind"]):
                         {**f["source"], "dataset_id": f["dataset_id"]} for f in cited}.values())
         if comparison: sources.extend(comparison['sources'])
-        if engine == "local_llm" or verified_storage_ids or verified_file_ids:
+        if engine == "local_llm" or verified_storage_ids or verified_file_ids or verified_overview_ids:
             self.last_result = {"engine": engine, "error": None}
         compact = purpose == 'storage'
         actions = []
@@ -402,10 +413,14 @@ class Agent:
             label = names([self.catalog.records[i] for i in ids])
             actions = [{'label':'Show file locations', 'query':f'Where can I find {label} data?'},
                        {'label':'Show monthly columns', 'query':f'Show {label} monthly columns'}]
+        if purpose == 'overview':
+            for dataset_id in ids:
+                for topic in self.catalog.records[dataset_id].get('readme_topics',[]):
+                    actions.append({'label':'Show '+topic['name'], 'query':'Tell me about '+topic['name']})
         return {"query": query, "engine": engine, "model": self.model if engine == "local_llm" else None,
                 "answer": intro if compact else "\n\n".join(lines), "intro": intro, "intent": purpose, "datasets": sections, "sources": sources,
                 "compact":compact, "actions":actions, 'comparison':comparison,
-                "interpretation":'verified_storage' if verified_storage_ids else 'verified_file_metadata' if verified_file_ids else interpretation['mode'] if interpretation else 'lexical_fallback',
+                "interpretation":'verified_storage' if verified_storage_ids else 'verified_file_metadata' if verified_file_ids else 'verified_overview' if verified_overview_ids else interpretation['mode'] if interpretation else 'lexical_fallback',
                 "context_dataset_ids":ids, "pending_topic":None,
                 "warning": warning, "elapsed_seconds": round(time.monotonic()-started, 2)}
 

@@ -38,7 +38,7 @@ def file_views(record, query, purpose):
     if is_lab_query(query) and record.get('documented_files'):
         return [{**item, 'show_columns': purpose in {'columns', 'preview', 'fake'},
                  'show_preview': False, 'show_types': False}
-                for item in record['documented_files']]
+                for item in record['documented_files'] if item.get('readme_kind') == 'ibd_lab']
     level, kinds = scope(query)
     if not level and purpose in {"columns", "preview", "fake", "overview", "dictionary", "research"}:
         level = "monthly"
@@ -60,14 +60,15 @@ def file_views(record, query, purpose):
                        "show_types": bool(re.search(r"\btype|class", query.lower())),
                        "show_preview": purpose == "preview"})
     if purpose in {'overview', 'research'} and not kinds and level == 'monthly' and not re.search(r'\bcounts?\b|raw|daily', query, re.I):
-        result += record.get('documented_files', [])
+        result += [item for item in record.get('documented_files', [])
+                   if not (item.get('topic_id') and re.search(r'\bmonthly\b|calendar month',query,re.I))]
     return result
 
 
 def location_views(record, query):
     level, kinds = scope(query)
     if is_lab_query(query) and record.get('documented_files'):
-        return record['documented_files']
+        return [item for item in record['documented_files'] if item.get('readme_kind') == 'ibd_lab']
     # A general location question offers raw, daily and monthly folders by name.
     return [{"name": r["name"], "location": r.get("location"),
              "alternative_location": r.get("alternative_location"), "columns": [],

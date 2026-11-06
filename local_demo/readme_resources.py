@@ -98,6 +98,8 @@ def prepare_readmes(record, directory):
         if len(aims) != 5 or len(aim_sections) != 5:
             raise ValueError('Expected the five MAJOR project aims')
         record['ibd_project'] = {'aims': aims, 'derived': derived, 'sections': aim_sections}
+    from .readme_topics import prepare_topics
+    prepare_topics(record, docs)
     return docs
 
 
@@ -117,6 +119,8 @@ def is_project_query(query):
 def extra_facts(record, docs):
     result = []
     for item in record.get('documented_files', []):
+        if item.get('readme_kind') != 'ibd_lab':
+            continue
         result.append(fact(record, 'lab_overview', 'lab', item['name'] + ': ' + item['description'], 'ibd_lab', 'Purpose'))
         result.append(fact(record, 'lab_columns', 'columns', item['name'] + ' columns: ' + ', '.join(item['columns']) + '. ' + item['row_meaning'], 'ibd_lab', 'Main output'))
         # Preserve the README's row/patient/measurement distinctions in retrieval.
@@ -127,6 +131,8 @@ def extra_facts(record, docs):
         for row in project['aims']:
             result.append(fact(record, 'project_' + row['Aim'].lower().replace(' ', '_'), 'project',
                                f"{row['Aim']}: {row['Objective']}. {row['Workstream']}.", 'ibd_project', row['Aim']))
+    from .readme_topics import topic_facts
+    result.extend(topic_facts(record))
     return result
 
 

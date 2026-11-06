@@ -108,7 +108,7 @@ def test_model_failure_is_honest_and_source_based(client, monkeypatch):
     agent = client.app.state.agent
     monkeypatch.setattr(agent, 'select', broken)
     monkeypatch.setattr(agent, 'interpret', broken)
-    result = asyncio.run(agent.answer('Show IBD'))
+    result = asyncio.run(agent.answer('Where can I find IBD data?'))
     assert result['engine'] == 'catalog'
     assert result['warning']
     assert result['datasets'][0]['files'][0]['dictionaries']

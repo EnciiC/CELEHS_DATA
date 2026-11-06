@@ -8,11 +8,11 @@
     "Eris"
   ],
   "has_o2_copy": false,
-  "description": "Raw EHR records, monthly codified/NLP counts, monthly laboratory summaries, and documentation of the five-aim MAJOR IBD project.",
+  "description": "Raw EHR records, monthly codified/NLP counts, monthly laboratory summaries, registry remission outcomes, and documentation of the five-aim MAJOR IBD project.",
   "sources": [
     {
       "kind": "Original documentation",
-      "path": "Local authoring path omitted from public metadata",
+      "path": "C:/Users/Enci/Desktop/personal/Harvard/LABDATA_MANAGEMENT/Sara Morini/IBD Data Documentation and Summary.docx",
       "local_copy": "README_original.docx"
     },
     {
@@ -68,20 +68,48 @@
       "row_meaning": "One synthetic patient, month, year, and CUI count."
     }
   ],
+  "readme_topics": [
+    {
+      "id": "ibd_registry",
+      "name": "IBD treatment-response registry",
+      "resource_type": "Registry outcomes",
+      "link_target": "EHR",
+      "readme_kind": "ibd_project",
+      "aliases": ["registry", "remission", "week 14", "week 52", "14 week", "52 week", "14 wk", "52 wk", "Ashwin"],
+      "alias_notes": {"Ashwin": "Search alias supplied by Enci; not an attribution in the original README."},
+      "overview": {"heading": "Registry population and known fields", "paragraphs": 2},
+      "files_section": "Registry population and known fields",
+      "views": {
+        "linkage": [
+          {"heading": "Recommended current alignment"},
+          {"heading": "Registry-to-EHR alignment", "paragraph_prefix": "Normalize treatments as follows:"}
+        ],
+        "columns": [{"heading": "Registry population and known fields", "paragraphs": 1}],
+        "statistics": [{"heading": "Registry population and known fields", "paragraphs": 2}],
+        "outcomes": [
+          {"heading": "Registry population and known fields", "paragraphs": 2},
+          {"heading": "Composite outcome"}
+        ]
+      },
+      "linkage_files": [
+        {"key_column": "Data", "row": "EMPI-to-patient mapping", "path_column": "File path", "columns_column": "Key columns", "heading": "Useful processed files"}
+      ]
+    }
+  ],
   "original_readmes": [
     {
       "kind": "ibd_lab",
       "file": "IBD_LAB_MONTHLY_README.md",
       "label": "IBD monthly laboratory data — original README",
       "description": "Monthly lab values, columns, processing script, and reported coverage. Owner: Enci Cai.",
-      "source_path": "Local authoring path omitted from public metadata"
+      "source_path": "C:/Users/Enci/Desktop/personal/Harvard/IBD/Readme/IBD_LAB_MONTHLY_README.md"
     },
     {
       "kind": "ibd_project",
       "file": "IBD_README.md",
       "label": "MAJOR IBD project — original README",
       "description": "Five aims, cohorts, analysis settings, processing folders, and reported results. Owner: Enci Cai.",
-      "source_path": "Local authoring path omitted from public metadata"
+      "source_path": "C:/Users/Enci/Desktop/personal/Harvard/IBD/Readme/IBD_README.md"
     }
   ],
   "column_dictionary": "column_dictionary.csv",
