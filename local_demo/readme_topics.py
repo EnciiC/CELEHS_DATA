@@ -47,15 +47,19 @@ def prepare_topics(record, docs):
                 name, path = clean(match[1]), match[2]
                 name = re.sub(r'^The ', '', name)
                 name = name[0].upper() + name[1:]
+                descriptions=spec.get('file_descriptions')
+                description=excerpt(document,descriptions[index]) if descriptions else overview
                 topic['files'].append({
                     'id':spec['id']+'_'+str(index), 'name':spec['name']+' — '+name,
                     'file':None, 'location':path, 'source_files':[path.rsplit('/',1)[-1]],
                     'columns':[], 'column_descriptions':[], 'row_meaning':'',
-                    'description':overview, 'readme_kind':kind, 'topic_id':spec['id'],
+                    'description':description, 'readme_kind':kind, 'topic_id':spec['id'],
                     'link_target':spec.get('link_target'),
                     'synthetic':False, 'preview_available':False, 'dictionaries':[],
                     'show_columns':False, 'source':topic['source'],
                 })
+            if spec.get('file_descriptions') and len(spec['file_descriptions'])!=len(topic['files']):
+                raise ValueError('README file descriptions and file paths differ')
         for selection in spec.get('linkage_files', []):
             row = next((row for headers, rows in tables(document) for row in rows
                         if clean(row.get(selection['key_column'], '')) == selection['row']), None)

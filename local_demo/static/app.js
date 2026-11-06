@@ -304,7 +304,7 @@ function filesAndColumnsPanel(record) {
     [...picker.children].forEach(button => button.classList.toggle('active', button.dataset.file === file.id));
     const card = el('div', null, 'panel-box'), heading = el('div', null, 'file-heading');
     heading.append(el('h3', file.name), el('span', 'DOCUMENTATION ONLY', 'documented-label'));
-    card.append(heading, el('p', file.description));
+    card.append(heading, markdownDocument(file.description));
     if (file.row_meaning) card.append(el('p', file.row_meaning));
     if (file.owner) card.append(el('p', 'Owner: ' + file.owner));
     for (const name of file.source_files) card.append(el('code', name, 'column-name'), document.createTextNode(' '));

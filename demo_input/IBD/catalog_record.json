@@ -79,6 +79,10 @@
       "alias_notes": {"Ashwin": "Search alias supplied by Enci; not an attribution in the original README."},
       "overview": {"heading": "Registry population and known fields", "paragraphs": 2},
       "files_section": "Registry population and known fields",
+      "file_descriptions": [
+        {"heading": "Registry population and known fields", "paragraphs": 1},
+        {"heading": "Registry population and known fields", "paragraph_prefix": "A second analysis used"}
+      ],
       "views": {
         "linkage": [
           {"heading": "Recommended current alignment"},

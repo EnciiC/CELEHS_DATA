@@ -63,6 +63,7 @@ def test_registry_locations_and_outcomes_are_source_backed(catalog):
     assert len(files)==2
     assert files[0]['location'].endswith('traetment response_for informatics_nodupl_mergedpatient_num_forXin_Feb6.xlsx')
     assert files[1]['location'].endswith('MGH_data-LLM_project__EMPI_and_patientnum (2).xlsx')
+    assert '338' in files[1]['description'] and '461' not in files[1]['description']
     assert all(f['file'] is None and f['columns']==[] for f in files)
     result=topic_answer(catalog,'What outcomes are defined in the IBD registry?',[])
     assert 'Remission versus no response.' in result['answer']
