@@ -191,12 +191,20 @@ class Catalog:
                 else json.loads((directory / 'README_original.json').read_text(encoding='utf-8'))['date_summaries']) if folder == 'IBD' else []
             record["column_descriptions"] = english_only(list(csv.DictReader(
                 (directory / "column_dictionary.csv").read_text(encoding="utf-8").splitlines())))
+            for dictionary in record.get('additional_column_dictionaries', []):
+                name = dictionary['file']
+                if Path(name).name != name:
+                    raise ValueError('Unsafe column dictionary filename')
+                rows = csv.DictReader((directory/name).read_text(encoding='utf-8-sig').splitlines())
+                record['column_descriptions'].extend({**dict.fromkeys(record['column_descriptions'][0],''),
+                    'Column':row['Column'], 'Meaning':row['Meaning'],
+                    'File':dictionary['data_file'], 'Demo type':row['Type']} for row in rows)
             for file in record["files"]:
                 if not file.get("synthetic") or not file["file"].endswith("_fake_data.csv"):
                     raise ValueError("Only explicitly synthetic data files can be served")
                 if Path(file["file"]).name != file["file"]:
                     raise ValueError("A registered filename must be a basename")
-                with (directory / file["file"]).open(encoding="utf-8", newline="") as handle:
+                with (directory / file["file"]).open(encoding="utf-8-sig", newline="") as handle:
                     rows = csv.DictReader(handle)
                     if rows.fieldnames != file["columns"]:
                         raise ValueError(f"CSV columns differ from schema: {file['file']}")
@@ -299,8 +307,14 @@ class Catalog:
         add("downloads", "downloads", "This demo provides downloads of synthetic CSVs and documentation. "
             "Real source datasets remain on their documented servers; the website does not connect to or download them.")
         add("access", "access", f"Contact {r['contact']} for access requirements.")
-        add("microbiome", "uncertainty", "Microbiome availability is not documented. "
-            f"Contact {r['contact']} about microbiome measurements.")
+        if any(t['id']=='ibd_scores' for t in r.get('readme_topics', [])):
+            add('microbiome', 'uncertainty',
+                'PRISM genetic and microbiome scores are documented in deID scores.xlsx, with patient_num. '
+                'Availability of underlying microbiome sequencing or taxon-abundance data is not established by this score workbook.',
+                'ibd_scores')
+        else:
+            add("microbiome", "uncertainty", "Microbiome availability is not documented. "
+                f"Contact {r['contact']} about microbiome measurements.")
         for i, text in enumerate(split_chunks(docs["original_section"])):
             digest = hashlib.sha1(text.encode()).hexdigest()[:8]
             add(f"original_{i}_{digest}", "original", text, "original")
@@ -388,7 +402,8 @@ class Catalog:
         record = self.records[dataset_id]
         allowed = {f["file"] for f in record["files"]} | {
             "column_dictionary.csv", "schema.json", "catalog_record.json"} | {
-                doc['file'] for doc in record.get('original_documents', [])}
+                doc['file'] for doc in record.get('original_documents', [])} | {
+                d['file'] for d in record.get('additional_column_dictionaries', [])}
         if filename not in allowed or Path(filename).name != filename:
             raise ValueError("File is not an approved demo download")
         path = (self.root / dataset_id / filename).resolve()

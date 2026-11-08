@@ -126,6 +126,23 @@ def test_request_limits_and_slot_release():
     asyncio.run(check())
 
 
+def test_public_documentation_lookup_never_uses_model_or_paid_chat_quota(cloud_env,monkeypatch):
+    from local_demo.app import app
+    async def forbidden(*args,**kwargs): raise AssertionError('Document lookup cannot call inference')
+    monkeypatch.setattr(httpx.AsyncClient,'post',forbidden)
+    with TestClient(app) as client:
+        client.app.state.chat_limits=ChatLimits(per_minute=0,per_day=0)
+        first=client.post('/api/lookup',json={'query':'Tell me more about MGH treatment-response registry','use_llm':True}).json()
+        assert first['selection']['kind']=='file'
+        result=client.post('/api/lookup',json={'query':'tell me more','selection':first['selection'],
+            'previous_dataset_ids':first['context_dataset_ids'],'use_llm':True})
+        assert result.status_code==200
+        data=result.json()
+        assert data['engine']=='catalog' and data['warning'] is None
+        assert data['selection']['id']==first['selection']['id']
+        assert not client.app.state.chat_limits.minute and not client.app.state.agent.cloud.last_success
+
+
 def test_hosted_app_browsing_paused_chat_and_security(cloud_env, monkeypatch):
     monkeypatch.setenv('CATALOG_CHAT_ENABLED', 'false')
     async def fail(*args, **kwargs):

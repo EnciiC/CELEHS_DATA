@@ -8,11 +8,11 @@
     "Eris"
   ],
   "has_o2_copy": false,
-  "description": "Raw EHR records, monthly codified/NLP counts, monthly laboratory summaries, registry remission outcomes, and documentation of the five-aim MAJOR IBD project.",
+  "description": "Raw EHR records, monthly codified/NLP counts, monthly laboratory summaries, registry remission outcomes, genetic and microbiome scores, and documentation of the five-aim MAJOR IBD project.",
   "sources": [
     {
       "kind": "Original documentation",
-      "path": "C:/Users/Enci/Desktop/personal/Harvard/LABDATA_MANAGEMENT/Sara Morini/IBD Data Documentation and Summary.docx",
+      "path": "Local authoring path omitted from public metadata",
       "local_copy": "README_original.docx"
     },
     {
@@ -66,38 +66,387 @@
         "Patient_num"
       ],
       "row_meaning": "One synthetic patient, month, year, and CUI count."
+    },
+    {
+      "file": "endo score PRISM EMPI merged July 2025_deID_fake_data.csv",
+      "synthetic": true,
+      "rows": 100,
+      "columns": [
+        "patient_num",
+        "dx",
+        "cdageatdiagnosisa",
+        "cdlocationlpriortofirstsurgery",
+        "cdbehaviorb",
+        "ucextente",
+        "dateofendoscopy",
+        "sescd",
+        "modifiedbaronsscore",
+        "hbi",
+        "sccai"
+      ],
+      "unique_synthetic_patients": 100,
+      "readme_kind": "ibd_registry",
+      "topic_id": "ibd_registry",
+      "source_path": "//SMBgpa.partners.org/asw_mgb$/SHARE/Registry_data_by_Ashwin/endo score PRISM EMPI merged July 2025_deID.xlsx",
+      "row_meaning": "One generated registry record. FAKE DATA; file-specific synthetic identifiers."
+    },
+    {
+      "file": "MGH_data-LLM_project__EMPI_and_patientnum_fake_data.csv",
+      "synthetic": true,
+      "rows": 100,
+      "columns": [
+        "Patient_num",
+        "Index treatment (IL23 vs JAK)",
+        "Date of Start index treatment",
+        "Findings on baseline endoscopy (within 6 months prior to start)",
+        "clinical response at 3 months",
+        "clinical response at 12 months",
+        "endoscopic severity at first endoscopy after therapy start",
+        "Date of scope"
+      ],
+      "unique_synthetic_patients": 100,
+      "readme_kind": "ibd_registry",
+      "topic_id": "ibd_registry",
+      "source_path": "//SMBgpa.partners.org/asw_mgb$/SHARE/Registry_data_by_Ashwin/MGH_data-LLM_project__EMPI_and_patientnum.xlsx",
+      "row_meaning": "One generated registry record. FAKE DATA; file-specific synthetic identifiers."
+    },
+    {
+      "file": "traetment response_for informatics_nodupl_mergedpatient_num_forXin_Feb6_fake_data.csv",
+      "synthetic": true,
+      "rows": 100,
+      "columns": [
+        "patient_num",
+        "prismid",
+        "drugsubstudy",
+        "baseline_date",
+        "sex",
+        "hispanicorlatinoorigin",
+        "race",
+        "ageatdiagnosisa",
+        "locationlpriortofirstsurgery",
+        "behaviorb",
+        "extente",
+        "dx",
+        "doesthesubjecthaveanyotherimmune",
+        "hasthesubjecteverhadbowelresecti",
+        "delzicoloralmesalamine",
+        "asacolmesalamine",
+        "pentasamesalamine",
+        "lialdamesalamine",
+        "aprisomesalamine",
+        "colazalbalsalazide",
+        "sulfasalazineazulfidine",
+        "dipentumolsalazine",
+        "prednisone",
+        "entocortbudesonide",
+        "ucerisbudesonideer",
+        "solumedrolmedrol",
+        "ivsteroids",
+        "cortenemascortifoamproctofoam",
+        "azathioprineimuranazasan",
+        "methotrexate",
+        "mercaptopurinepurinethol6mp",
+        "ozanimodzeposia",
+        "xeljanztofacitinib",
+        "rinvoqupadacitinib",
+        "remicadeinfliximab",
+        "humiraadalimumab",
+        "cimziacertalizumab",
+        "tysabrinatalizumab",
+        "simponigolimumab",
+        "entyviovedolizumab",
+        "stelaraustekinumab",
+        "skyrizirisankizumab",
+        "whatisthesubjectscurrentsmokings",
+        "heightcm",
+        "weightkg",
+        "baseline_crp",
+        "baseline_hct",
+        "baseline_hgb",
+        "baseline_esr",
+        "baseline_wbc",
+        "baseline_plt",
+        "baseline_alb",
+        "baseline_hbi_total",
+        "baseline_sibdq_total",
+        "week14_crp",
+        "week14_hct",
+        "week14_hgb",
+        "week14_esr",
+        "week14_wbc",
+        "week14_plt",
+        "week14_alb",
+        "week14_hbi_total",
+        "week14_sccai_total",
+        "week14_sibdq",
+        "week30_crp",
+        "week30_hct",
+        "week30_hgb",
+        "week30_esr",
+        "week30_wbc",
+        "week30_plt",
+        "week30_alb",
+        "week30_hbi",
+        "week30_sccai",
+        "week30_sibdq",
+        "week54_crp",
+        "week54_hct",
+        "week54_hgb",
+        "week54_esr",
+        "week54_wbc",
+        "week54_plt",
+        "week54_alb",
+        "week54_hbi",
+        "week54_sccai",
+        "week54_sibdq",
+        "bmi_bl",
+        "wk14_remis",
+        "wk30_remis",
+        "wk52_remis",
+        "endo_date",
+        "crohns",
+        "week14_composite",
+        "week52_composite",
+        "week30_composite",
+        "endo_remission"
+      ],
+      "unique_synthetic_patients": 100,
+      "readme_kind": "ibd_registry",
+      "topic_id": "ibd_registry",
+      "source_path": "//SMBgpa.partners.org/asw_mgb$/SHARE/Registry_data_by_Ashwin/traetment response_for informatics_nodupl_mergedpatient_num_forXin_Feb6.xlsx",
+      "row_meaning": "One generated registry record. FAKE DATA; file-specific synthetic identifiers."
     }
   ],
   "readme_topics": [
     {
       "id": "ibd_registry",
-      "name": "IBD treatment-response registry",
+      "name": "IBD registry data",
       "resource_type": "Registry outcomes",
+      "readme_kind": "ibd_registry",
       "link_target": "EHR",
-      "readme_kind": "ibd_project",
-      "aliases": ["registry", "remission", "week 14", "week 52", "14 week", "52 week", "14 wk", "52 wk", "Ashwin"],
-      "alias_notes": {"Ashwin": "Search alias supplied by Enci; not an attribution in the original README."},
-      "overview": {"heading": "Registry population and known fields", "paragraphs": 2},
-      "files_section": "Registry population and known fields",
-      "file_descriptions": [
-        {"heading": "Registry population and known fields", "paragraphs": 1},
-        {"heading": "Registry population and known fields", "paragraph_prefix": "A second analysis used"}
+      "aliases": [
+        "registry",
+        "remission",
+        "Ashwin",
+        "week 14",
+        "week 52",
+        "14 week",
+        "52 week",
+        "14 wk",
+        "52 wk",
+        "PRISM endoscopy",
+        "endoscopy scores",
+        "MGH treatment",
+        "drugsubstudy",
+        "wk14_remis",
+        "wk30_remis",
+        "wk52_remis"
       ],
+      "overview": {
+        "heading": "Overview",
+        "paragraphs": 1
+      },
+      "file_specs": [
+        {
+          "id": "endo_scores",
+          "name": "PRISM endoscopy scores",
+          "heading": "1. PRISM endoscopy scores",
+          "source_file": "endo score PRISM EMPI merged July 2025_deID.xlsx",
+          "file": "endo score PRISM EMPI merged July 2025_deID_fake_data.csv",
+          "aliases": [
+            "PRISM endoscopy",
+            "endoscopy scores",
+            "endo score",
+            "sescd",
+            "hbi",
+            "sccai"
+          ],
+          "description": {
+            "heading": "1. PRISM endoscopy scores",
+            "paragraphs": 2
+          }
+        },
+        {
+          "id": "mgh_treatment_response",
+          "name": "MGH treatment-response registry",
+          "heading": "2. MGH treatment-response registry",
+          "source_file": "MGH_data-LLM_project__EMPI_and_patientnum.xlsx",
+          "file": "MGH_data-LLM_project__EMPI_and_patientnum_fake_data.csv",
+          "aliases": [
+            "MGH registry",
+            "MGH treatment",
+            "3 months",
+            "12 months",
+            "IL23 vs JAK"
+          ],
+          "description": {
+            "heading": "2. MGH treatment-response registry",
+            "paragraphs": 2
+          },
+          "outcome_views": [
+            {
+              "readme_kind": "ibd_registry_summaries",
+              "heading": "clinical response at 3 months"
+            }
+          ]
+        },
+        {
+          "id": "legacy_treatment_response",
+          "name": "Legacy PRISM treatment-response registry",
+          "heading": "3. Legacy PRISM treatment-response registry",
+          "source_file": "traetment response_for informatics_nodupl_mergedpatient_num_forXin_Feb6.xlsx",
+          "file": "traetment response_for informatics_nodupl_mergedpatient_num_forXin_Feb6_fake_data.csv",
+          "aliases": [
+            "legacy registry",
+            "legacy PRISM",
+            "drugsubstudy",
+            "wk14_remis",
+            "wk30_remis",
+            "wk52_remis",
+            "week 14",
+            "week 52"
+          ],
+          "description": {
+            "heading": "3. Legacy PRISM treatment-response registry",
+            "paragraphs": 2
+          },
+          "outcome_views": [
+            {
+              "readme_kind": "ibd_registry_summaries",
+              "heading": "wk14_remis"
+            },
+            {
+              "readme_kind": "ibd_registry_summaries",
+              "heading": "wk52_remis"
+            }
+          ]
+        }
+      ],
+      "location_heading": "Location",
       "views": {
         "linkage": [
-          {"heading": "Recommended current alignment"},
-          {"heading": "Registry-to-EHR alignment", "paragraph_prefix": "Normalize treatments as follows:"}
+          {
+            "heading": "EHR linkage"
+          },
+          {
+            "readme_kind": "ibd_project",
+            "heading": "Registry-to-EHR alignment",
+            "paragraph_prefix": "Normalize treatments as follows:"
+          }
         ],
-        "columns": [{"heading": "Registry population and known fields", "paragraphs": 1}],
-        "statistics": [{"heading": "Registry population and known fields", "paragraphs": 2}],
         "outcomes": [
-          {"heading": "Registry population and known fields", "paragraphs": 2},
-          {"heading": "Composite outcome"}
+          {
+            "heading": "Relationship to Aim 3",
+            "paragraphs": 6
+          }
+        ],
+        "statistics": [
+          {
+            "readme_kind": "ibd_registry_summaries",
+            "heading": "Supplied source summaries",
+            "paragraphs": 1
+          }
+        ],
+        "versions": [
+          {
+            "heading": "File versions"
+          }
         ]
       },
       "linkage_files": [
-        {"key_column": "Data", "row": "EMPI-to-patient mapping", "path_column": "File path", "columns_column": "Key columns", "heading": "Useful processed files"}
+        {
+          "readme_kind": "ibd_project",
+          "key_column": "Data",
+          "row": "EMPI-to-patient mapping",
+          "path_column": "File path",
+          "columns_column": "Key columns",
+          "heading": "Useful processed files"
+        }
       ]
+    },
+    {
+      "id": "ibd_scores",
+      "name": "IBD genetic and microbiome scores",
+      "resource_type": "Genetic and microbiome scores",
+      "readme_kind": "ibd_scores",
+      "aliases": [
+        "microbiome",
+        "genetic scores",
+        "genetic risk scores",
+        "polygenic risk scores",
+        "PRS",
+        "GRS",
+        "deID scores",
+        "PRISM scores",
+        "Biobank scores",
+        "prs_crohns",
+        "prs_uc",
+        "prs_ibd"
+      ],
+      "overview": {
+        "heading": "Overview",
+        "paragraphs": 1
+      },
+      "location_heading": "Location",
+      "view_keywords": {
+        "underlying": [
+          "raw microbiome",
+          "sequencing",
+          "taxon abundance",
+          "taxon-abundance"
+        ]
+      },
+      "view_intros": {
+        "underlying": "The README describes microbiome scores. It does not give a location for raw sequencing or taxon-abundance data."
+      },
+      "file_specs": [
+        {
+          "id": "prism_scores",
+          "name": "PRISM genetic and microbiome scores",
+          "heading": "PRISM worksheet",
+          "source_file": "deID scores.xlsx",
+          "worksheet": "PRISM",
+          "aliases": [
+            "PRISM",
+            "hcindex_microbiome",
+            "ibdindex_microbiome"
+          ]
+        },
+        {
+          "id": "biobank_scores",
+          "name": "Biobank polygenic risk scores",
+          "heading": "Biobank worksheet",
+          "source_file": "deID scores.xlsx",
+          "worksheet": "Biobank",
+          "aliases": [
+            "Biobank",
+            "prs_crohns",
+            "prs_uc",
+            "prs_ibd"
+          ]
+        }
+      ],
+      "views": {
+        "underlying": [
+          {
+            "heading": "Additional information",
+            "line_prefix": "- Microbiome sampling dates"
+          }
+        ],
+        "linkage": [
+          {
+            "heading": "Linking to EHR"
+          }
+        ],
+        "columns": [
+          {
+            "heading": "PRISM worksheet"
+          },
+          {
+            "heading": "Biobank worksheet"
+          }
+        ]
+      }
     }
   ],
   "original_readmes": [
@@ -106,14 +455,42 @@
       "file": "IBD_LAB_MONTHLY_README.md",
       "label": "IBD monthly laboratory data — original README",
       "description": "Monthly lab values, columns, processing script, and reported coverage. Owner: Enci Cai.",
-      "source_path": "C:/Users/Enci/Desktop/personal/Harvard/IBD/Readme/IBD_LAB_MONTHLY_README.md"
+      "source_path": "Local authoring path omitted from public metadata"
     },
     {
       "kind": "ibd_project",
       "file": "IBD_README.md",
       "label": "MAJOR IBD project — original README",
       "description": "Five aims, cohorts, analysis settings, processing folders, and reported results. Owner: Enci Cai.",
-      "source_path": "C:/Users/Enci/Desktop/personal/Harvard/IBD/Readme/IBD_README.md"
+      "source_path": "Local authoring path omitted from public metadata"
+    },
+    {
+      "kind": "ibd_registry",
+      "file": "IBD_REGISTRY_README.md",
+      "label": "IBD registry data — README",
+      "description": "Three registry files, column descriptions, outcomes and Aim 3 linkage.",
+      "source_path": "Local authoring path omitted from public metadata"
+    },
+    {
+      "kind": "ibd_scores",
+      "file": "IBD_GENETIC_MICROBIOME_README.md",
+      "label": "IBD genetic and microbiome scores — README",
+      "description": "PRISM genetic/microbiome scores and Biobank PRS fields.",
+      "source_path": "Local authoring path omitted from public metadata"
+    },
+    {
+      "kind": "ibd_registry_summaries",
+      "file": "IBD_REGISTRY_SOURCE_SUMMARIES.md",
+      "label": "IBD registry — supplied category counts",
+      "description": "Category labels and frequencies supplied for the registry files.",
+      "source_path": "Local authoring path omitted from public metadata"
+    },
+    {
+      "kind": "ibd_registry_generation",
+      "file": "IBD_REGISTRY_GENERATION_NOTES.md",
+      "label": "IBD registry — fake-data generation",
+      "description": "How the 100-row synthetic examples were made.",
+      "source_path": "Local authoring path omitted from public metadata"
     }
   ],
   "column_dictionary": "column_dictionary.csv",
@@ -255,7 +632,23 @@
     "Real EMPI stays on the source server.",
     "Do not claim an O2 copy exists.",
     "Do not use fake records as evidence of real cohort distributions or code coverage.",
-    "Microbiome availability is not documented in the supplied source.",
-    "The MAJOR IBD README documents a concept_dimension export for concept names; the export itself has not been loaded locally."
+    "The MAJOR IBD README documents a concept_dimension export for concept names; the export itself has not been loaded locally.",
+    "PRISM microbiome scores are documented in deID scores.xlsx. These scores do not establish availability of raw microbiome sequencing or taxon-abundance data.",
+    "PRISM microbiome scores are documented in deID scores.xlsx. These scores do not establish availability of raw microbiome sequencing or taxon-abundance data.",
+    "PRISM microbiome scores are documented in deID scores.xlsx. These scores do not establish availability of raw microbiome sequencing or taxon-abundance data."
+  ],
+  "additional_column_dictionaries": [
+    {
+      "file": "registry_endo_scores_column_dictionary.csv",
+      "data_file": "endo score PRISM EMPI merged July 2025_deID_fake_data.csv"
+    },
+    {
+      "file": "registry_mgh_treatment_response_column_dictionary.csv",
+      "data_file": "MGH_data-LLM_project__EMPI_and_patientnum_fake_data.csv"
+    },
+    {
+      "file": "registry_legacy_treatment_response_column_dictionary.csv",
+      "data_file": "traetment response_for informatics_nodupl_mergedpatient_num_forXin_Feb6_fake_data.csv"
+    }
   ]
 }

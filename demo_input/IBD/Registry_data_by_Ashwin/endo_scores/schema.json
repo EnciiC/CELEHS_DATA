@@ -1,0 +1,85 @@
+{
+  "id": "endo_scores",
+  "name": "PRISM endoscopy scores",
+  "source_file": "endo score PRISM EMPI merged July 2025_deID.xlsx",
+  "columns": [
+    "patient_num",
+    "dx",
+    "cdageatdiagnosisa",
+    "cdlocationlpriortofirstsurgery",
+    "cdbehaviorb",
+    "ucextente",
+    "dateofendoscopy",
+    "sescd",
+    "modifiedbaronsscore",
+    "hbi",
+    "sccai"
+  ],
+  "definitions": [
+    {
+      "Column": "patient_num",
+      "Meaning": "Patient identifier in the registry file.",
+      "Type": "Identifier"
+    },
+    {
+      "Column": "dx",
+      "Meaning": "Diagnosis: UC or CD.",
+      "Type": "Category"
+    },
+    {
+      "Column": "cdageatdiagnosisa",
+      "Meaning": "Age at diagnosis: A1 (16 years or younger), A2 (17 to 40 years), A3 (Over 40 years), or N/A.",
+      "Type": "Category"
+    },
+    {
+      "Column": "cdlocationlpriortofirstsurgery",
+      "Meaning": "Recorded disease location before first surgery; preserve the supplied L categories, 0 and N/A.",
+      "Type": "Category"
+    },
+    {
+      "Column": "cdbehaviorb",
+      "Meaning": "Recorded disease behavior; includes B1/B2/B3, perianal variants, 0 and N/A.",
+      "Type": "Category"
+    },
+    {
+      "Column": "ucextente",
+      "Meaning": "UC extent: E1 (Ulcerative proctitis), E2 (Left-sided UC), E3 (Extensive UC / Pancolitis), or N/A.",
+      "Type": "Category"
+    },
+    {
+      "Column": "dateofendoscopy",
+      "Meaning": "Endoscopy date, supplied as yyyy-mm-dd.",
+      "Type": "Date"
+    },
+    {
+      "Column": "sescd",
+      "Meaning": "Simple Endoscopic Score for Crohn’s Disease (SES-CD). Reported observed values 0–29, mostly 0, with missing values.",
+      "Type": "Integer or missing"
+    },
+    {
+      "Column": "modifiedbaronsscore",
+      "Meaning": "Recorded modified Baron score. Values and coding have not yet been supplied.",
+      "Type": "Not supplied"
+    },
+    {
+      "Column": "hbi",
+      "Meaning": "Harvey-Bradshaw Index (HBI), a Crohn’s disease clinical activity score. Reported observed values 0–19, with possible missing values.",
+      "Type": "Integer or missing"
+    },
+    {
+      "Column": "sccai",
+      "Meaning": "Simple Clinical Colitis Activity Index (SCCAI), a UC clinical activity score. Reported observed values 0–12, with possible missing values.",
+      "Type": "Integer or missing"
+    }
+  ],
+  "purpose": "PRISM diagnosis, disease classification, endoscopy dates and clinical/endoscopic activity scores.",
+  "fake_file": "endo score PRISM EMPI merged July 2025_deID_fake_data.csv",
+  "source_path": "//SMBgpa.partners.org/asw_mgb$/SHARE/Registry_data_by_Ashwin/endo score PRISM EMPI merged July 2025_deID.xlsx",
+  "blank_demo_columns": [
+    "modifiedbaronsscore"
+  ],
+  "synthetic": true,
+  "synthetic_rows": 100,
+  "seed": 20261108,
+  "description_source": "Enci supplied names and frequency tables on 2026-11-08"
+}

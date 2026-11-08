@@ -1,0 +1,95 @@
+﻿Column,Meaning,Type
+patient_num,Patient identifier; retain the lower-case column name.,Identifier
+prismid,PRISM registry identifier.,Identifier
+drugsubstudy,"Registry treatment code: ADA, IFX, RIS, TOFA, UPA, USK or VEDO.",Category
+baseline_date,"Registry treatment-baseline date, yyyy-mm-dd.",Date
+sex,Sex field; response coding to be supplied.,Not supplied
+hispanicorlatinoorigin,Hispanic/Latino-origin field; response coding to be supplied.,Not supplied
+race,Race field; response coding to be supplied.,Not supplied
+ageatdiagnosisa,"Age at diagnosis group: A1 (16 years or younger), A2 (17 to 40 years), A3 (Over 40 years).",Category
+locationlpriortofirstsurgery,Disease-location field before first surgery; source coding to be supplied for this file.,Not supplied
+behaviorb,Disease-behavior field; source coding to be supplied for this file.,Not supplied
+extente,Disease-extent field; source coding to be supplied for this file.,Not supplied
+dx,"Diagnosis: UC, CD and a few IC entries. Definition of IC to be confirmed.",Category
+doesthesubjecthaveanyotherimmune,Other immune-condition field; confirm the full question and response coding.,Not supplied
+hasthesubjecteverhadbowelresecti,Bowel-resection-history field; confirm the full question and response coding.,Not supplied
+delzicoloralmesalamine,Mesalamine (Delzicol) medication field; response coding and timing to be supplied.,Not supplied
+asacolmesalamine,Mesalamine (Asacol) medication field; response coding and timing to be supplied.,Not supplied
+pentasamesalamine,Mesalamine (Pentasa) medication field; response coding and timing to be supplied.,Not supplied
+lialdamesalamine,Mesalamine (Lialda) medication field; response coding and timing to be supplied.,Not supplied
+aprisomesalamine,Mesalamine (Apriso) medication field; response coding and timing to be supplied.,Not supplied
+colazalbalsalazide,Balsalazide (Colazal) medication field; response coding and timing to be supplied.,Not supplied
+sulfasalazineazulfidine,Sulfasalazine (Azulfidine) medication field; response coding and timing to be supplied.,Not supplied
+dipentumolsalazine,Olsalazine (Dipentum) medication field; response coding and timing to be supplied.,Not supplied
+prednisone,Prednisone medication field; response coding and timing to be supplied.,Not supplied
+entocortbudesonide,Budesonide (Entocort) medication field; response coding and timing to be supplied.,Not supplied
+ucerisbudesonideer,Budesonide ER (Uceris) medication field; response coding and timing to be supplied.,Not supplied
+solumedrolmedrol,Solu-Medrol/Medrol medication field; response coding and timing to be supplied.,Not supplied
+ivsteroids,Intravenous steroids medication field; response coding and timing to be supplied.,Not supplied
+cortenemascortifoamproctofoam,Cortenema/Cortifoam/Proctofoam medication field; response coding and timing to be supplied.,Not supplied
+azathioprineimuranazasan,Azathioprine (Imuran/Azasan) medication field; response coding and timing to be supplied.,Not supplied
+methotrexate,Methotrexate medication field; response coding and timing to be supplied.,Not supplied
+mercaptopurinepurinethol6mp,Mercaptopurine (Purinethol/6-MP) medication field; response coding and timing to be supplied.,Not supplied
+ozanimodzeposia,Ozanimod (Zeposia) medication field; response coding and timing to be supplied.,Not supplied
+xeljanztofacitinib,Tofacitinib (Xeljanz) medication field; response coding and timing to be supplied.,Not supplied
+rinvoqupadacitinib,Upadacitinib (Rinvoq) medication field; response coding and timing to be supplied.,Not supplied
+remicadeinfliximab,Infliximab (Remicade) medication field; response coding and timing to be supplied.,Not supplied
+humiraadalimumab,Adalimumab (Humira) medication field; response coding and timing to be supplied.,Not supplied
+cimziacertalizumab,Cimzia field as named in the source header medication field; response coding and timing to be supplied.,Not supplied
+tysabrinatalizumab,Natalizumab (Tysabri) medication field; response coding and timing to be supplied.,Not supplied
+simponigolimumab,Golimumab (Simponi) medication field; response coding and timing to be supplied.,Not supplied
+entyviovedolizumab,Vedolizumab (Entyvio) medication field; response coding and timing to be supplied.,Not supplied
+stelaraustekinumab,Ustekinumab (Stelara) medication field; response coding and timing to be supplied.,Not supplied
+skyrizirisankizumab,Risankizumab (Skyrizi) medication field; response coding and timing to be supplied.,Not supplied
+whatisthesubjectscurrentsmokings,Smoking-status field; confirm the full question and response coding.,Not supplied
+heightcm,Height field labeled in centimetres; source value format to be supplied.,Numeric format not supplied
+weightkg,Weight field labeled in kilograms; source value format to be supplied.,Numeric format not supplied
+baseline_crp,Baseline C-reactive protein (CRP) field; units or score coding to be supplied.,Numeric format not supplied
+baseline_hct,Baseline Hematocrit field; units or score coding to be supplied.,Numeric format not supplied
+baseline_hgb,Baseline Hemoglobin field; units or score coding to be supplied.,Numeric format not supplied
+baseline_esr,Baseline Erythrocyte sedimentation rate (ESR) field; units or score coding to be supplied.,Numeric format not supplied
+baseline_wbc,Baseline White blood cell count field; units or score coding to be supplied.,Numeric format not supplied
+baseline_plt,Baseline Platelet count field; units or score coding to be supplied.,Numeric format not supplied
+baseline_alb,Baseline Albumin field; units or score coding to be supplied.,Numeric format not supplied
+baseline_hbi_total,Baseline Harvey-Bradshaw Index (HBI) total field; units or score coding to be supplied.,Numeric format not supplied
+baseline_sibdq_total,Baseline Short Inflammatory Bowel Disease Questionnaire (SIBDQ) total field; units or score coding to be supplied.,Numeric format not supplied
+week14_crp,Week 14 C-reactive protein (CRP) field; units or score coding to be supplied.,Numeric format not supplied
+week14_hct,Week 14 Hematocrit field; units or score coding to be supplied.,Numeric format not supplied
+week14_hgb,Week 14 Hemoglobin field; units or score coding to be supplied.,Numeric format not supplied
+week14_esr,Week 14 Erythrocyte sedimentation rate (ESR) field; units or score coding to be supplied.,Numeric format not supplied
+week14_wbc,Week 14 White blood cell count field; units or score coding to be supplied.,Numeric format not supplied
+week14_plt,Week 14 Platelet count field; units or score coding to be supplied.,Numeric format not supplied
+week14_alb,Week 14 Albumin field; units or score coding to be supplied.,Numeric format not supplied
+week14_hbi_total,Week 14 Harvey-Bradshaw Index (HBI) total field; units or score coding to be supplied.,Numeric format not supplied
+week14_sccai_total,Week 14 Simple Clinical Colitis Activity Index (SCCAI) total field; units or score coding to be supplied.,Numeric format not supplied
+week14_sibdq,Week 14 Short Inflammatory Bowel Disease Questionnaire (SIBDQ) field; units or score coding to be supplied.,Numeric format not supplied
+week30_crp,Week 30 C-reactive protein (CRP) field; units or score coding to be supplied.,Numeric format not supplied
+week30_hct,Week 30 Hematocrit field; units or score coding to be supplied.,Numeric format not supplied
+week30_hgb,Week 30 Hemoglobin field; units or score coding to be supplied.,Numeric format not supplied
+week30_esr,Week 30 Erythrocyte sedimentation rate (ESR) field; units or score coding to be supplied.,Numeric format not supplied
+week30_wbc,Week 30 White blood cell count field; units or score coding to be supplied.,Numeric format not supplied
+week30_plt,Week 30 Platelet count field; units or score coding to be supplied.,Numeric format not supplied
+week30_alb,Week 30 Albumin field; units or score coding to be supplied.,Numeric format not supplied
+week30_hbi,Week 30 Harvey-Bradshaw Index (HBI) field; units or score coding to be supplied.,Numeric format not supplied
+week30_sccai,Week 30 Simple Clinical Colitis Activity Index (SCCAI) field; units or score coding to be supplied.,Numeric format not supplied
+week30_sibdq,Week 30 Short Inflammatory Bowel Disease Questionnaire (SIBDQ) field; units or score coding to be supplied.,Numeric format not supplied
+week54_crp,Week 54 C-reactive protein (CRP) field; units or score coding to be supplied.,Numeric format not supplied
+week54_hct,Week 54 Hematocrit field; units or score coding to be supplied.,Numeric format not supplied
+week54_hgb,Week 54 Hemoglobin field; units or score coding to be supplied.,Numeric format not supplied
+week54_esr,Week 54 Erythrocyte sedimentation rate (ESR) field; units or score coding to be supplied.,Numeric format not supplied
+week54_wbc,Week 54 White blood cell count field; units or score coding to be supplied.,Numeric format not supplied
+week54_plt,Week 54 Platelet count field; units or score coding to be supplied.,Numeric format not supplied
+week54_alb,Week 54 Albumin field; units or score coding to be supplied.,Numeric format not supplied
+week54_hbi,Week 54 Harvey-Bradshaw Index (HBI) field; units or score coding to be supplied.,Numeric format not supplied
+week54_sccai,Week 54 Simple Clinical Colitis Activity Index (SCCAI) field; units or score coding to be supplied.,Numeric format not supplied
+week54_sibdq,Week 54 Short Inflammatory Bowel Disease Questionnaire (SIBDQ) field; units or score coding to be supplied.,Numeric format not supplied
+bmi_bl,Baseline BMI field; calculation and source value format to be supplied.,Numeric format not supplied
+wk14_remis,"Week-14 registry clinical status; retain every supplied label, including non-assessment statuses.",Category
+wk30_remis,Week-30 registry clinical-status field; categories were not supplied.,Not supplied
+wk52_remis,"Week-52 registry clinical status; retain every supplied label, including non-assessment statuses.",Category
+endo_date,Endoscopy-date field; exact source representation to be supplied.,Date format not supplied
+crohns,Crohn-related field; exact definition and coding to be supplied.,Not supplied
+week14_composite,Week-14 composite-outcome field; definition and coding to be supplied.,Not supplied
+week52_composite,Week-52 composite-outcome field; definition and coding to be supplied.,Not supplied
+week30_composite,Week-30 composite-outcome field; definition and coding to be supplied.,Not supplied
+endo_remission,Endoscopic-remission field; cutoff and coding to be supplied.,Not supplied

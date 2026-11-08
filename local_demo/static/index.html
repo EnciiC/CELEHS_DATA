@@ -34,6 +34,14 @@
         </form>
         <p id="hosted-notice" class="page-footer" hidden>Powered by GPT-OSS-20B, hosted by Cloudflare. Do not enter real patient information.</p>
         <div class="examples"><span>Try a question</span><button data-query="I wanted to see IBD data, guide me and let me know where I can find it">Where can I find IBD data?</button><button data-query="I wanted to see AD, what we have now">What AD data do we have?</button><button data-query="Can you show me what IBD monthly count data look like?">IBD monthly structure</button><button data-query="Compare the monthly count columns for MGB AD and UPMC AD">Compare AD monthly columns</button><button data-query="Show IBD monthly lab columns">IBD monthly lab data</button><button data-query="What can we do with IBD data?">MAJOR IBD project aims</button></div>
+        <details class="comparison-picker"><summary>Compare resources or files</summary>
+          <form id="comparison-form">
+            <label>First resource or file<select id="compare-first" required></select></label>
+            <label>Second resource or file<select id="compare-second" required></select></label>
+            <label>Compare<select id="compare-field"><option value="overview">Contents and storage</option><option value="columns" selected>Columns and format</option><option value="location">Storage</option><option value="counts">Patient / cohort counts</option><option value="dates">Date coverage</option><option value="access">Access requirements</option><option value="code">Related code</option></select></label>
+            <button class="quiet-button" type="submit">Compare selected items</button>
+          </form>
+        </details>
         <div id="conversation" aria-live="polite"></div>
         <div class="examples"><button data-query="How do I get started with All of Us?">All of Us access</button><button data-query="Compare the FAS UKB matrix with the O2 CRAFT matrix">FAS versus CRAFT</button><button data-query="What gene-disease relation resources do we have?">Gene-disease resources</button></div>
         <div id="initial-catalog"><div class="section-heading"><h2>Documented resources</h2><span id="dataset-total"></span></div><nav id="home-categories" class="resource-categories" aria-label="Resource categories"></nav><div class="dataset-grid" id="home-cards"></div></div>

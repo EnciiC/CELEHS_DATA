@@ -22,11 +22,11 @@ def catalog(tmp_path):
 def test_registry_discovery_uses_source_cohorts_not_ehr_counts(catalog,query):
     result=topic_answer(catalog,query,[])
     assert result['interpretation']=='verified_readme_topic'
-    assert '461' in result['answer'] and '338' in result['answer']
-    assert 'week-14' in result['answer'] and 'week-52' in result['answer']
+    assert 'Three registry workbooks' in result['answer']
+    assert 'PRISM endoscopy scores' in result['answer']
     assert '56,704' not in result['answer']
-    assert len(result['datasets'][0]['files'])==2
-    assert all(s['kind']=='ibd_project' for s in result['sources'])
+    assert len(result['datasets'][0]['files'])==3
+    assert all(s['kind']=='ibd_registry' for s in result['sources'])
     assert 'Ashwin' not in result['answer']  # Search alias, not a source attribution.
 
 
@@ -44,8 +44,8 @@ def test_registry_linkage_preserves_time_index_mapping_and_sensitivity(catalog,q
     assert result['warning'] is None and result['interpretation']=='verified_readme_topic'
     assert 'baseline_date' in result['answer']
     assert 'deduplicated mapping' in result['answer']
-    assert 'any same-drug occurrence within plus or minus 30 days' in result['answer']
-    assert 'earliest same-drug occurrence within plus or minus 30 days' in result['answer']
+    assert 'any same-drug EHR occurrence within ±30 days' in result['answer']
+    assert 'earliest same-drug occurrence within ±30 days' in result['answer']
     assert 'stricter sensitivity cohort' in result['answer']
     assert 'UST/USK and RIS to anti-IL-12/23' in result['answer']
     assert '388' not in result['answer']  # Historical linkage checks stay separate.
@@ -54,30 +54,31 @@ def test_registry_linkage_preserves_time_index_mapping_and_sensitivity(catalog,q
     assert mapping['columns']==['EMPI','Patient_num']
     assert mapping['file'] is None
     for f in result['datasets'][0]['facts']:
-        assert f['text'] in catalog.documents['IBD']['ibd_project']
+        assert f['text'] in catalog.documents['IBD'][f['source']['kind']]
 
 
 def test_registry_locations_and_outcomes_are_source_backed(catalog):
     locations=topic_answer(catalog,'Where are the IBD registry files?',[])
     files=locations['datasets'][0]['files']
-    assert len(files)==2
-    assert files[0]['location'].endswith('traetment response_for informatics_nodupl_mergedpatient_num_forXin_Feb6.xlsx')
-    assert files[1]['location'].endswith('MGH_data-LLM_project__EMPI_and_patientnum (2).xlsx')
-    assert '338' in files[1]['description'] and '461' not in files[1]['description']
-    assert all(f['file'] is None and f['columns']==[] for f in files)
+    assert len(files)==3
+    assert files[0]['location'].endswith('endo score PRISM EMPI merged July 2025_deID.xlsx')
+    assert files[1]['location'].endswith('MGH_data-LLM_project__EMPI_and_patientnum.xlsx')
+    assert all('/SHARE/Registry_data_by_Ashwin/' in f['location'] for f in files)
+    assert [len(f['columns']) for f in files]==[11,8,94]
     result=topic_answer(catalog,'What outcomes are defined in the IBD registry?',[])
     assert 'Remission versus no response.' in result['answer']
     assert 'Remission or partial response versus no response.' in result['answer']
-    assert '69' in result['answer'] and '97' in result['answer']
-    assert '3-month' in result['answer']  # Preserve source table labels.
+    assert 'Clinical remission' in result['answer']
+    versions=topic_answer(catalog,'Show IBD registry file versions',[])
+    assert '338' in versions['answer'] and '337' in versions['answer']
 
 
-def test_registry_does_not_invent_samples_or_full_column_dictionary(catalog):
+def test_registry_samples_use_the_supplied_full_column_dictionary(catalog):
     result=topic_answer(catalog,'Show fake sample rows for the IBD registry',[])
-    assert 'Fake sample rows are not available' in result['intro']
-    assert all(f['file'] is None for f in result['datasets'][0]['files'])
+    assert 'generated fake rows' in result['intro']
+    assert all(f['file'].endswith('_fake_data.csv') for f in result['datasets'][0]['files'])
     result=topic_answer(catalog,'Show IBD registry columns',[])
-    assert '`drugsubstudy`' in result['answer'] and '`baseline_date`' in result['answer']
+    assert 'drugsubstudy' in result['answer'] and 'baseline_date' in result['answer']
     assert 'Group_Code_Count' not in result['answer'] and 'Rollup_Code' not in result['answer']
 
 
@@ -95,12 +96,11 @@ def test_named_inventory_includes_registry_without_depending_on_model(catalog):
     result=asyncio.run(agent.answer('What IBD data do we have?',use_llm=True))
     assert result['warning'] is None and result['interpretation']=='verified_overview'
     assert 'registry remission outcomes' in result['answer']
-    assert len(result['datasets'][0]['files'])==5
+    assert len(result['datasets'][0]['files'])==8
 
 
 @pytest.mark.parametrize('query,previous',[
     ('Show UPMC IBD registry data',[]),
-    ('How do I link the IBD registry to microbiome data?',[]),
     ('How do I connect these with EHR?',[]),
     ('How do I connect these with EHR?',['MGB_AD']),
     ('Run a remission prediction model using IBD registry data',[]),

@@ -8,7 +8,7 @@ This repository contains the application and a selected documentation snapshot f
 
 - Python FastAPI backend and browser interface.
 - Original Markdown documentation, readable body-only exports of the Word READMEs, recorded file structures, and a selected tracker-metadata snapshot.
-- Nine fake CSVs with 1,000 generated rows each. These are not real patient records or real cohort sizes.
+- Nine fake CSVs with 1,000 generated rows each, plus three registry examples with 100 generated rows each. These are not real patient records or real cohort sizes.
 - Documentation-only IBD monthly laboratory summaries; no real or fake laboratory rows are supplied.
 - Source-backed views of the MAJOR IBD project aims and reported analyses. The website does not perform those analyses.
 - A local Ollama configuration based on `gpt-oss:20b`, without model weights or credentials.
@@ -59,3 +59,14 @@ Hosted chat starts paused. Documentation, schemas and synthetic previews remain 
 The adapter is covered by simulated-provider tests. Real Cloudflare schema compatibility, credentials, billing and answer quality still need the first live test. Publishing the source alone does not deploy the website. GitHub Pages cannot run this Python backend.
 
 Review source-document permissions before redistributing them or sending them to a hosted model provider. Adding sign-in later does not retract copies already made from a public repository. Generated examples are for file-format and software testing only, not clinical inference or treatment advice.
+
+
+## File exploration and comparisons
+
+The IBD documentation includes genetic/microbiome score worksheets and three registry files, with column descriptions, supplied category summaries and Aim 3 linkage instructions. Score worksheets have documentation only. Registry previews contain generated fake rows.
+
+After selecting a file, users can ask “tell me more”, “what are the columns?”, “where is it?” or “show the original README”. The request carries the selected file ID; switching subjects selects a new file or resource. No conversation is stored on the server.
+
+Comparisons use registered resource/file IDs and documented fields. The comparison picker supports contents, columns, storage, documented counts/date coverage, access and code. It also accepts named comparison questions. Code mappings and cohorts are not treated as interchangeable merely because column names match.
+
+`GET /api/comparison-options` lists choices. `POST /api/compare` accepts `entity_ids` and `field`. `POST /api/lookup` provides documentation-only lookup and follow-ups; it never invokes a model. Paid hosted chat keeps its existing request limits and provider-side budget settings.

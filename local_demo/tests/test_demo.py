@@ -52,7 +52,8 @@ def test_ad_inventory_and_site_filter(client):
 
 def test_microbiome_gap_and_unknown_dataset(client):
     result = ask(client, 'I want EHR data and gut microbiome measurements')
-    assert 'Microbiome availability is not documented' in result['answer']
+    assert 'PRISM genetic and microbiome scores' in result['answer']
+    assert 'taxon-abundance data is not established' in result['answer']
     assert 'does not contain microbiome' not in result['answer']
     assert not ask(client, 'Where is VINCI heart failure data?')['datasets']
     assert not ask(client, 'Where is UPMC IBD?')['datasets']
@@ -460,7 +461,7 @@ def test_public_generation_notes_are_short_and_do_not_expose_internal_review(cli
     if dataset_id == 'IBD' and source: assert '## Points to confirm' in source
 
 
-@pytest.mark.parametrize('dataset_id, expected_rows', [('IBD',17), ('MGB_AD',18), ('UPMC_AD',10)])
+@pytest.mark.parametrize('dataset_id, expected_rows', [('IBD',130), ('MGB_AD',18), ('UPMC_AD',10)])
 def test_dictionary_download_is_english_and_excel_readable(client, dataset_id, expected_rows):
     response = client.get(f'/api/datasets/{dataset_id}/download/column_dictionary.csv')
     assert response.status_code == 200

@@ -23,7 +23,8 @@ def ask(client, query, **extra):
 def test_additional_original_readmes_are_distinct_and_unchanged(client):
     record = client.get('/api/datasets/IBD').json()
     docs = record['original_documents']
-    assert [d['kind'] for d in docs] == ['original', 'ibd_lab', 'ibd_project']
+    assert [d['kind'] for d in docs] == ['original', 'ibd_lab', 'ibd_project', 'ibd_registry',
+        'ibd_scores', 'ibd_registry_summaries', 'ibd_registry_generation']
     assert len(client.get('/api/datasets/MGB_AD').json()['original_documents']) == 1
     for doc in docs[1:]:
         readme = client.get(doc['url'])
@@ -45,8 +46,8 @@ def test_inventory_includes_laboratory_data_and_project_documentation(client):
     assert 'monthly laboratory' in result['answer'].lower()
     assert 'MAJOR IBD project' in result['answer']
     files = result['datasets'][0]['files']
-    assert len(files) == 5  # Monthly counts, lab summary and the two registry cohorts.
-    assert sum(f.get('topic_id') == 'ibd_registry' for f in files) == 2
+    assert len(files) == 8  # Two count files, lab, three registry files and two score worksheets.
+    assert sum(f.get('topic_id') == 'ibd_registry' for f in files) == 3
     assert 'registry remission outcomes' in result['answer']
     lab = next(f for f in files if f.get('id') == 'ibd_lab_monthly')
     assert lab['file'] is None and lab['preview_available'] is False
@@ -67,7 +68,7 @@ def test_lab_as_an_organization_is_not_a_lab_measurement_filter(client):
     assert not is_lab_query('Show lab resources')
     assert is_lab_query('Show IBD lab data')
     result = ask(client, 'What IBD data do we have in the lab?')
-    assert len(result['datasets'][0]['files']) == 5
+    assert len(result['datasets'][0]['files']) == 8
 
 
 @pytest.mark.parametrize('query', [
@@ -93,7 +94,7 @@ def test_lab_browse_metadata_has_columns_and_processing_but_no_fake_download(cli
     assert lab['owner'] == 'Enci Cai'
     assert lab['processing_script'].endswith('/monthly_summary/lab_value_monthly_count.R')
     assert next(c['Meaning'] for c in lab['column_descriptions'] if c['Column'] == 'LAB_NAME') == 'Albumin, CRP, ESR, FCP, or Hemoglobin'
-    assert len(record['files']) == 3  # Existing fake files only; not a real lab-data endpoint.
+    assert len(record['files']) == 6  # Original count examples plus registry examples, no lab payload.
     assert client.get('/api/datasets/IBD/download/IBD_lab_monthly_summary.csv').status_code == 404
     assert client.get('/api/datasets/IBD/download/IBD_lab_monthly_summary.rds').status_code == 404
 

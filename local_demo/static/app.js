@@ -1,5 +1,5 @@
 const $ = selector => document.querySelector(selector);
-const state = {datasets: [], resources: [], category:'datasets', previous: [], pending: null, detail: null, busy: false};
+const state = {datasets: [], resources: [], category:'datasets', previous: [], pending: null, selection:null, detail: null, busy: false};
 
 function el(tag, text, cls) {
   const node = document.createElement(tag);
@@ -36,6 +36,15 @@ function datasetCard(dataset) {
 async function loadCatalog() {
   const data = await api('/api/inventory'); state.datasets = data.datasets;state.resources=data.resources;
   renderInventory();
+  const choices=await api('/api/comparison-options');
+  for(const [id,initial] of [['compare-first','MGB_AD'],['compare-second','UPMC_AD']]){
+    const select=$('#'+id),saved=select.value;select.replaceChildren();const groups=new Map();
+    for(const item of choices.options){
+      if(!groups.has(item.group)){const group=el('optgroup');group.label=item.group;groups.set(item.group,group);select.append(group);}
+      const option=el('option',item.label);option.value=item.id;groups.get(item.group).append(option);
+    }
+    select.value=saved||initial;
+  }
 }
 async function status() {
   try {
@@ -81,7 +90,7 @@ function table(columns, rows, cls = '') {
   const t = el('table', null, cls); const head = el('thead'); const tr = el('tr');
   columns.forEach(c => tr.append(el('th', c))); head.append(tr);
   const body = el('tbody');
-  rows.forEach(row => { const r = el('tr'); columns.forEach(c => r.append(el('td', row[c] === '' ? 'NA' : row[c]))); body.append(r); });
+  rows.forEach(row => { const r = el('tr'); columns.forEach(c => r.append(el('td', row[c] === '' && cls === 'preview-table' ? 'NA' : row[c]))); body.append(r); });
   t.append(head, body); wrap.append(t); return wrap;
 }
 function markdownDocument(text) {
@@ -172,7 +181,7 @@ function answerFile(section, file) {
   if (file.show_types && file.types?.length) card.append(el('p', `Types: ${file.types.join(', ')}`, 'note'));
   const links = el('div', null, 'resource-links'); const path = pathDisclosure(file);
   if (path) links.append(path);
-  if (file.dictionaries?.length || file.file) links.append(dictionaryDisclosure(file.dictionaries || []));
+  if (file.dictionaries?.length) links.append(dictionaryDisclosure(file.dictionaries));
   if (file.readme_kind) links.append(smallButton('Original README', () => openDocument(section.dataset.id, file.readme_kind)));
   card.append(links);
   if (file.file) {
@@ -212,7 +221,13 @@ function renderAnswer(result, box) {
   box.append(header);
   if (result.warning) box.append(el('p', result.warning, 'answer-warning'));
   box.append(el('p', result.intro || result.answer, 'answer-intro'));
-  renderResourceResults(result, box);
+  const comparisonDetails=result.comparison_table ? el('div') : box;
+  renderResourceResults(result, comparisonDetails);
+  if(result.comparison_table){
+    const grid=table(result.comparison_table.columns,result.comparison_table.rows,'comparison-table');
+    for(const cell of grid.querySelectorAll('td')){const value=cell.textContent;cell.replaceChildren();appendInline(cell,value);}
+    box.append(grid);
+  }
   if (result.comparison) {
     const summary = el('div', null, 'comparison-summary');
     for (const line of result.comparison.details) summary.append(markdownDocument(line));
@@ -223,6 +238,8 @@ function renderAnswer(result, box) {
     const actions = el('div', null, 'suggested-actions');
     for (const action of result.actions) actions.append(smallButton(action.label, () => {
       if (action.view === 'browse') show('browse');
+      else if (action.document?.dataset_id) openDocument(action.document.dataset_id,action.document.kind);
+      else if (action.document?.resource_id) openResourceReadme(action.document.resource_id);
       else if (action.query) { $('#question').value = action.query; ask(action.query); }
     }));
     box.append(actions);
@@ -256,10 +273,11 @@ function renderAnswer(result, box) {
     } else links.append(smallButton('Original README', () => openDocument(section.dataset.id, 'original'), ''));
     if (result.intent === 'project') links.append(smallButton('Open full MAJOR IBD project README', () => openDocument(section.dataset.id, 'ibd_project'), ''));
     if (section.dataset.has_tracker) links.append(smallButton('Spreadsheet entry', () => openDocument(section.dataset.id, 'tracker'), ''));
-    block.append(links); box.append(block);
+    block.append(links); comparisonDetails.append(block);
   }
+  if(result.comparison_table)box.append(disclosure('File locations and original READMEs',comparisonDetails));
 }
-async function ask(query) {
+async function ask(query, comparisonRequest=null) {
   if (state.busy || !query.trim()) return;
   show('ask'); state.busy = true; $('#ask-button').disabled = true; $('#ask-button').textContent = 'Searching…';
   $('#initial-catalog').hidden = true;
@@ -268,10 +286,11 @@ async function ask(query) {
   $('#conversation').append(user, box);
   box.scrollIntoView({behavior:'smooth', block:'start'});
   try {
-    const result = await api('/api/chat', {method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({query, previous_dataset_ids:state.previous, pending_topic:state.pending, use_llm:true})});
+    const result = await api(comparisonRequest?'/api/compare':'/api/chat', {method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(comparisonRequest||{query, previous_dataset_ids:state.previous, pending_topic:state.pending, selection:state.selection, use_llm:true})});
     state.previous = result.context_dataset_ids ?? result.datasets.map(s => s.dataset.id);
     state.pending = result.pending_topic || null;
+    state.selection = result.selection || null;
     renderAnswer(result, box); await status();
   } catch(error) { box.replaceChildren(el('p', error.message, 'answer-warning')); }
   finally { state.busy = false; $('#ask-button').disabled = false; $('#ask-button').textContent = 'Search resources →'; }
@@ -280,6 +299,7 @@ function filesAndColumnsPanel(record) {
   const panel = el('div'), picker = el('div', null, 'file-picker'), area = el('div');
   const dictionaryDownload = link('Download full column dictionary', `/api/datasets/${record.dataset_id}/download/column_dictionary.csv`);
   function select(file) {
+    state.selection=record.file_selections?.[file.file] || {kind:'dataset',id:record.dataset_id};
     dictionaryDownload.hidden = false;
     [...picker.children].forEach(button => button.classList.toggle('active', button.dataset.file === file.file));
     const detail = record.file_details.find(item => item.file === file.file);
@@ -303,6 +323,7 @@ function filesAndColumnsPanel(record) {
     sampleRows(record.dataset_id, file, preview, true).finally(() => { more.disabled = false; });
   }
   function selectDocumented(file) {
+    state.selection=record.file_selections?.[file.id] || {kind:'dataset',id:record.dataset_id};
     dictionaryDownload.hidden = true;
     [...picker.children].forEach(button => button.classList.toggle('active', button.dataset.file === file.id));
     const card = el('div', null, 'panel-box'), heading = el('div', null, 'file-heading');
@@ -314,7 +335,7 @@ function filesAndColumnsPanel(record) {
     card.append(pathDisclosure(file));
     if (file.column_descriptions?.length) card.append(el('h4', 'Column explanations'), table(['Column','Meaning'], file.column_descriptions, 'field-table'));
     if (file.processing_script) card.append(disclosure('Processing script', el('code', file.processing_script, 'source-location')));
-    if (file.topic_id) {
+    if (file.topic_id && file.link_target) {
       const target = file.link_target ? ` with ${file.link_target}` : '';
       card.append(smallButton('How to link' + target, () => ask(`How do I link ${file.name.split(' — ')[0]}${target}?`)));
     }
@@ -326,6 +347,7 @@ function filesAndColumnsPanel(record) {
     const button = smallButton(detail.name, () => select(file), ''); button.dataset.file = file.file; picker.append(button);
   }
   for (const file of record.documented_files || []) {
+    if (record.files.some(f => f.file === file.file)) continue;
     const button = smallButton(file.name, () => selectDocumented(file), ''); button.dataset.file = file.id; picker.append(button);
   }
   panel.append(picker, area, dictionaryDownload);
@@ -370,7 +392,7 @@ function dictionariesPanel(record) {
 async function openDataset(id) {
   try {
     const record = await api(`/api/datasets/${id}`); state.category='datasets';renderInventory();state.detail = record;
-    state.previous = [id]; state.pending = null; show('detail');
+    state.previous = [id]; state.pending = null; state.selection={kind:'dataset',id}; show('detail');
     const node = $('#detail-view'); node.replaceChildren();
     node.append(smallButton('← Back to datasets', () => show('browse'), 'back-button'));
     const heading = el('div', null, 'page-heading');
@@ -387,11 +409,17 @@ async function openDataset(id) {
   } catch(error) { toast(error.message); }
 }
 $('#question-form').addEventListener('submit', event => {event.preventDefault(); ask($('#question').value);});
+$('#comparison-form').addEventListener('submit',event=>{
+  event.preventDefault();const first=$('#compare-first'),second=$('#compare-second'),field=$('#compare-field');
+  if(first.value===second.value){toast('Choose two different items.');return;}
+  ask(`Compare ${first.selectedOptions[0].textContent} and ${second.selectedOptions[0].textContent} — ${field.selectedOptions[0].textContent}`,
+      {entity_ids:[first.value,second.value],field:field.value});
+});
 $('#question').addEventListener('keydown', event => {if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {event.preventDefault();ask(event.target.value);}});
 document.querySelectorAll('[data-query]').forEach(button => button.addEventListener('click', () => {$('#question').value = button.dataset.query; ask(button.dataset.query);}));
 $('#nav-ask').addEventListener('click', () => show('ask'));
 $('#new-chat').addEventListener('click', () => {
-  state.previous=[];state.pending=null;$('#conversation').replaceChildren();
+  state.previous=[];state.pending=null;state.selection=null;$('#conversation').replaceChildren();
   $('#initial-catalog').hidden=false;$('#question').value='';show('ask');$('#question').focus();
 });
 $('#nav-browse').addEventListener('click', () => show('browse'));

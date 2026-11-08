@@ -8,6 +8,7 @@ from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
+from typing import Literal
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from .agent import Agent
@@ -127,12 +128,16 @@ def datasets(request: Request, q: str = ""):
 @app.get("/api/datasets/{dataset_id}")
 def detail(dataset_id: str, request: Request):
     r = record(request, dataset_id)
+    from .single_files import file_inventory
+    file_selections={key:{'kind':'file','id':item['id']} for item in file_inventory(request.app.state.catalog)
+                     if item['clinical'] and item['parent']==dataset_id
+                     for key in [item['card'].get('file'),item['card'].get('id')] if key}
     return {**r, "documents": [
         {"kind": "notes", "label": "Dataset notes", "url": f"/api/datasets/{dataset_id}/readme/notes"},
         {"kind": "synthetic", "label": "How the fake data were made", "url": f"/api/datasets/{dataset_id}/readme/synthetic"},
         *r.get('original_documents', []),
         *([{"kind":"tracker", "label":"Spreadsheet entry", "url":f"/api/datasets/{dataset_id}/readme/tracker"}] if r.get('tracker_source') else [])],
-        "synthetic_only": True, "file_details": file_views(r, '', 'browse')}
+        "synthetic_only": True, "file_details": file_views(r, '', 'browse'), 'file_selections':file_selections}
 
 
 @app.get("/api/datasets/{dataset_id}/readme/{kind}")
@@ -165,7 +170,7 @@ def preview(dataset_id: str, filename: str, request: Request, limit: int = Query
     registered = next((f for f in r["files"] if f["file"] == filename), None)
     if not registered: raise HTTPException(404, "Only registered synthetic data files can be previewed")
     path = request.app.state.catalog.downloadable(dataset_id, filename)
-    with path.open(encoding="utf-8", newline="") as handle:
+    with path.open(encoding="utf-8-sig", newline="") as handle:
         reader = csv.DictReader(handle)
         rows = []
         for row in reader:
@@ -193,11 +198,56 @@ def download(dataset_id: str, filename: str, request: Request):
     return FileResponse(path, filename=filename)
 
 
+class Selection(BaseModel):
+    kind: Literal['file','dataset','resource','topic','choices','comparison']
+    id: str | None = Field(default=None,max_length=160)
+    ids: list[str] = Field(default_factory=list,max_length=19)
+    view: str | None = Field(default=None,max_length=40)
+    levels: list[Literal['raw','daily','monthly']] = Field(default_factory=list,max_length=3)
+    data_kinds: list[Literal['codified','nlp']] = Field(default_factory=list,max_length=2)
+
+
 class Question(BaseModel):
     query: str = Field(min_length=1, max_length=1500)
-    previous_dataset_ids: list[str] = Field(default_factory=list, max_length=3)
+    previous_dataset_ids: list[str] = Field(default_factory=list, max_length=19)
     use_llm: bool = True
     pending_topic: str | None = Field(default=None, max_length=80)
+    selection: Selection | None = None
+
+
+class ComparisonRequest(BaseModel):
+    entity_ids: list[str] = Field(min_length=2,max_length=4)
+    field: Literal['overview','columns','location','counts','dates','access','code'] = 'overview'
+
+
+@app.get('/api/comparison-options')
+def comparison_options(request: Request):
+    from .compare_resources import entities
+    options=[]
+    for e in entities(request.app.state.catalog).values():
+        label=e['name'];group='Datasets and resources'
+        if e['kind']=='file':
+            item=e['item'];group=item['label']+' — files and folders';label=item['name']
+            location=item.get('card',{}).get('location') or item.get('location') or ''
+            parts=location.replace('\\','/').rstrip('/').rsplit('/',2)
+            if len(parts)>1: label+=' — '+parts[-2]
+        options.append({'id':e['id'],'label':label,'group':group})
+    return {'options':options}
+
+
+@app.post('/api/compare')
+def compare_from_selection(body: ComparisonRequest, request: Request):
+    from .compare_resources import entities,comparison_answer
+    catalog=request.app.state.catalog
+    index=entities(catalog)
+    if len(set(body.entity_ids))!=len(body.entity_ids): raise HTTPException(422,'Choose different comparison targets')
+    if any(key not in index for key in body.entity_ids): raise HTTPException(422,'Unknown comparison target')
+    query={'overview':'Tell me more','columns':'What about the columns?','location':'What about storage?',
+           'counts':'What about patient counts?','dates':'What about dates?','access':'What about access?',
+           'code':'What about code?'}[body.field]
+    result=comparison_answer(catalog,query,{'kind':'comparison','ids':body.entity_ids})
+    result['query']='Compare '+' and '.join(index[key]['name'] for key in body.entity_ids)
+    return result
 
 
 @app.post("/api/chat")
@@ -210,13 +260,24 @@ async def chat(question: Question, request: Request):
         # Chat can remain source-only during setup; no paid calls until both switches are on.
         use_llm = question.use_llm and bool(agent.cloud and agent.cloud.ready)
         async with request.app.state.chat_limits.slot():
-            result = await agent.answer(query, question.previous_dataset_ids, use_llm, question.pending_topic)
+            result = await agent.answer(query, question.previous_dataset_ids, use_llm, question.pending_topic,
+                                        question.selection.model_dump(exclude_none=True) if question.selection else None)
         if result.get('engine') == 'local_llm':
             result['engine'] = 'hosted_llm'
         if question.use_llm and not use_llm:
             result['warning'] = 'Hosted chat is paused. This answer uses saved documentation; you can also browse datasets.'
         return result
-    return await agent.answer(query, question.previous_dataset_ids, question.use_llm, question.pending_topic)
+    return await agent.answer(query, question.previous_dataset_ids, question.use_llm, question.pending_topic,
+                              question.selection.model_dump(exclude_none=True) if question.selection else None)
+
+
+@app.post('/api/lookup')
+async def documentation_lookup(question: Question, request: Request):
+    """Read-only documentation lookup; this endpoint never invokes a model."""
+    query=question.query.strip()
+    if not query: raise HTTPException(422,'Enter a question')
+    return await request.app.state.agent.answer(query,question.previous_dataset_ids,False,question.pending_topic,
+        question.selection.model_dump(exclude_none=True) if question.selection else None)
 
 
 @app.post("/api/catalog/reload")

@@ -21,6 +21,9 @@ from .document_stats import date_view
 from .comparison import comparison_summary
 from .readme_resources import is_lab_query, is_project_query, lab_answer_facts, project_answer_facts
 from .readme_topics import topic_answer
+from .single_files import single_file_answer
+from .exploration import infer_selection,resolve_exploration,valid_selection
+from .compare_resources import comparison_answer
 from .hosting import provider
 from .hosted import CloudflareModel, MODEL as CLOUD_MODEL
 
@@ -43,7 +46,9 @@ and flag missing required information. Absence in documentation does not establi
 Monthly laboratory summaries and code/concept counts are different resources. Use lab-specific evidence for lab questions.
 The MAJOR IBD README documents previous project analyses, cohorts and five aims. Select project evidence for those
 questions, not the synthetic examples. Reported project findings are documentation, not a new analysis or treatment advice.
-Microbiome availability is not documented. Synthetic examples are not evidence of real cohort size,
+IBD PRISM genetic and microbiome scores and Biobank PRS fields are documented separately from EHR counts.
+These scores do not establish availability of raw microbiome sequencing or taxon-abundance data.
+Synthetic examples are not evidence of real cohort size,
 coverage, distributions or clinical code meanings. Do not invent any facts or identifiers.
 Your output is a selection plan only; the server renders the actual source text.
 """
@@ -171,7 +176,24 @@ class Agent:
             chosen[dataset_id] = ids
         return chosen
 
-    async def answer(self, query, previous=None, use_llm=True, pending_topic=None):
+    async def answer(self, query, previous=None, use_llm=True, pending_topic=None, selection=None):
+        compared=comparison_answer(self.catalog,query,selection,previous)
+        if compared is not None:
+            self.last_result={'engine':'catalog','error':None}
+            return compared
+        focused,rewritten,focus=resolve_exploration(self.catalog,query,selection,previous)
+        if focused is not None:
+            if 'selection' not in focused:
+                focused['selection']=infer_selection(self.catalog,focused,query)
+            return focused
+        result=await self._answer(rewritten or query,previous,use_llm,pending_topic)
+        result['query']=query
+        result['selection']=focus or infer_selection(self.catalog,result,rewritten or query)
+        if result.get('intent') in {'greeting','thanks'}:
+            result['selection']=valid_selection(self.catalog,selection) or result['selection']
+        return result
+
+    async def _answer(self, query, previous=None, use_llm=True, pending_topic=None):
         started = time.monotonic()
         if re.search(r'download|export|see|show|view', query, re.I) and re.search(r'real (?:patient |clinical )?(?:data|records|notes)|actual patient',query,re.I):
             intro='This website provides documentation and clearly labeled fake examples. Real patient data must be accessed through the documented source platform with the required permission.'
@@ -179,10 +201,20 @@ class Agent:
                     'intro':intro,'answer':intro,'datasets':[],'resources':[],'sources':[],
                     'context_dataset_ids':previous or [],'pending_topic':None,'warning':None,'compact':True,
                     'actions':[{'label':'Browse resources','view':'browse'}],'elapsed_seconds':0}
+        # An explicit path or a duplicated filename needs resolution before a
+        # project-topic shortcut can silently choose another file version.
+        early_file=single_file_answer(self.catalog,query,previous or [])
+        if early_file and (early_file.get('interpretation')=='ambiguous_file' or re.search(r'/n/|//SMB|\\\\',query,re.I)):
+            self.last_result={'engine':'catalog','error':None}
+            return early_file
         documented_topic = topic_answer(self.catalog, query, previous or [])
         if documented_topic is not None:
             self.last_result = {'engine':'catalog', 'error':None}
             return documented_topic
+        file_result=early_file
+        if file_result is not None:
+            self.last_result={'engine':'catalog','error':None}
+            return file_result
         resource_result = await self.catalog.library.maybe_answer(
             query, previous or [], self.catalog, self.structured, use_llm, self.model)
         if resource_result is not None:

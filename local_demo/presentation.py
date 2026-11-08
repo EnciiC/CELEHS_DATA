@@ -45,6 +45,11 @@ def file_views(record, query, purpose):
     files = [f for f in record["files"] if matches(f["file"], level, kinds)]
     result = []
     for file in files:
+        documented = next((f for f in record.get('documented_files',[]) if f.get('file')==file['file']), None)
+        if documented:
+            result.append({**documented, 'show_columns':purpose in {'columns','preview'},
+                           'show_preview':purpose=='preview','show_types':False})
+            continue
         resource = next((r for r in record["resources"] if file.get("source_path") and r.get("location") == file["source_path"]), None)
         if resource is None:
             is_nlp = "nlp" in file["file"].lower()
@@ -70,9 +75,10 @@ def location_views(record, query):
     if is_lab_query(query) and record.get('documented_files'):
         return [item for item in record['documented_files'] if item.get('readme_kind') == 'ibd_lab']
     # A general location question offers raw, daily and monthly folders by name.
+    documented = {f['name']:f for f in record.get('documented_files',[])}
     return [{"name": r["name"], "location": r.get("location"),
              "alternative_location": r.get("alternative_location"), "columns": [],
-             "dictionaries": dictionaries_for(record, r["name"]), "show_columns": False}
+             "dictionaries": [] if r['name'] in documented else dictionaries_for(record, r["name"]), "show_columns": False}
             for r in record["resources"] if "dictionary" not in r["kind"].lower()
             and "script" not in r["kind"].lower() and matches(r["name"], level, kinds)]
 

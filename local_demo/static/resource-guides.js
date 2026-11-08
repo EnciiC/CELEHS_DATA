@@ -109,6 +109,10 @@ async function openResourceReadme(id) {
 }
 function resourceFollowups(resource) {
   const actions = el('div', null, 'resource-followups');
+  if(resource.selected_file_name){
+    actions.append(smallButton('Original README',()=>openResourceReadme(resource.id),''));
+    return actions;
+  }
   for (const [label, question] of [
     ['How to start', `How do I get started with ${resource.label}?`],
     ['Files and contents', `What files are included in ${resource.label}?`],
@@ -140,7 +144,7 @@ function renderResourceResults(result, box) {
 }
 async function openResource(id) {
   try {
-    const record = await api(`/api/resources/${id}`); state.category=record.category;renderInventory();state.detail=record;state.previous=[id];state.pending=null;show('detail');
+    const record = await api(`/api/resources/${id}`); state.category=record.category;renderInventory();state.detail=record;state.previous=[id];state.pending=null;state.selection={kind:'resource',id};show('detail');
     const node = $('#detail-view'); node.replaceChildren(smallButton('← Back to resources', () => show('browse'), 'back-button'));
     const heading = el('div', null, 'page-heading');
     heading.append(el('span',resourceCategoryLabel(record.category).toUpperCase(),'eyebrow'),

@@ -1,0 +1,65 @@
+{
+  "id": "mgh_treatment_response",
+  "name": "MGH treatment-response registry",
+  "source_file": "MGH_data-LLM_project__EMPI_and_patientnum.xlsx",
+  "columns": [
+    "Patient_num",
+    "Index treatment (IL23 vs JAK)",
+    "Date of Start index treatment",
+    "Findings on baseline endoscopy (within 6 months prior to start)",
+    "clinical response at 3 months",
+    "clinical response at 12 months",
+    "endoscopic severity at first endoscopy after therapy start",
+    "Date of scope"
+  ],
+  "definitions": [
+    {
+      "Column": "Patient_num",
+      "Meaning": "Patient identifier; retain the capital P in Patient_num.",
+      "Type": "Identifier"
+    },
+    {
+      "Column": "Index treatment (IL23 vs JAK)",
+      "Meaning": "Index treatment: Risankizumab, Tofacitinib or Upadacitinib.",
+      "Type": "Category"
+    },
+    {
+      "Column": "Date of Start index treatment",
+      "Meaning": "Index-treatment start date, yyyy-mm-dd.",
+      "Type": "Date"
+    },
+    {
+      "Column": "Findings on baseline endoscopy (within 6 months prior to start)",
+      "Meaning": "Baseline endoscopy findings within six months before treatment: Mild, Moderate to severe or Normal.",
+      "Type": "Category"
+    },
+    {
+      "Column": "clinical response at 3 months",
+      "Meaning": "Three-month response: Clinical remission, No response or Partial clinical response.",
+      "Type": "Category"
+    },
+    {
+      "Column": "clinical response at 12 months",
+      "Meaning": "Twelve-month response, using the same three supplied categories. Separate 12-month frequencies were not supplied.",
+      "Type": "Category"
+    },
+    {
+      "Column": "endoscopic severity at first endoscopy after therapy start",
+      "Meaning": "Severity at the first endoscopy after therapy begins: Mild, Moderate to severe or Normal.",
+      "Type": "Category"
+    },
+    {
+      "Column": "Date of scope",
+      "Meaning": "Scope date, yyyy-mm-dd.",
+      "Type": "Date"
+    }
+  ],
+  "purpose": "Index treatment and treatment-start date, baseline endoscopy, clinical response at 3 and 12 months, and post-treatment endoscopy.",
+  "fake_file": "MGH_data-LLM_project__EMPI_and_patientnum_fake_data.csv",
+  "source_path": "//SMBgpa.partners.org/asw_mgb$/SHARE/Registry_data_by_Ashwin/MGH_data-LLM_project__EMPI_and_patientnum.xlsx",
+  "blank_demo_columns": [],
+  "synthetic": true,
+  "synthetic_rows": 100,
+  "seed": 20261108,
+  "description_source": "Enci supplied names and frequency tables on 2026-11-08"
+}

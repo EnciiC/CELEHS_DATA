@@ -1,0 +1,101 @@
+﻿patient_num,dx,cdageatdiagnosisa,cdlocationlpriortofirstsurgery,cdbehaviorb,ucextente,dateofendoscopy,sescd,modifiedbaronsscore,hbi,sccai
+SYN_REG_ENDO_000001,CD,A3 (Over 40 years),L3 (Ileocolon),B1 (Inflammatory disease),N/A,2021-09-02,0,,13,
+SYN_REG_ENDO_000002,UC,N/A,N/A,N/A,E1 (Ulcerative proctitis),2022-05-19,,,,1
+SYN_REG_ENDO_000003,CD,A1 (16 years or younger),L3 (Ileocolon),B3 (Penetrating disease),N/A,2022-08-14,0,,13,
+SYN_REG_ENDO_000004,UC,N/A,N/A,N/A,E3 (Extensive UC / Pancolitis),2022-05-20,,,,5
+SYN_REG_ENDO_000005,CD,A1 (16 years or younger),L3 (Ileocolon),N/A,N/A,2021-01-11,,,15,
+SYN_REG_ENDO_000006,UC,N/A,N/A,N/A,E3 (Extensive UC / Pancolitis),2020-07-16,,,,7
+SYN_REG_ENDO_000007,CD,A2 (17 to 40 years),L3 (Ileocolon),N/A,N/A,2024-12-12,0,,11,
+SYN_REG_ENDO_000008,UC,N/A,N/A,N/A,E1 (Ulcerative proctitis),2022-10-13,,,,2
+SYN_REG_ENDO_000009,CD,A3 (Over 40 years),L2 (Colon),B3p (Penetrating and perianal disease),N/A,2024-09-22,21,,0,
+SYN_REG_ENDO_000010,UC,N/A,N/A,N/A,E3 (Extensive UC / Pancolitis),2024-01-21,,,,12
+SYN_REG_ENDO_000011,CD,A1 (16 years or younger),L2 (Colon),B2 (Stricturing disease),N/A,2021-11-09,0,,14,
+SYN_REG_ENDO_000012,UC,N/A,N/A,N/A,E2 (Left-sided UC),2020-01-08,,,,8
+SYN_REG_ENDO_000013,CD,A1 (16 years or younger),L2 (Colon),B3 (Penetrating disease),N/A,2024-09-17,0,,,
+SYN_REG_ENDO_000014,UC,N/A,N/A,N/A,E2 (Left-sided UC),2021-07-05,,,,11
+SYN_REG_ENDO_000015,CD,A2 (17 to 40 years),L3 (Ileocolon),B1 (Inflammatory disease),N/A,2024-06-08,0,,,
+SYN_REG_ENDO_000016,UC,N/A,N/A,N/A,E3 (Extensive UC / Pancolitis),2021-04-17,,,,10
+SYN_REG_ENDO_000017,CD,A3 (Over 40 years),L3 (Ileocolon),B3 (Penetrating disease),N/A,2023-06-08,,,6,
+SYN_REG_ENDO_000018,UC,N/A,N/A,N/A,E2 (Left-sided UC),2021-02-22,,,,3
+SYN_REG_ENDO_000019,CD,A2 (17 to 40 years),L1 (Ileum),N/A,N/A,2023-06-21,0,,,
+SYN_REG_ENDO_000020,UC,N/A,N/A,N/A,E3 (Extensive UC / Pancolitis),2024-09-27,,,,5
+SYN_REG_ENDO_000021,CD,A2 (17 to 40 years),L1 + L4 (Ileum and Upper GI),B1 (Inflammatory disease),N/A,2022-02-12,0,,0,
+SYN_REG_ENDO_000022,UC,N/A,N/A,N/A,E3 (Extensive UC / Pancolitis),2021-06-12,,,,2
+SYN_REG_ENDO_000023,CD,A1 (16 years or younger),L3 (Ileocolon),B2 (Stricturing disease),N/A,2023-05-23,17,,16,
+SYN_REG_ENDO_000024,UC,N/A,N/A,N/A,E3 (Extensive UC / Pancolitis),2021-09-05,,,,
+SYN_REG_ENDO_000025,CD,A1 (16 years or younger),L3 (Ileocolon),N/A,N/A,2022-07-16,0,,,
+SYN_REG_ENDO_000026,UC,N/A,N/A,N/A,E3 (Extensive UC / Pancolitis),2023-04-13,,,,7
+SYN_REG_ENDO_000027,CD,A2 (17 to 40 years),L3 (Ileocolon),N/A,N/A,2022-06-04,0,,6,
+SYN_REG_ENDO_000028,UC,N/A,N/A,N/A,E3 (Extensive UC / Pancolitis),2022-11-10,,,,6
+SYN_REG_ENDO_000029,CD,A2 (17 to 40 years),N/A,N/A,N/A,2020-11-19,0,,3,
+SYN_REG_ENDO_000030,UC,N/A,N/A,N/A,E1 (Ulcerative proctitis),2024-03-17,,,,10
+SYN_REG_ENDO_000031,CD,A1 (16 years or younger),N/A,N/A,N/A,2021-05-25,0,,12,
+SYN_REG_ENDO_000032,UC,N/A,N/A,N/A,E1 (Ulcerative proctitis),2020-10-04,,,,1
+SYN_REG_ENDO_000033,CD,A2 (17 to 40 years),L2 + L4 (Colon and upper GI),N/A,N/A,2024-09-09,0,,15,
+SYN_REG_ENDO_000034,UC,N/A,N/A,N/A,E3 (Extensive UC / Pancolitis),2021-10-14,,,,2
+SYN_REG_ENDO_000035,CD,A1 (16 years or younger),L2 (Colon),B1 (Inflammatory disease),N/A,2020-10-30,,,,
+SYN_REG_ENDO_000036,UC,N/A,N/A,N/A,E1 (Ulcerative proctitis),2023-12-27,,,,5
+SYN_REG_ENDO_000037,CD,A2 (17 to 40 years),N/A,N/A,N/A,2022-03-03,0,,9,
+SYN_REG_ENDO_000038,UC,N/A,N/A,N/A,E3 (Extensive UC / Pancolitis),2021-08-28,,,,12
+SYN_REG_ENDO_000039,CD,A1 (16 years or younger),L3 + L4 (Ileocolon and Upper GI),B3 (Penetrating disease),N/A,2021-04-25,0,,0,
+SYN_REG_ENDO_000040,UC,N/A,N/A,N/A,E3 (Extensive UC / Pancolitis),2023-01-01,,,,10
+SYN_REG_ENDO_000041,CD,A2 (17 to 40 years),L3 (Ileocolon),N/A,N/A,2022-11-06,0,,9,
+SYN_REG_ENDO_000042,UC,N/A,N/A,N/A,E1 (Ulcerative proctitis),2020-01-01,,,,9
+SYN_REG_ENDO_000043,CD,A1 (16 years or younger),N/A,B1 (Inflammatory disease),N/A,2023-05-29,17,,15,
+SYN_REG_ENDO_000044,UC,N/A,N/A,N/A,E3 (Extensive UC / Pancolitis),2023-01-09,,,,5
+SYN_REG_ENDO_000045,CD,A1 (16 years or younger),L3 (Ileocolon),B1 (Inflammatory disease),N/A,2022-01-09,15,,4,
+SYN_REG_ENDO_000046,UC,N/A,N/A,N/A,E3 (Extensive UC / Pancolitis),2024-01-08,,,,11
+SYN_REG_ENDO_000047,CD,A2 (17 to 40 years),L3 (Ileocolon),B1 (Inflammatory disease),N/A,2021-02-12,10,,15,
+SYN_REG_ENDO_000048,UC,N/A,N/A,N/A,E2 (Left-sided UC),2022-10-21,,,,0
+SYN_REG_ENDO_000049,CD,A2 (17 to 40 years),L3 (Ileocolon),N/A,N/A,2024-06-07,0,,3,
+SYN_REG_ENDO_000050,UC,N/A,N/A,N/A,E2 (Left-sided UC),2021-05-13,,,,11
+SYN_REG_ENDO_000051,CD,A2 (17 to 40 years),N/A,N/A,N/A,2023-10-01,21,,0,
+SYN_REG_ENDO_000052,UC,N/A,N/A,N/A,E2 (Left-sided UC),2020-08-25,,,,
+SYN_REG_ENDO_000053,CD,A2 (17 to 40 years),N/A,N/A,N/A,2020-12-17,0,,2,
+SYN_REG_ENDO_000054,UC,N/A,N/A,N/A,E3 (Extensive UC / Pancolitis),2020-07-06,,,,3
+SYN_REG_ENDO_000055,CD,A1 (16 years or younger),L3 (Ileocolon),N/A,N/A,2020-07-10,0,,0,
+SYN_REG_ENDO_000056,UC,N/A,N/A,N/A,E3 (Extensive UC / Pancolitis),2022-05-07,,,,0
+SYN_REG_ENDO_000057,CD,A3 (Over 40 years),L3 (Ileocolon),B1 (Inflammatory disease),N/A,2023-07-06,22,,,
+SYN_REG_ENDO_000058,UC,N/A,N/A,N/A,E3 (Extensive UC / Pancolitis),2020-12-23,,,,8
+SYN_REG_ENDO_000059,CD,A2 (17 to 40 years),L1 (Ileum),B2p (Stricturing and perianal disease),N/A,2022-12-04,4,,2,
+SYN_REG_ENDO_000060,UC,N/A,N/A,N/A,E2 (Left-sided UC),2023-01-08,,,,1
+SYN_REG_ENDO_000061,CD,A2 (17 to 40 years),L3 (Ileocolon),N/A,N/A,2024-01-07,10,,5,
+SYN_REG_ENDO_000062,UC,N/A,N/A,N/A,E3 (Extensive UC / Pancolitis),2021-04-16,,,,3
+SYN_REG_ENDO_000063,CD,A1 (16 years or younger),L3 (Ileocolon),B3p (Penetrating and perianal disease),N/A,2024-10-30,0,,,
+SYN_REG_ENDO_000064,UC,N/A,N/A,N/A,E2 (Left-sided UC),2024-04-19,,,,11
+SYN_REG_ENDO_000065,CD,A2 (17 to 40 years),N/A,N/A,N/A,2022-11-16,0,,6,
+SYN_REG_ENDO_000066,UC,N/A,N/A,N/A,E3 (Extensive UC / Pancolitis),2020-11-12,,,,9
+SYN_REG_ENDO_000067,CD,A2 (17 to 40 years),N/A,B3p (Penetrating and perianal disease),N/A,2020-12-08,13,,14,
+SYN_REG_ENDO_000068,UC,N/A,N/A,N/A,E2 (Left-sided UC),2022-04-16,,,,3
+SYN_REG_ENDO_000069,CD,A1 (16 years or younger),N/A,B1 (Inflammatory disease),N/A,2022-12-07,0,,,
+SYN_REG_ENDO_000070,UC,N/A,N/A,N/A,E3 (Extensive UC / Pancolitis),2024-03-07,,,,
+SYN_REG_ENDO_000071,CD,A1 (16 years or younger),N/A,B2 (Stricturing disease),N/A,2022-10-18,0,,10,
+SYN_REG_ENDO_000072,UC,N/A,N/A,N/A,E2 (Left-sided UC),2020-11-15,,,,1
+SYN_REG_ENDO_000073,CD,A3 (Over 40 years),N/A,N/A,N/A,2021-01-02,0,,,
+SYN_REG_ENDO_000074,UC,N/A,N/A,N/A,E2 (Left-sided UC),2021-07-14,,,,3
+SYN_REG_ENDO_000075,CD,A2 (17 to 40 years),L1 (Ileum),N/A,N/A,2021-12-01,4,,0,
+SYN_REG_ENDO_000076,UC,N/A,N/A,N/A,E2 (Left-sided UC),2020-12-18,,,,5
+SYN_REG_ENDO_000077,CD,A2 (17 to 40 years),N/A,N/A,N/A,2024-10-30,2,,17,
+SYN_REG_ENDO_000078,UC,N/A,N/A,N/A,E2 (Left-sided UC),2023-11-12,,,,12
+SYN_REG_ENDO_000079,CD,A2 (17 to 40 years),L3 (Ileocolon),N/A,N/A,2024-05-03,0,,,
+SYN_REG_ENDO_000080,UC,N/A,N/A,N/A,E3 (Extensive UC / Pancolitis),2021-06-04,,,,8
+SYN_REG_ENDO_000081,CD,A2 (17 to 40 years),L3 (Ileocolon),N/A,N/A,2024-04-09,0,,19,
+SYN_REG_ENDO_000082,UC,N/A,N/A,N/A,E1 (Ulcerative proctitis),2024-07-09,,,,12
+SYN_REG_ENDO_000083,CD,A2 (17 to 40 years),N/A,N/A,N/A,2022-07-22,23,,3,
+SYN_REG_ENDO_000084,UC,N/A,N/A,N/A,E1 (Ulcerative proctitis),2023-02-04,,,,1
+SYN_REG_ENDO_000085,CD,A2 (17 to 40 years),L2 (Colon),B2 (Stricturing disease),N/A,2023-12-19,3,,3,
+SYN_REG_ENDO_000086,UC,N/A,N/A,N/A,E3 (Extensive UC / Pancolitis),2023-07-24,,,,2
+SYN_REG_ENDO_000087,CD,A3 (Over 40 years),N/A,N/A,N/A,2023-02-16,0,,,
+SYN_REG_ENDO_000088,UC,N/A,N/A,N/A,E1 (Ulcerative proctitis),2021-05-31,,,,2
+SYN_REG_ENDO_000089,CD,A3 (Over 40 years),L3 (Ileocolon),B1 (Inflammatory disease),N/A,2023-06-20,0,,16,
+SYN_REG_ENDO_000090,UC,N/A,N/A,N/A,E1 (Ulcerative proctitis),2022-02-18,,,,6
+SYN_REG_ENDO_000091,CD,A1 (16 years or younger),N/A,B1 (Inflammatory disease),N/A,2023-04-10,0,,18,
+SYN_REG_ENDO_000092,UC,N/A,N/A,N/A,E3 (Extensive UC / Pancolitis),2024-08-07,,,,11
+SYN_REG_ENDO_000093,CD,A1 (16 years or younger),N/A,B2 (Stricturing disease),N/A,2021-08-07,0,,11,
+SYN_REG_ENDO_000094,UC,N/A,N/A,N/A,E3 (Extensive UC / Pancolitis),2020-12-17,,,,10
+SYN_REG_ENDO_000095,CD,A1 (16 years or younger),N/A,B2 (Stricturing disease),N/A,2023-08-17,0,,3,
+SYN_REG_ENDO_000096,UC,N/A,N/A,N/A,E3 (Extensive UC / Pancolitis),2021-10-15,,,,1
+SYN_REG_ENDO_000097,CD,A2 (17 to 40 years),N/A,N/A,N/A,2022-10-04,0,,19,
+SYN_REG_ENDO_000098,UC,N/A,N/A,N/A,E3 (Extensive UC / Pancolitis),2020-10-10,,,,12
+SYN_REG_ENDO_000099,CD,A2 (17 to 40 years),L3 (Ileocolon),N/A,N/A,2022-06-07,0,,13,
+SYN_REG_ENDO_000100,UC,N/A,N/A,N/A,E3 (Extensive UC / Pancolitis),2024-07-02,,,,1

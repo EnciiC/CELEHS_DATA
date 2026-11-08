@@ -1,0 +1,101 @@
+﻿Patient_num,Index treatment (IL23 vs JAK),Date of Start index treatment,Findings on baseline endoscopy (within 6 months prior to start),clinical response at 3 months,clinical response at 12 months,endoscopic severity at first endoscopy after therapy start,Date of scope
+SYN_REG_MGH_000001,Risankizumab,2020-12-04,Normal,No response,No response,,2021-04-13
+SYN_REG_MGH_000002,Risankizumab,2020-05-25,,No response,Partial clinical response,,2021-04-09
+SYN_REG_MGH_000003,Risankizumab,2023-09-12,Normal,No response,No response,Mild,2024-08-18
+SYN_REG_MGH_000004,Risankizumab,2023-12-29,Normal,No response,Partial clinical response,Normal,2024-12-09
+SYN_REG_MGH_000005,Risankizumab,2024-06-13,Moderate to severe,No response,Clinical remission,Mild,2025-04-07
+SYN_REG_MGH_000006,Risankizumab,2023-05-28,,No response,,Normal,2023-07-31
+SYN_REG_MGH_000007,Upadacitinib,2021-10-28,Normal,Clinical remission,Partial clinical response,,2022-06-06
+SYN_REG_MGH_000008,Upadacitinib,2021-10-20,,Partial clinical response,Partial clinical response,,2022-06-21
+SYN_REG_MGH_000009,Risankizumab,2020-09-05,Mild,No response,Partial clinical response,,2021-02-12
+SYN_REG_MGH_000010,Upadacitinib,2023-06-06,Normal,Clinical remission,No response,Moderate to severe,2024-03-29
+SYN_REG_MGH_000011,Risankizumab,2022-03-06,Moderate to severe,No response,Clinical remission,Moderate to severe,2023-01-30
+SYN_REG_MGH_000012,Risankizumab,2020-06-23,,Clinical remission,Clinical remission,Moderate to severe,2021-04-15
+SYN_REG_MGH_000013,Risankizumab,2022-01-07,Moderate to severe,Clinical remission,No response,Moderate to severe,2022-09-27
+SYN_REG_MGH_000014,Risankizumab,2023-11-17,Mild,No response,Clinical remission,Moderate to severe,2024-05-20
+SYN_REG_MGH_000015,Risankizumab,2024-11-26,Moderate to severe,No response,Partial clinical response,,2025-01-31
+SYN_REG_MGH_000016,Risankizumab,2021-01-31,Moderate to severe,No response,Partial clinical response,Normal,2022-01-08
+SYN_REG_MGH_000017,Tofacitinib,2020-06-05,,Clinical remission,Clinical remission,,2021-02-25
+SYN_REG_MGH_000018,Risankizumab,2024-09-14,Moderate to severe,No response,Partial clinical response,Normal,2025-06-19
+SYN_REG_MGH_000019,Upadacitinib,2022-03-14,Mild,Clinical remission,Clinical remission,Moderate to severe,2022-06-06
+SYN_REG_MGH_000020,Risankizumab,2023-06-10,Moderate to severe,No response,Partial clinical response,,2024-03-08
+SYN_REG_MGH_000021,Tofacitinib,2022-08-07,Mild,No response,,Normal,2023-03-31
+SYN_REG_MGH_000022,Risankizumab,2021-07-28,Moderate to severe,Partial clinical response,Clinical remission,Moderate to severe,2021-12-22
+SYN_REG_MGH_000023,Upadacitinib,2022-08-28,,Partial clinical response,Clinical remission,Mild,2023-06-27
+SYN_REG_MGH_000024,Tofacitinib,2024-07-02,Mild,Partial clinical response,Clinical remission,Moderate to severe,2025-05-26
+SYN_REG_MGH_000025,Risankizumab,2021-09-01,Moderate to severe,Partial clinical response,No response,Mild,2021-11-09
+SYN_REG_MGH_000026,Risankizumab,2024-04-06,,,Clinical remission,Normal,2024-07-08
+SYN_REG_MGH_000027,Risankizumab,2023-09-18,,Partial clinical response,Clinical remission,,2024-01-26
+SYN_REG_MGH_000028,Risankizumab,2021-12-08,Moderate to severe,Partial clinical response,Partial clinical response,Moderate to severe,2022-05-24
+SYN_REG_MGH_000029,Upadacitinib,2020-09-25,Moderate to severe,,No response,Moderate to severe,2021-03-06
+SYN_REG_MGH_000030,Risankizumab,2020-12-20,,Partial clinical response,Partial clinical response,Normal,2021-02-16
+SYN_REG_MGH_000031,Risankizumab,2020-11-26,,Partial clinical response,No response,Moderate to severe,2021-01-04
+SYN_REG_MGH_000032,Risankizumab,2024-10-14,Moderate to severe,Partial clinical response,No response,Mild,2024-12-16
+SYN_REG_MGH_000033,Risankizumab,2023-01-30,Moderate to severe,Partial clinical response,Clinical remission,,2023-12-15
+SYN_REG_MGH_000034,Upadacitinib,2024-08-21,Moderate to severe,,,,2025-02-18
+SYN_REG_MGH_000035,,2020-10-17,Moderate to severe,No response,Clinical remission,Moderate to severe,2021-05-27
+SYN_REG_MGH_000036,Upadacitinib,2021-09-15,Moderate to severe,Clinical remission,No response,Normal,2022-05-08
+SYN_REG_MGH_000037,Upadacitinib,2020-10-22,Moderate to severe,Partial clinical response,Clinical remission,Mild,2021-08-29
+SYN_REG_MGH_000038,Risankizumab,2021-04-08,,No response,Clinical remission,Moderate to severe,2021-05-18
+SYN_REG_MGH_000039,Risankizumab,2023-03-01,Normal,Partial clinical response,Clinical remission,Moderate to severe,2023-08-28
+SYN_REG_MGH_000040,Risankizumab,2024-12-17,Mild,No response,Clinical remission,Normal,2025-01-30
+SYN_REG_MGH_000041,Risankizumab,2020-06-04,Moderate to severe,No response,No response,Mild,2021-03-25
+SYN_REG_MGH_000042,Risankizumab,2024-07-07,Moderate to severe,No response,No response,Normal,2025-06-03
+SYN_REG_MGH_000043,Upadacitinib,2021-06-16,,Clinical remission,Partial clinical response,Moderate to severe,2021-12-03
+SYN_REG_MGH_000044,Risankizumab,2023-08-10,Moderate to severe,Clinical remission,No response,Moderate to severe,2023-10-21
+SYN_REG_MGH_000045,Risankizumab,2023-02-11,Moderate to severe,Partial clinical response,Partial clinical response,Moderate to severe,2024-01-16
+SYN_REG_MGH_000046,Risankizumab,2021-01-16,Normal,Partial clinical response,Clinical remission,Moderate to severe,2022-01-01
+SYN_REG_MGH_000047,Upadacitinib,2022-12-06,,Clinical remission,No response,Moderate to severe,2023-02-03
+SYN_REG_MGH_000048,Tofacitinib,2021-05-21,,Clinical remission,No response,Normal,2021-10-12
+SYN_REG_MGH_000049,Risankizumab,2024-11-18,Moderate to severe,No response,No response,Normal,2025-11-12
+SYN_REG_MGH_000050,Risankizumab,2024-05-13,Moderate to severe,Partial clinical response,,Moderate to severe,2024-08-24
+SYN_REG_MGH_000051,Risankizumab,2021-06-19,,Partial clinical response,,Normal,2022-05-03
+SYN_REG_MGH_000052,Risankizumab,2020-02-08,Moderate to severe,Clinical remission,Clinical remission,Normal,2021-01-23
+SYN_REG_MGH_000053,Risankizumab,2021-09-11,Mild,Clinical remission,,Moderate to severe,2022-05-15
+SYN_REG_MGH_000054,Risankizumab,2024-03-29,,Clinical remission,Partial clinical response,Mild,2025-02-06
+SYN_REG_MGH_000055,,2024-08-09,Moderate to severe,Partial clinical response,Clinical remission,Moderate to severe,2024-11-23
+SYN_REG_MGH_000056,Tofacitinib,2021-01-07,Moderate to severe,Clinical remission,No response,,2021-05-31
+SYN_REG_MGH_000057,Upadacitinib,2022-05-14,Normal,Partial clinical response,No response,,2023-04-01
+SYN_REG_MGH_000058,Upadacitinib,2020-06-28,,Clinical remission,No response,Mild,2020-08-15
+SYN_REG_MGH_000059,Risankizumab,2023-06-13,,Clinical remission,Clinical remission,Moderate to severe,2024-04-04
+SYN_REG_MGH_000060,Tofacitinib,2021-07-18,Moderate to severe,No response,,Moderate to severe,2021-12-20
+SYN_REG_MGH_000061,Risankizumab,2020-04-02,,No response,Clinical remission,Normal,2020-07-31
+SYN_REG_MGH_000062,Upadacitinib,2023-02-15,Mild,Clinical remission,Clinical remission,Normal,2023-04-08
+SYN_REG_MGH_000063,Tofacitinib,2022-07-05,,Partial clinical response,No response,,2023-02-09
+SYN_REG_MGH_000064,Tofacitinib,2024-07-28,,Partial clinical response,No response,Mild,2024-10-30
+SYN_REG_MGH_000065,Risankizumab,2020-11-24,,Partial clinical response,No response,,2020-12-24
+SYN_REG_MGH_000066,Upadacitinib,2023-07-09,Moderate to severe,No response,Clinical remission,Moderate to severe,2023-10-08
+SYN_REG_MGH_000067,Risankizumab,2022-12-28,,No response,No response,,2023-03-20
+SYN_REG_MGH_000068,Risankizumab,2022-09-19,Moderate to severe,No response,Clinical remission,,2022-12-10
+SYN_REG_MGH_000069,Tofacitinib,2022-03-13,Moderate to severe,Clinical remission,Partial clinical response,Moderate to severe,2023-03-06
+SYN_REG_MGH_000070,Upadacitinib,2024-11-25,Moderate to severe,No response,Partial clinical response,Mild,2025-03-01
+SYN_REG_MGH_000071,Risankizumab,2021-07-17,Moderate to severe,No response,,,2022-02-21
+SYN_REG_MGH_000072,Risankizumab,2022-11-29,,No response,Partial clinical response,,2023-09-19
+SYN_REG_MGH_000073,Risankizumab,2021-10-20,Moderate to severe,Partial clinical response,Clinical remission,Normal,2022-08-19
+SYN_REG_MGH_000074,Risankizumab,2020-02-24,,Clinical remission,Partial clinical response,,2021-01-03
+SYN_REG_MGH_000075,Upadacitinib,2024-12-19,Mild,Partial clinical response,Partial clinical response,Mild,2025-04-01
+SYN_REG_MGH_000076,Risankizumab,2022-05-12,,Clinical remission,Clinical remission,Normal,2023-02-19
+SYN_REG_MGH_000077,Upadacitinib,2023-03-07,Moderate to severe,No response,No response,Mild,2023-08-11
+SYN_REG_MGH_000078,Tofacitinib,2022-07-03,,No response,Clinical remission,Moderate to severe,2023-03-05
+SYN_REG_MGH_000079,Risankizumab,2020-10-19,,Clinical remission,Partial clinical response,Normal,2020-12-03
+SYN_REG_MGH_000080,Risankizumab,2022-05-11,,Partial clinical response,,Moderate to severe,2022-10-25
+SYN_REG_MGH_000081,Risankizumab,2024-12-29,,Partial clinical response,,Normal,2025-03-25
+SYN_REG_MGH_000082,Risankizumab,2023-11-04,Mild,Partial clinical response,Partial clinical response,Normal,2024-06-11
+SYN_REG_MGH_000083,Risankizumab,2022-01-16,Moderate to severe,,Clinical remission,Mild,2022-08-11
+SYN_REG_MGH_000084,Upadacitinib,2020-11-03,Moderate to severe,No response,,,2021-07-03
+SYN_REG_MGH_000085,Risankizumab,2024-05-24,Mild,Partial clinical response,,Mild,2024-07-13
+SYN_REG_MGH_000086,Risankizumab,2020-05-04,Moderate to severe,No response,,,2021-01-03
+SYN_REG_MGH_000087,Risankizumab,2022-12-31,Moderate to severe,No response,Partial clinical response,,2023-06-27
+SYN_REG_MGH_000088,Risankizumab,2021-01-12,,Partial clinical response,Clinical remission,Normal,2021-05-19
+SYN_REG_MGH_000089,Risankizumab,2020-06-13,,No response,No response,Moderate to severe,2021-01-06
+SYN_REG_MGH_000090,Risankizumab,2022-06-16,Moderate to severe,,Clinical remission,Normal,2022-08-02
+SYN_REG_MGH_000091,Risankizumab,2021-02-27,,Partial clinical response,Partial clinical response,Mild,2021-09-11
+SYN_REG_MGH_000092,Risankizumab,2020-04-21,Moderate to severe,Clinical remission,Clinical remission,Normal,2021-04-21
+SYN_REG_MGH_000093,Risankizumab,2021-05-29,Moderate to severe,Partial clinical response,Partial clinical response,Normal,2021-12-07
+SYN_REG_MGH_000094,Risankizumab,2021-04-16,Normal,No response,No response,Normal,2021-05-25
+SYN_REG_MGH_000095,Risankizumab,2020-06-15,,Partial clinical response,Clinical remission,,2021-03-26
+SYN_REG_MGH_000096,Risankizumab,2022-05-24,Mild,Clinical remission,Clinical remission,Mild,2022-07-10
+SYN_REG_MGH_000097,Risankizumab,2022-06-05,,No response,No response,,2022-12-19
+SYN_REG_MGH_000098,Risankizumab,2021-05-12,Moderate to severe,Partial clinical response,,Mild,2021-11-27
+SYN_REG_MGH_000099,Upadacitinib,2022-12-06,Moderate to severe,Partial clinical response,,Moderate to severe,2023-06-29
+SYN_REG_MGH_000100,Risankizumab,2022-01-12,Normal,No response,Partial clinical response,Moderate to severe,2022-04-11

@@ -27,7 +27,9 @@ Monthly count rows have a patient, month/year AND a code/concept key. There may 
 NEVER describe them as one row per patient per month without the code/concept key.
 Recognize paraphrases and synonyms of the DOCUMENTED diseases, but do not substitute unrelated cohorts.
 For a research request naming a documented cohort, retrieve it and leave undocumented requirements unconfirmed.
-For an EHR-and-gut-microbiome research request, IBD can be a possible EHR starting point, NOT confirmed microbiome data.
+For an EHR-and-gut-microbiome research request, IBD has documented PRISM genetic/microbiome scores
+and Biobank PRS fields. These are scores, not evidence of raw sequencing or taxon-abundance data.
+Confirm identifier mapping and cohort overlap before asserting these scores can be joined to EHR.
 Raw/daily UPMC AD files are documented; only monthly fake examples are prepared. Do not mark raw/daily files absent.
 IBD monthly laboratory summaries are documented separately from monthly code/concept counts.
 They contain lab values and measurement counts by patient, lab, unit, and calendar month; not just code occurrence counts.
@@ -144,5 +146,5 @@ def direct_document_request(query, records):
         documented.update(re.findall(r'[a-z0-9_]+', text.lower()))
     core -= {'mgb','upmc','data','dataset'}
     if not words.intersection(core): return False
-    operations = set('a an the i we you it its our this these those them their is are was were be do does have has had wanted want see show tell me please can could would should what which where how many now currently available availability stored storage on in at from for and or to of as with look looks like format structure sample samples rows row patient patients count counts calendar monthly daily raw codified nlp fake synthetic files file dataset datasets data columns column names name types type classes class size cohort total range dates date start end code codes meaning means find locate located location hosted saved copy copies exists exist there check confirm know time distribution minimum maximum min max median percentile percentiles quartile quartiles earliest latest 25 75 25th 75th spreadsheet tracker s'.split())
+    operations = set('a an the i we you it its our this these those them their is are was were be do does have has had wanted want see show tell me more about overview describe description information details please can could would should what which where how many now currently available availability stored storage on in at from for and or to of as with look looks like format structure sample samples rows row patient patients count counts calendar monthly daily raw codified nlp fake synthetic files file dataset datasets data columns column names name types type classes class size cohort total range dates date start end code codes meaning means find locate located location hosted saved copy copies exists exist there check confirm know time distribution minimum maximum min max median percentile percentiles quartile quartiles earliest latest 25 75 25th 75th spreadsheet tracker s'.split())
     return not (words - documented - operations)

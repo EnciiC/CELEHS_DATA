@@ -155,6 +155,586 @@
         }
       ],
       "row_meaning": "One synthetic patient, month, year, and CUI count."
+    },
+    {
+      "name": "endo score PRISM EMPI merged July 2025_deID_fake_data.csv",
+      "columns": [
+        {
+          "name": "patient_num",
+          "meaning": "Patient identifier in the registry file.",
+          "demo_type": "Identifier"
+        },
+        {
+          "name": "dx",
+          "meaning": "Diagnosis: UC or CD.",
+          "demo_type": "Category"
+        },
+        {
+          "name": "cdageatdiagnosisa",
+          "meaning": "Age at diagnosis: A1 (16 years or younger), A2 (17 to 40 years), A3 (Over 40 years), or N/A.",
+          "demo_type": "Category"
+        },
+        {
+          "name": "cdlocationlpriortofirstsurgery",
+          "meaning": "Recorded disease location before first surgery; preserve the supplied L categories, 0 and N/A.",
+          "demo_type": "Category"
+        },
+        {
+          "name": "cdbehaviorb",
+          "meaning": "Recorded disease behavior; includes B1/B2/B3, perianal variants, 0 and N/A.",
+          "demo_type": "Category"
+        },
+        {
+          "name": "ucextente",
+          "meaning": "UC extent: E1 (Ulcerative proctitis), E2 (Left-sided UC), E3 (Extensive UC / Pancolitis), or N/A.",
+          "demo_type": "Category"
+        },
+        {
+          "name": "dateofendoscopy",
+          "meaning": "Endoscopy date, supplied as yyyy-mm-dd.",
+          "demo_type": "Date"
+        },
+        {
+          "name": "sescd",
+          "meaning": "Simple Endoscopic Score for Crohn’s Disease (SES-CD). Reported observed values 0–29, mostly 0, with missing values.",
+          "demo_type": "Integer or missing"
+        },
+        {
+          "name": "modifiedbaronsscore",
+          "meaning": "Recorded modified Baron score. Values and coding have not yet been supplied.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "hbi",
+          "meaning": "Harvey-Bradshaw Index (HBI), a Crohn’s disease clinical activity score. Reported observed values 0–19, with possible missing values.",
+          "demo_type": "Integer or missing"
+        },
+        {
+          "name": "sccai",
+          "meaning": "Simple Clinical Colitis Activity Index (SCCAI), a UC clinical activity score. Reported observed values 0–12, with possible missing values.",
+          "demo_type": "Integer or missing"
+        }
+      ]
+    },
+    {
+      "name": "MGH_data-LLM_project__EMPI_and_patientnum_fake_data.csv",
+      "columns": [
+        {
+          "name": "Patient_num",
+          "meaning": "Patient identifier; retain the capital P in Patient_num.",
+          "demo_type": "Identifier"
+        },
+        {
+          "name": "Index treatment (IL23 vs JAK)",
+          "meaning": "Index treatment: Risankizumab, Tofacitinib or Upadacitinib.",
+          "demo_type": "Category"
+        },
+        {
+          "name": "Date of Start index treatment",
+          "meaning": "Index-treatment start date, yyyy-mm-dd.",
+          "demo_type": "Date"
+        },
+        {
+          "name": "Findings on baseline endoscopy (within 6 months prior to start)",
+          "meaning": "Baseline endoscopy findings within six months before treatment: Mild, Moderate to severe or Normal.",
+          "demo_type": "Category"
+        },
+        {
+          "name": "clinical response at 3 months",
+          "meaning": "Three-month response: Clinical remission, No response or Partial clinical response.",
+          "demo_type": "Category"
+        },
+        {
+          "name": "clinical response at 12 months",
+          "meaning": "Twelve-month response, using the same three supplied categories. Separate 12-month frequencies were not supplied.",
+          "demo_type": "Category"
+        },
+        {
+          "name": "endoscopic severity at first endoscopy after therapy start",
+          "meaning": "Severity at the first endoscopy after therapy begins: Mild, Moderate to severe or Normal.",
+          "demo_type": "Category"
+        },
+        {
+          "name": "Date of scope",
+          "meaning": "Scope date, yyyy-mm-dd.",
+          "demo_type": "Date"
+        }
+      ]
+    },
+    {
+      "name": "traetment response_for informatics_nodupl_mergedpatient_num_forXin_Feb6_fake_data.csv",
+      "columns": [
+        {
+          "name": "patient_num",
+          "meaning": "Patient identifier; retain the lower-case column name.",
+          "demo_type": "Identifier"
+        },
+        {
+          "name": "prismid",
+          "meaning": "PRISM registry identifier.",
+          "demo_type": "Identifier"
+        },
+        {
+          "name": "drugsubstudy",
+          "meaning": "Registry treatment code: ADA, IFX, RIS, TOFA, UPA, USK or VEDO.",
+          "demo_type": "Category"
+        },
+        {
+          "name": "baseline_date",
+          "meaning": "Registry treatment-baseline date, yyyy-mm-dd.",
+          "demo_type": "Date"
+        },
+        {
+          "name": "sex",
+          "meaning": "Sex field; response coding to be supplied.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "hispanicorlatinoorigin",
+          "meaning": "Hispanic/Latino-origin field; response coding to be supplied.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "race",
+          "meaning": "Race field; response coding to be supplied.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "ageatdiagnosisa",
+          "meaning": "Age at diagnosis group: A1 (16 years or younger), A2 (17 to 40 years), A3 (Over 40 years).",
+          "demo_type": "Category"
+        },
+        {
+          "name": "locationlpriortofirstsurgery",
+          "meaning": "Disease-location field before first surgery; source coding to be supplied for this file.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "behaviorb",
+          "meaning": "Disease-behavior field; source coding to be supplied for this file.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "extente",
+          "meaning": "Disease-extent field; source coding to be supplied for this file.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "dx",
+          "meaning": "Diagnosis: UC, CD and a few IC entries. Definition of IC to be confirmed.",
+          "demo_type": "Category"
+        },
+        {
+          "name": "doesthesubjecthaveanyotherimmune",
+          "meaning": "Other immune-condition field; confirm the full question and response coding.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "hasthesubjecteverhadbowelresecti",
+          "meaning": "Bowel-resection-history field; confirm the full question and response coding.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "delzicoloralmesalamine",
+          "meaning": "Mesalamine (Delzicol) medication field; response coding and timing to be supplied.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "asacolmesalamine",
+          "meaning": "Mesalamine (Asacol) medication field; response coding and timing to be supplied.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "pentasamesalamine",
+          "meaning": "Mesalamine (Pentasa) medication field; response coding and timing to be supplied.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "lialdamesalamine",
+          "meaning": "Mesalamine (Lialda) medication field; response coding and timing to be supplied.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "aprisomesalamine",
+          "meaning": "Mesalamine (Apriso) medication field; response coding and timing to be supplied.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "colazalbalsalazide",
+          "meaning": "Balsalazide (Colazal) medication field; response coding and timing to be supplied.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "sulfasalazineazulfidine",
+          "meaning": "Sulfasalazine (Azulfidine) medication field; response coding and timing to be supplied.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "dipentumolsalazine",
+          "meaning": "Olsalazine (Dipentum) medication field; response coding and timing to be supplied.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "prednisone",
+          "meaning": "Prednisone medication field; response coding and timing to be supplied.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "entocortbudesonide",
+          "meaning": "Budesonide (Entocort) medication field; response coding and timing to be supplied.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "ucerisbudesonideer",
+          "meaning": "Budesonide ER (Uceris) medication field; response coding and timing to be supplied.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "solumedrolmedrol",
+          "meaning": "Solu-Medrol/Medrol medication field; response coding and timing to be supplied.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "ivsteroids",
+          "meaning": "Intravenous steroids medication field; response coding and timing to be supplied.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "cortenemascortifoamproctofoam",
+          "meaning": "Cortenema/Cortifoam/Proctofoam medication field; response coding and timing to be supplied.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "azathioprineimuranazasan",
+          "meaning": "Azathioprine (Imuran/Azasan) medication field; response coding and timing to be supplied.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "methotrexate",
+          "meaning": "Methotrexate medication field; response coding and timing to be supplied.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "mercaptopurinepurinethol6mp",
+          "meaning": "Mercaptopurine (Purinethol/6-MP) medication field; response coding and timing to be supplied.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "ozanimodzeposia",
+          "meaning": "Ozanimod (Zeposia) medication field; response coding and timing to be supplied.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "xeljanztofacitinib",
+          "meaning": "Tofacitinib (Xeljanz) medication field; response coding and timing to be supplied.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "rinvoqupadacitinib",
+          "meaning": "Upadacitinib (Rinvoq) medication field; response coding and timing to be supplied.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "remicadeinfliximab",
+          "meaning": "Infliximab (Remicade) medication field; response coding and timing to be supplied.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "humiraadalimumab",
+          "meaning": "Adalimumab (Humira) medication field; response coding and timing to be supplied.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "cimziacertalizumab",
+          "meaning": "Cimzia field as named in the source header medication field; response coding and timing to be supplied.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "tysabrinatalizumab",
+          "meaning": "Natalizumab (Tysabri) medication field; response coding and timing to be supplied.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "simponigolimumab",
+          "meaning": "Golimumab (Simponi) medication field; response coding and timing to be supplied.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "entyviovedolizumab",
+          "meaning": "Vedolizumab (Entyvio) medication field; response coding and timing to be supplied.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "stelaraustekinumab",
+          "meaning": "Ustekinumab (Stelara) medication field; response coding and timing to be supplied.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "skyrizirisankizumab",
+          "meaning": "Risankizumab (Skyrizi) medication field; response coding and timing to be supplied.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "whatisthesubjectscurrentsmokings",
+          "meaning": "Smoking-status field; confirm the full question and response coding.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "heightcm",
+          "meaning": "Height field labeled in centimetres; source value format to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "weightkg",
+          "meaning": "Weight field labeled in kilograms; source value format to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "baseline_crp",
+          "meaning": "Baseline C-reactive protein (CRP) field; units or score coding to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "baseline_hct",
+          "meaning": "Baseline Hematocrit field; units or score coding to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "baseline_hgb",
+          "meaning": "Baseline Hemoglobin field; units or score coding to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "baseline_esr",
+          "meaning": "Baseline Erythrocyte sedimentation rate (ESR) field; units or score coding to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "baseline_wbc",
+          "meaning": "Baseline White blood cell count field; units or score coding to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "baseline_plt",
+          "meaning": "Baseline Platelet count field; units or score coding to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "baseline_alb",
+          "meaning": "Baseline Albumin field; units or score coding to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "baseline_hbi_total",
+          "meaning": "Baseline Harvey-Bradshaw Index (HBI) total field; units or score coding to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "baseline_sibdq_total",
+          "meaning": "Baseline Short Inflammatory Bowel Disease Questionnaire (SIBDQ) total field; units or score coding to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "week14_crp",
+          "meaning": "Week 14 C-reactive protein (CRP) field; units or score coding to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "week14_hct",
+          "meaning": "Week 14 Hematocrit field; units or score coding to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "week14_hgb",
+          "meaning": "Week 14 Hemoglobin field; units or score coding to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "week14_esr",
+          "meaning": "Week 14 Erythrocyte sedimentation rate (ESR) field; units or score coding to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "week14_wbc",
+          "meaning": "Week 14 White blood cell count field; units or score coding to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "week14_plt",
+          "meaning": "Week 14 Platelet count field; units or score coding to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "week14_alb",
+          "meaning": "Week 14 Albumin field; units or score coding to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "week14_hbi_total",
+          "meaning": "Week 14 Harvey-Bradshaw Index (HBI) total field; units or score coding to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "week14_sccai_total",
+          "meaning": "Week 14 Simple Clinical Colitis Activity Index (SCCAI) total field; units or score coding to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "week14_sibdq",
+          "meaning": "Week 14 Short Inflammatory Bowel Disease Questionnaire (SIBDQ) field; units or score coding to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "week30_crp",
+          "meaning": "Week 30 C-reactive protein (CRP) field; units or score coding to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "week30_hct",
+          "meaning": "Week 30 Hematocrit field; units or score coding to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "week30_hgb",
+          "meaning": "Week 30 Hemoglobin field; units or score coding to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "week30_esr",
+          "meaning": "Week 30 Erythrocyte sedimentation rate (ESR) field; units or score coding to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "week30_wbc",
+          "meaning": "Week 30 White blood cell count field; units or score coding to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "week30_plt",
+          "meaning": "Week 30 Platelet count field; units or score coding to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "week30_alb",
+          "meaning": "Week 30 Albumin field; units or score coding to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "week30_hbi",
+          "meaning": "Week 30 Harvey-Bradshaw Index (HBI) field; units or score coding to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "week30_sccai",
+          "meaning": "Week 30 Simple Clinical Colitis Activity Index (SCCAI) field; units or score coding to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "week30_sibdq",
+          "meaning": "Week 30 Short Inflammatory Bowel Disease Questionnaire (SIBDQ) field; units or score coding to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "week54_crp",
+          "meaning": "Week 54 C-reactive protein (CRP) field; units or score coding to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "week54_hct",
+          "meaning": "Week 54 Hematocrit field; units or score coding to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "week54_hgb",
+          "meaning": "Week 54 Hemoglobin field; units or score coding to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "week54_esr",
+          "meaning": "Week 54 Erythrocyte sedimentation rate (ESR) field; units or score coding to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "week54_wbc",
+          "meaning": "Week 54 White blood cell count field; units or score coding to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "week54_plt",
+          "meaning": "Week 54 Platelet count field; units or score coding to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "week54_alb",
+          "meaning": "Week 54 Albumin field; units or score coding to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "week54_hbi",
+          "meaning": "Week 54 Harvey-Bradshaw Index (HBI) field; units or score coding to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "week54_sccai",
+          "meaning": "Week 54 Simple Clinical Colitis Activity Index (SCCAI) field; units or score coding to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "week54_sibdq",
+          "meaning": "Week 54 Short Inflammatory Bowel Disease Questionnaire (SIBDQ) field; units or score coding to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "bmi_bl",
+          "meaning": "Baseline BMI field; calculation and source value format to be supplied.",
+          "demo_type": "Numeric format not supplied"
+        },
+        {
+          "name": "wk14_remis",
+          "meaning": "Week-14 registry clinical status; retain every supplied label, including non-assessment statuses.",
+          "demo_type": "Category"
+        },
+        {
+          "name": "wk30_remis",
+          "meaning": "Week-30 registry clinical-status field; categories were not supplied.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "wk52_remis",
+          "meaning": "Week-52 registry clinical status; retain every supplied label, including non-assessment statuses.",
+          "demo_type": "Category"
+        },
+        {
+          "name": "endo_date",
+          "meaning": "Endoscopy-date field; exact source representation to be supplied.",
+          "demo_type": "Date format not supplied"
+        },
+        {
+          "name": "crohns",
+          "meaning": "Crohn-related field; exact definition and coding to be supplied.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "week14_composite",
+          "meaning": "Week-14 composite-outcome field; definition and coding to be supplied.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "week52_composite",
+          "meaning": "Week-52 composite-outcome field; definition and coding to be supplied.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "week30_composite",
+          "meaning": "Week-30 composite-outcome field; definition and coding to be supplied.",
+          "demo_type": "Not supplied"
+        },
+        {
+          "name": "endo_remission",
+          "meaning": "Endoscopic-remission field; cutoff and coding to be supplied.",
+          "demo_type": "Not supplied"
+        }
+      ]
     }
   ]
 }

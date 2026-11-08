@@ -1,0 +1,12 @@
+﻿Column,Meaning,Type
+patient_num,Patient identifier in the registry file.,Identifier
+dx,Diagnosis: UC or CD.,Category
+cdageatdiagnosisa,"Age at diagnosis: A1 (16 years or younger), A2 (17 to 40 years), A3 (Over 40 years), or N/A.",Category
+cdlocationlpriortofirstsurgery,"Recorded disease location before first surgery; preserve the supplied L categories, 0 and N/A.",Category
+cdbehaviorb,"Recorded disease behavior; includes B1/B2/B3, perianal variants, 0 and N/A.",Category
+ucextente,"UC extent: E1 (Ulcerative proctitis), E2 (Left-sided UC), E3 (Extensive UC / Pancolitis), or N/A.",Category
+dateofendoscopy,"Endoscopy date, supplied as yyyy-mm-dd.",Date
+sescd,"Simple Endoscopic Score for Crohn’s Disease (SES-CD). Reported observed values 0–29, mostly 0, with missing values.",Integer or missing
+modifiedbaronsscore,Recorded modified Baron score. Values and coding have not yet been supplied.,Not supplied
+hbi,"Harvey-Bradshaw Index (HBI), a Crohn’s disease clinical activity score. Reported observed values 0–19, with possible missing values.",Integer or missing
+sccai,"Simple Clinical Colitis Activity Index (SCCAI), a UC clinical activity score. Reported observed values 0–12, with possible missing values.",Integer or missing

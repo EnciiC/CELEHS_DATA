@@ -181,7 +181,7 @@ class ResourceLibrary:
         explicit = self.explicit(query)
         if explicit:
             # An unqualified FAVOR or MVP query may have more than one matching role.
-            if ' favor ' in ' '+norm(query)+' ':
+            if ' favor ' in ' '+norm(query)+' ' and len(explicit)!=1:
                 explicit += [i for i in self.entries if i.startswith('ZX_FAVOR')]
             return list(dict.fromkeys(explicit))
         q = norm(query)

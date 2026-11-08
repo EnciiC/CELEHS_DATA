@@ -26,7 +26,10 @@ def fake_data_notes(record):
     patients = assumptions.get('synthetic_patients')
     lines.extend(['', '## Generation', ''])
     if patients:
-        lines.append(f'- The files share {patients:,} generated patient IDs.')
+        lines.append(f'- The original raw/count examples share {patients:,} generated patient IDs.'
+                     if record.get('additional_column_dictionaries') else f'- The files share {patients:,} generated patient IDs.')
+    if record.get('additional_column_dictionaries'):
+        lines.append('- Each registry file has 100 generated rows with its own synthetic identifiers. Unspecified fields remain blank.')
     lines.append('- Column names and order match the supplied structures. Dates and code-format examples are generated.')
     counts = assumptions.get('monthly_count_range', assumptions.get('count_range'))
     if counts:

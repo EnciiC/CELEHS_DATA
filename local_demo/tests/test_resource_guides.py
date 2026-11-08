@@ -152,8 +152,9 @@ def test_distinct_matrix_sources_and_ancestry_scope(client):
     result=ask(client,'Compare FAS UKB and CRAFT')
     assert {r['id'] for r in result['resources']}=={'ZX_FAS','ZX_CRAFT'}
     assert 'FAS only; no O2 copy' in result['answer']
-    assert 'Storage: O2' in result['answer']
-    assert all(any(b['title']=='Files and contents' for b in r['blocks']) for r in result['resources'])
+    storage=next(row for row in result['comparison_table']['rows'] if row['Field']=='Storage')
+    assert storage['CRAFT UKB signed-correlation matrix']=='O2'
+    assert storage['FAS UKB variant-phenotype matrix']=='FAS only; no O2 copy'
     assert 'Keep in mind' not in result['answer']
     result=ask(client,'Which files and ancestries are included in MVP multi-ancestry data?')
     assert 'AFR, AMR, EAS, and EUR' in result['answer']
