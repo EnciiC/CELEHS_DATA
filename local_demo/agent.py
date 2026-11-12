@@ -25,6 +25,7 @@ from .single_files import single_file_answer
 from .exploration import infer_selection,resolve_exploration,valid_selection
 from .compare_resources import comparison_answer
 from .ms import ms_answer
+from .ibd_workflow import ibd_workflow_answer
 from .hosting import provider
 from .hosted import CloudflareModel, MODEL as CLOUD_MODEL
 
@@ -202,6 +203,10 @@ class Agent:
                     'intro':intro,'answer':intro,'datasets':[],'resources':[],'sources':[],
                     'context_dataset_ids':previous or [],'pending_topic':None,'warning':None,'compact':True,
                     'actions':[{'label':'Browse resources','view':'browse'}],'elapsed_seconds':0}
+        workflow = ibd_workflow_answer(self.catalog, query, previous)
+        if workflow is not None:
+            self.last_result = {'engine': 'catalog', 'error': None}
+            return workflow
         # An explicit path or a duplicated filename needs resolution before a
         # project-topic shortcut can silently choose another file version.
         early_file=single_file_answer(self.catalog,query,previous or [])

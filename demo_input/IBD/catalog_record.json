@@ -8,7 +8,7 @@
     "Eris"
   ],
   "has_o2_copy": false,
-  "description": "Raw EHR records, monthly codified/NLP counts, monthly laboratory summaries, registry remission outcomes, genetic and microbiome scores, and documentation of the five-aim MAJOR IBD project.",
+  "description": "Raw EHR records, monthly codified/NLP counts, monthly laboratory summaries, registry remission outcomes, genetic and microbiome scores, endoscopy agent output, and documentation of the five-aim MAJOR IBD project.",
   "sources": [
     {
       "kind": "Original documentation",
@@ -37,7 +37,8 @@
         "END_DATE",
         "CONCEPT_CD"
       ],
-      "row_meaning": "One synthetic code occurrence for a patient and encounter."
+      "row_meaning": "One synthetic code occurrence for a patient and encounter.",
+      "file_group": "raw"
     },
     {
       "file": "codified_data_monthly_fake_data.csv",
@@ -51,7 +52,8 @@
         "Rollup_Code",
         "N"
       ],
-      "row_meaning": "One synthetic patient, month, year, and Rollup_Code count."
+      "row_meaning": "One synthetic patient, month, year, and Rollup_Code count.",
+      "file_group": "counts"
     },
     {
       "file": "NLP_data_monthly_fake_data.csv",
@@ -65,7 +67,8 @@
         "N",
         "Patient_num"
       ],
-      "row_meaning": "One synthetic patient, month, year, and CUI count."
+      "row_meaning": "One synthetic patient, month, year, and CUI count.",
+      "file_group": "counts"
     },
     {
       "file": "endo score PRISM EMPI merged July 2025_deID_fake_data.csv",
@@ -88,7 +91,8 @@
       "readme_kind": "ibd_registry",
       "topic_id": "ibd_registry",
       "source_path": "//SMBgpa.partners.org/asw_mgb$/SHARE/Registry_data_by_Ashwin/endo score PRISM EMPI merged July 2025_deID.xlsx",
-      "row_meaning": "One generated registry record. FAKE DATA; file-specific synthetic identifiers."
+      "row_meaning": "One generated registry record. FAKE DATA; file-specific synthetic identifiers.",
+      "file_group": "registry"
     },
     {
       "file": "MGH_data-LLM_project__EMPI_and_patientnum_fake_data.csv",
@@ -108,7 +112,8 @@
       "readme_kind": "ibd_registry",
       "topic_id": "ibd_registry",
       "source_path": "//SMBgpa.partners.org/asw_mgb$/SHARE/Registry_data_by_Ashwin/MGH_data-LLM_project__EMPI_and_patientnum.xlsx",
-      "row_meaning": "One generated registry record. FAKE DATA; file-specific synthetic identifiers."
+      "row_meaning": "One generated registry record. FAKE DATA; file-specific synthetic identifiers.",
+      "file_group": "registry"
     },
     {
       "file": "traetment response_for informatics_nodupl_mergedpatient_num_forXin_Feb6_fake_data.csv",
@@ -214,7 +219,32 @@
       "readme_kind": "ibd_registry",
       "topic_id": "ibd_registry",
       "source_path": "//SMBgpa.partners.org/asw_mgb$/SHARE/Registry_data_by_Ashwin/traetment response_for informatics_nodupl_mergedpatient_num_forXin_Feb6.xlsx",
-      "row_meaning": "One generated registry record. FAKE DATA; file-specific synthetic identifiers."
+      "row_meaning": "One generated registry record. FAKE DATA; file-specific synthetic identifiers.",
+      "file_group": "registry"
+    },
+    {
+      "file": "endoscopy_agent_results_final_fake_data.csv",
+      "synthetic": true,
+      "rows": 100,
+      "columns": [
+        "EMPI",
+        "dateofendoscopy",
+        "sescd",
+        "binary_sescd",
+        "low",
+        "high",
+        "binary_low",
+        "binary_high",
+        "flagged",
+        "modifiedbaronsscore",
+        "binary_mbs"
+      ],
+      "unique_synthetic_patients": 50,
+      "readme_kind": "ibd_agents",
+      "topic_id": "ibd_agents",
+      "file_group": "agents",
+      "source_path": "//eristwofs.partners.org/ASW-ERIS/agent_extdata/endoscopy_agent_results_final.csv",
+      "row_meaning": "One generated endoscopy output row."
     }
   ],
   "readme_topics": [
@@ -362,7 +392,8 @@
           "columns_column": "Key columns",
           "heading": "Useful processed files"
         }
-      ]
+      ],
+      "file_group": "registry"
     },
     {
       "id": "ibd_scores",
@@ -446,7 +477,85 @@
             "heading": "Biobank worksheet"
           }
         ]
-      }
+      },
+      "file_group": "scores"
+    },
+    {
+      "id": "ibd_agents",
+      "name": "IBD agent outputs",
+      "file_group": "agents",
+      "resource_type": "Agent output",
+      "readme_kind": "ibd_agents",
+      "location_heading": "Location",
+      "aliases": [
+        "IBD agent",
+        "IBD agents",
+        "IBD agent work",
+        "IBD agent data",
+        "endoscopy agent",
+        "endoscopy scoring agent",
+        "chart review agent",
+        "chart review agent for treatment response",
+        "treatment response agent"
+      ],
+      "overview": {
+        "heading": "Overview"
+      },
+      "view_keywords": {
+        "treatment_agent": [
+          "chart review agent",
+          "treatment response agent",
+          "agent for treatment response"
+        ],
+        "statistics": [
+          "summary statistics",
+          "row counts",
+          "distribution",
+          "output summary"
+        ],
+        "linkage": [
+          "agent output to prism",
+          "endoscopy agent to prism",
+          "endoscopy agent output with prism"
+        ]
+      },
+      "views": {
+        "treatment_agent": [
+          {
+            "heading": "Chart review agent for treatment response"
+          }
+        ],
+        "statistics": [
+          {
+            "heading": "Output summary"
+          }
+        ],
+        "linkage": [
+          {
+            "heading": "Endoscopy agent output",
+            "paragraphs": 2
+          }
+        ]
+      },
+      "file_specs": [
+        {
+          "id": "endoscopy",
+          "name": "IBD endoscopy agent output",
+          "heading": "Endoscopy agent output",
+          "file": "endoscopy_agent_results_final_fake_data.csv",
+          "source_file": "endoscopy_agent_results_final.csv",
+          "owner": "Thomas Charlon",
+          "aliases": [
+            "endoscopy agent",
+            "endoscopy agent output",
+            "endoscopy scoring agent"
+          ],
+          "description": {
+            "heading": "Endoscopy agent output",
+            "paragraphs": 2
+          }
+        }
+      ]
     }
   ],
   "original_readmes": [
@@ -491,6 +600,18 @@
       "label": "IBD registry — fake-data generation",
       "description": "How the 100-row synthetic examples were made.",
       "source_path": "Local authoring path omitted from public metadata"
+    },
+    {
+      "kind": "ibd_workflow",
+      "file": "IBD_DERIVED_DATA_README.md",
+      "label": "Build derived IBD data",
+      "description": "Cohort filters, R scripts, derived files and registry-to-EHR linkage."
+    },
+    {
+      "kind": "ibd_agents",
+      "file": "IBD_AGENT_README.md",
+      "label": "IBD agent outputs",
+      "description": "Endoscopy output, column descriptions and related registry data."
     }
   ],
   "column_dictionary": "column_dictionary.csv",
@@ -510,14 +631,6 @@
       "location": "/data/aws-eris/Sara/refactored-nile-processing-main/NILE/2026-05-26_IBD_dict_w_vedo_acr.txt",
       "description": "NILE dictionary including the vedo acronym. Dictionary contents have not been copied or verified locally.",
       "source": "Sara documentation"
-    },
-    {
-      "name": "CONCEPT_CD / NAME_CHAR lookup",
-      "kind": "Dictionary lookup",
-      "location": "//SMBgpa.partners.org/asw_mgb$/Sara/IBD/For_Enci_2026-10-05/2026-10-05_concept_dimension_full_table.csv",
-      "description": "The MAJOR project README identifies this full concept_dimension export with concept_path, concept_cd, and name_char. The export contents have not been loaded or verified locally.",
-      "source_kind": "ibd_project",
-      "source": "MAJOR IBD project README"
     }
   ],
   "resources": [
@@ -526,7 +639,8 @@
       "kind": "Raw data",
       "location": "//SMBgpa.partners.org/asw_mgb$/Sara/IBD/IBD_2020_codified/raw",
       "description": "IBD_2020 observation_fact extract, split into RData batches. Five columns in this demo.",
-      "source": "User clarification and Sara documentation"
+      "source": "User clarification and Sara documentation",
+      "file_group": "raw"
     },
     {
       "name": "IBD_2019_MART_EXTENDED",
@@ -534,7 +648,8 @@
       "location": "//SMBgpa.partners.org/asw_mgb$/SHARE/IBD_2019_MART_EXTENDED",
       "alternative_location": "/data/aws-eris/IBD_2019_MART_EXTENDED",
       "description": "RPDR source with diagnosis, encounter, lab, medication, and other files. Full file schemas have not been supplied.",
-      "source": "User clarification and Sara documentation"
+      "source": "User clarification and Sara documentation",
+      "file_group": "raw"
     },
     {
       "name": "IBD_2019_2025_MART",
@@ -542,7 +657,8 @@
       "location": "//SMBgpa.partners.org/asw_mgb$/SHARE/IBD_2019_2025_MART",
       "alternative_location": "/data/aws-eris/IBD_2019_2025_MART",
       "description": "RPDR source with diagnosis, encounter, lab, medication, and other files. Full file schemas have not been supplied.",
-      "source": "User clarification and Sara documentation"
+      "source": "User clarification and Sara documentation",
+      "file_group": "raw"
     },
     {
       "name": "IBD daily codified data",
@@ -551,7 +667,8 @@
       "alternative_location": "/data/aws-eris/Sara/IBD/2026-03-16_Refresh/codified_daily",
       "file": "merged_daily_data.RDS",
       "description": "Day-level diagnosis, medication, procedure, and lab data using Rollup_Code. No daily fake file was generated because its complete schema was not supplied.",
-      "source": "User clarification and Sara documentation"
+      "source": "User clarification and Sara documentation",
+      "file_group": "counts"
     },
     {
       "name": "IBD monthly codified counts",
@@ -559,7 +676,8 @@
       "location": "\\\\eristwofs.partners.org\\ASW-ERIS\\IBD_DATA_REAGGREGATED\\codified_data_monthly.Rdata",
       "alternative_location": "/data/aws-eris/IBD_DATA_REAGGREGATED/codified_data_monthly.RData",
       "description": "EMPI, Patient_num, month, year, Rollup_Code, N. User supplied the structure and occurrence-count meaning.",
-      "source": "User clarification"
+      "source": "User clarification",
+      "file_group": "counts"
     },
     {
       "name": "IBD monthly NLP counts",
@@ -567,7 +685,8 @@
       "location": "\\\\eristwofs.partners.org\\ASW-ERIS\\IBD_DATA_REAGGREGATED\\NLP_data_monthly.RData",
       "alternative_location": "/data/aws-eris/IBD_DATA_REAGGREGATED/NLP_data_monthly.RData",
       "description": "EMPI, month, year, CUI, N, Patient_num. N counts CUI occurrences for a patient in a month.",
-      "source": "User clarification"
+      "source": "User clarification",
+      "file_group": "counts"
     },
     {
       "name": "Codified mapping dictionary",
@@ -582,14 +701,6 @@
       "location": "/data/aws-eris/Sara/refactored-nile-processing-main/NILE/2026-05-26_IBD_dict_w_vedo_acr.txt",
       "description": "NILE dictionary including the vedo acronym. Dictionary contents have not been copied or verified locally.",
       "source": "Sara documentation"
-    },
-    {
-      "name": "CONCEPT_CD / NAME_CHAR lookup",
-      "kind": "Dictionary lookup",
-      "location": "//SMBgpa.partners.org/asw_mgb$/Sara/IBD/For_Enci_2026-10-05/2026-10-05_concept_dimension_full_table.csv",
-      "description": "The MAJOR project README identifies this full concept_dimension export with concept_path, concept_cd, and name_char. The export contents have not been loaded or verified locally.",
-      "source_kind": "ibd_project",
-      "source": "MAJOR IBD project README"
     },
     {
       "name": "Codified processing script",
@@ -632,7 +743,6 @@
     "Real EMPI stays on the source server.",
     "Do not claim an O2 copy exists.",
     "Do not use fake records as evidence of real cohort distributions or code coverage.",
-    "The MAJOR IBD README documents a concept_dimension export for concept names; the export itself has not been loaded locally.",
     "PRISM microbiome scores are documented in deID scores.xlsx. These scores do not establish availability of raw microbiome sequencing or taxon-abundance data.",
     "PRISM microbiome scores are documented in deID scores.xlsx. These scores do not establish availability of raw microbiome sequencing or taxon-abundance data.",
     "PRISM microbiome scores are documented in deID scores.xlsx. These scores do not establish availability of raw microbiome sequencing or taxon-abundance data."
@@ -649,6 +759,10 @@
     {
       "file": "registry_legacy_treatment_response_column_dictionary.csv",
       "data_file": "traetment response_for informatics_nodupl_mergedpatient_num_forXin_Feb6_fake_data.csv"
+    },
+    {
+      "file": "endoscopy_agent_column_dictionary.csv",
+      "data_file": "endoscopy_agent_results_final_fake_data.csv"
     }
   ]
 }

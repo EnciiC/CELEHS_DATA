@@ -24,7 +24,7 @@ def test_additional_original_readmes_are_distinct_and_unchanged(client):
     record = client.get('/api/datasets/IBD').json()
     docs = record['original_documents']
     assert [d['kind'] for d in docs] == ['original', 'ibd_lab', 'ibd_project', 'ibd_registry',
-        'ibd_scores', 'ibd_registry_summaries', 'ibd_registry_generation']
+        'ibd_scores', 'ibd_registry_summaries', 'ibd_registry_generation', 'ibd_workflow', 'ibd_agents']
     assert len(client.get('/api/datasets/MGB_AD').json()['original_documents']) == 1
     for doc in docs[1:]:
         readme = client.get(doc['url'])
@@ -46,7 +46,8 @@ def test_inventory_includes_laboratory_data_and_project_documentation(client):
     assert 'monthly laboratory' in result['answer'].lower()
     assert 'MAJOR IBD project' in result['answer']
     files = result['datasets'][0]['files']
-    assert len(files) == 8  # Two count files, lab, three registry files and two score worksheets.
+    assert len(files) == 9  # Count, lab, registry, score and endoscopy agent files.
+    assert any(f['name'] == 'IBD endoscopy agent output' for f in files)
     assert sum(f.get('topic_id') == 'ibd_registry' for f in files) == 3
     assert 'registry remission outcomes' in result['answer']
     lab = next(f for f in files if f.get('id') == 'ibd_lab_monthly')
@@ -68,7 +69,7 @@ def test_lab_as_an_organization_is_not_a_lab_measurement_filter(client):
     assert not is_lab_query('Show lab resources')
     assert is_lab_query('Show IBD lab data')
     result = ask(client, 'What IBD data do we have in the lab?')
-    assert len(result['datasets'][0]['files']) == 8
+    assert len(result['datasets'][0]['files']) == 9
 
 
 @pytest.mark.parametrize('query', [
@@ -94,7 +95,7 @@ def test_lab_browse_metadata_has_columns_and_processing_but_no_fake_download(cli
     assert lab['owner'] == 'Enci Cai'
     assert lab['processing_script'].endswith('/monthly_summary/lab_value_monthly_count.R')
     assert next(c['Meaning'] for c in lab['column_descriptions'] if c['Column'] == 'LAB_NAME') == 'Albumin, CRP, ESR, FCP, or Hemoglobin'
-    assert len(record['files']) == 6  # Original count examples plus registry examples, no lab payload.
+    assert not any(file.get('readme_kind') == 'ibd_lab' for file in record['files'])
     assert client.get('/api/datasets/IBD/download/IBD_lab_monthly_summary.csv').status_code == 404
     assert client.get('/api/datasets/IBD/download/IBD_lab_monthly_summary.rds').status_code == 404
 
@@ -191,13 +192,46 @@ def test_lab_query_does_not_turn_upmc_ibd_into_a_documented_cohort(client):
     assert result['datasets'] == []
 
 
-def test_new_project_readme_updates_old_unconfirmed_raw_concept_lookup(client):
+def test_project_specific_concept_lookup_is_absent_from_ibd_dictionaries(client):
     result = ask(client, 'Show IBD raw dictionary')
-    lookup = result['datasets'][0]['dictionaries'][0]
-    assert lookup['location'].endswith('2026-10-05_concept_dimension_full_table.csv')
-    assert 'visit_dimension' not in lookup['description']
-    assert 'concept_path, concept_cd, and name_char' in lookup['description']
-    assert 'not been loaded or verified' not in lookup['description']
+    assert not result['datasets'][0]['dictionaries']
+    detail = client.get('/api/datasets/IBD').json()
+    assert {d['name'] for d in detail['dictionaries']} == {'Codified mapping dictionary', 'NLP dictionary'}
+    assert 'CONCEPT_CD' in detail['files'][0]['columns']
+
+
+def test_ibd_cohort_workflow_returns_historical_filters_and_next_steps(client):
+    result = ask(client, 'How do I filter and select eligible IBD patients?')
+    assert result['interpretation'] == 'verified_ibd_workflow'
+    answer = result['answer']
+    assert [answer.index(n) for n in ('55,651', '25,921', '21,194', '10,610')] == sorted(
+        answer.index(n) for n in ('55,651', '25,921', '21,194', '10,610'))
+    assert 'at least three visits' in answer and 'KOMAP' in answer
+    assert 'Xin Xiong' in answer and '/prep_data/more_sensitivity/' in answer
+    next_step = next(action['query'] for action in result['actions'] if 'registry' in action['label'])
+    linkage = ask(client, next_step)
+    assert linkage['interpretation'] == 'verified_ibd_workflow'
+    assert 'EMPI_to_Patient_num_full_mapping.csv' in linkage['answer']
+    assert 'earliest same-drug occurrence' in linkage['answer'] and '±30 days' in linkage['answer']
+
+
+def test_endoscopy_agent_output_is_separate_from_registry_and_downloads_only_fake_rows(client):
+    result = ask(client, 'Show columns for endoscopy_agent_results_final.csv')
+    file, = result['datasets'][0]['files']
+    assert file['owner'] == 'Thomas Charlon' and file['file_group'] == 'agents'
+    assert file['location'].endswith('/agent_extdata/endoscopy_agent_results_final.csv')
+    assert [row['Column'] for row in file['column_descriptions']] == file['columns']
+    assert len(file['columns']) == 11
+    fake = client.get('/api/datasets/IBD/files/' + file['file'] + '/preview').json()
+    assert fake['total_rows'] == 100 and fake['synthetic']
+    assert all(row['EMPI'].startswith('SYN_ENDO_') and row['low'] == row['high'] == '' for row in fake['rows'])
+    assert client.get('/api/datasets/IBD/download/endoscopy_agent_results_final.csv').status_code == 404
+    assert client.get('/api/datasets/IBD/download/' + file['file']).status_code == 200
+    placeholder = ask(client, 'Tell me about the chart review agent for treatment response')
+    assert placeholder['intro'] == 'Chart review agent for treatment response'
+    assert not placeholder['datasets'][0]['files']
+    assert {action['label'] for action in placeholder['actions']} == {
+        'MGH treatment-response registry', 'Legacy PRISM treatment-response registry'}
 
 
 def test_original_document_parser_rejects_internal_or_unsafe_registration(tmp_path):

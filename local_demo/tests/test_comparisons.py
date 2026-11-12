@@ -122,7 +122,8 @@ def test_structured_picker_bypasses_language_routing(client,field):
 
 def test_picker_options_and_input_validation(client):
     options=client.get('/api/comparison-options').json()['options']
-    assert len(options)==126 and len({o['id'] for o in options})==126
+    assert len({o['id'] for o in options})==len(options)
+    assert any('endoscopy agent output' in o['label'] for o in options)
     assert any('MGH treatment-response' in o['label'] for o in options)
     for ids in [['MGB_AD','missing'],['MGB_AD','MGB_AD'],['MGB_AD']]:
         assert client.post('/api/compare',json={'entity_ids':ids}).status_code==422

@@ -112,7 +112,7 @@ def test_model_failure_is_honest_and_source_based(client, monkeypatch):
     result = asyncio.run(agent.answer('Where can I find IBD data?'))
     assert result['engine'] == 'catalog'
     assert result['warning']
-    assert result['datasets'][0]['files'][0]['dictionaries']
+    assert any(f['dictionaries'] for f in result['datasets'][0]['files'] if 'monthly' in f['name'])
     assert 'dictionary_mapping_v3.4.tsv' not in result['answer']
 
 
@@ -461,7 +461,7 @@ def test_public_generation_notes_are_short_and_do_not_expose_internal_review(cli
     if dataset_id == 'IBD' and source: assert '## Points to confirm' in source
 
 
-@pytest.mark.parametrize('dataset_id, expected_rows', [('IBD',130), ('MGB_AD',18), ('UPMC_AD',10)])
+@pytest.mark.parametrize('dataset_id, expected_rows', [('IBD',141), ('MGB_AD',18), ('UPMC_AD',10)])
 def test_dictionary_download_is_english_and_excel_readable(client, dataset_id, expected_rows):
     response = client.get(f'/api/datasets/{dataset_id}/download/column_dictionary.csv')
     assert response.status_code == 200

@@ -205,13 +205,14 @@ function answerFile(section, file) {
     file.columns.forEach((name, i) => { if (i) title.append(document.createTextNode(', ')); title.append(el('code', name, 'column-name')); });
   }
   card.append(title);
+  if (file.owner) card.append(el('p', 'Managed by ' + file.owner, 'note'));
   if (file.show_types && file.types?.length) card.append(el('p', `Types: ${file.types.join(', ')}`, 'note'));
   const links = el('div', null, 'resource-links'); const path = pathDisclosure(file);
   if (path) links.append(path);
   if (file.dictionaries?.length) links.append(dictionaryDisclosure(file.dictionaries));
   if (file.readme_kind) links.append(smallButton(section.dataset.public_summary ? 'File documentation' : 'Original README', () => openDocument(section.dataset.id, file.readme_kind)));
   card.append(links);
-  if (section.dataset.documentation_only && file.column_descriptions?.length) {
+  if ((section.dataset.documentation_only || file.topic_id === 'ibd_agents') && file.column_descriptions?.length) {
     card.append(disclosure('Column definitions', table(['Column','Meaning','Type'], file.column_descriptions, 'field-table')));
   }
   if (file.file) {
@@ -302,6 +303,9 @@ function renderAnswer(result, box) {
       links.append(disclosure(section.dataset.public_summary ? 'Documentation' : 'Original READMEs', choices));
     } else links.append(smallButton('Original README', () => openDocument(section.dataset.id, 'original'), ''));
     if (result.intent === 'project') links.append(smallButton('Open full MAJOR IBD project README', () => openDocument(section.dataset.id, 'ibd_project'), ''));
+    if (section.dataset.id === 'IBD' && ['overview','project'].includes(result.intent)) {
+      links.append(smallButton('Build derived IBD data', () => ask('How do I build and save derived IBD data?'), ''));
+    }
     if (section.dataset.has_tracker) links.append(smallButton('Spreadsheet entry', () => openDocument(section.dataset.id, 'tracker'), ''));
     block.append(links); comparisonDetails.append(block);
   }
@@ -327,6 +331,11 @@ async function ask(query, comparisonRequest=null) {
 }
 function filesAndColumnsPanel(record) {
   const panel = el('div'), picker = el('div', null, 'file-picker'), area = el('div');
+  const groups = record.dataset_id === 'IBD' ? new Map([
+    ['raw', 'Raw data'], ['counts', 'Counts and labs'], ['registry', 'Registry data'],
+    ['scores', 'Genetic and microbiome scores'], ['agents', 'Agent data']
+  ]) : null;
+  const choices = [];
   const dictionaryDownload = link('Download full column dictionary', `/api/datasets/${record.dataset_id}/download/column_dictionary.csv`);
   function select(file) {
     state.selection=record.file_selections?.[file.file] || {kind:'dataset',id:record.dataset_id};
@@ -336,6 +345,7 @@ function filesAndColumnsPanel(record) {
     const card = el('div', null, 'panel-box'), header = el('div', null, 'file-heading');
     header.append(el('h3', detail.name), el('span', 'SYNTHETIC DATA', 'fake-label'));
     card.append(header, el('p', `${file.rows.toLocaleString()} generated rows. ${file.row_meaning}`));
+    if (detail.owner) card.append(el('p', 'Managed by ' + detail.owner));
     card.append(el('code', file.file, 'column-name'));
     if (detail.location) card.append(pathDisclosure(detail));
     const actions = el('div', null, 'file-actions');
@@ -349,6 +359,14 @@ function filesAndColumnsPanel(record) {
     });
     more.disabled = true;
     actions.append(more, link('Download synthetic CSV', `/api/datasets/${record.dataset_id}/download/${encodeURIComponent(file.file)}`));
+    if (file.topic_id === 'ibd_agents') {
+      actions.append(smallButton('Read agent documentation', () => openDocument(record.dataset_id, 'ibd_agents')));
+      actions.append(smallButton('Related PRISM registry', () => ask('Tell me about PRISM endoscopy scores')));
+    } else if (detail.id === 'ibd_registry_endo_scores') {
+      actions.append(smallButton('Related endoscopy agent output', () => ask('Tell me about the IBD endoscopy agent output')));
+    } else if (file.topic_id === 'ibd_registry') {
+      actions.append(smallButton('Related chart review agent', () => ask('Tell me about the chart review agent for treatment response')));
+    }
     card.append(actions, preview); area.replaceChildren(card);
     sampleRows(record.dataset_id, file, preview, true).finally(() => { more.disabled = false; });
   }
@@ -362,7 +380,7 @@ function filesAndColumnsPanel(record) {
     if (file.row_meaning) card.append(el('p', file.row_meaning));
     if (file.owner) card.append(el('p', 'Owner: ' + file.owner));
     for (const name of file.source_files) card.append(el('code', name, 'column-name'), document.createTextNode(' '));
-    card.append(pathDisclosure(file));
+    if (file.location) card.append(pathDisclosure(file));
     if (file.column_descriptions?.length) card.append(el('h4', 'Column explanations'), table(
       record.documentation_only ? ['Column','Meaning','Type'] : ['Column','Meaning'], file.column_descriptions, 'field-table'));
     if (file.processing_script) card.append(disclosure('Processing script', el('code', file.processing_script, 'source-location')));
@@ -370,29 +388,72 @@ function filesAndColumnsPanel(record) {
       const target = file.link_target ? ` with ${file.link_target}` : '';
       card.append(smallButton('How to link' + target, () => ask(`How do I link ${file.name.split(' — ')[0]}${target}?`)));
     }
-    card.append(smallButton(record.public_summary ? 'Read file documentation' : 'Read original README', () => openDocument(record.dataset_id, file.readme_kind)));
+    if (file.readme_kind) card.append(smallButton(record.public_summary ? 'Read file documentation' : 'Read original README', () => openDocument(record.dataset_id, file.readme_kind)));
     area.replaceChildren(card);
   }
   for (const file of record.files) {
     const detail = record.file_details.find(item => item.file === file.file);
-    const button = smallButton(detail.name, () => select(file), ''); button.dataset.file = file.file; picker.append(button);
+    choices.push({key:file.file, name:detail.name, group:file.file_group, open:() => select(file)});
   }
   for (const file of record.documented_files || []) {
     if (record.files.some(f => f.file === file.file)) continue;
-    const button = smallButton(file.name, () => selectDocumented(file), ''); button.dataset.file = file.id; picker.append(button);
+    choices.push({key:file.id, name:file.name, group:file.file_group, open:() => selectDocumented(file)});
   }
+  const shownPaths = new Set([...record.file_details, ...(record.documented_files || [])].map(file => file.location));
+  if (groups) for (const item of record.resources) {
+    if (!groups.has(item.file_group) || !item.location || shownPaths.has(item.location)) continue;
+    const file = {...item, id:item.location, source_files:item.file ? [item.file] : [], readme_kind:'original'};
+    choices.push({key:file.id, name:file.name, group:file.file_group, open:() => selectDocumented(file)});
+    shownPaths.add(item.location);
+  }
+  function showChoices(group) {
+    const visible = choices.filter(choice => !groups || choice.group === group);
+    picker.replaceChildren(...visible.map(choice => {
+      const button = smallButton(choice.name, choice.open, '');
+      button.dataset.file = choice.key;
+      return button;
+    }));
+    if (groups) visible[0]?.open();
+  }
+  if (groups) {
+    const groupPicker = el('nav', null, 'file-picker file-groups');
+    groupPicker.setAttribute('aria-label','IBD file groups');
+    function showGroup(group) {
+      [...groupPicker.children].forEach(button => {
+        const active = button.dataset.group === group;
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-pressed', String(active));
+      });
+      showChoices(group);
+    }
+    for (const [group,label] of groups) {
+      const button = smallButton(label, () => showGroup(group), '');
+      button.dataset.group = group;
+      groupPicker.append(button);
+    }
+    panel.append(groupPicker);
+    showGroup('counts');
+  } else showChoices();
   panel.append(picker, area, dictionaryDownload);
   const sources = el('div', null, 'panel-box'); sources.append(el('h3', 'Source locations and processing code'));
-  const shownPaths = new Set(record.file_details.map(file => file.location));
   record.resources.filter(r => r.location && !shownPaths.has(r.location)).forEach(r => {
     const row = el('div', null, 'source-row'); row.append(el('h3', r.name), pathDisclosure(r));
     sources.append(row);
   }); panel.append(disclosure('Other source locations and processing scripts', sources));
   const initialExample = record.files.find(f => /monthly/i.test(f.file) && !/nlp/i.test(f.file)) || record.files[0];
   const initialDocument = record.documented_files?.find(f => f.level === 'monthly' && f.data_kind === 'codified') || record.documented_files?.[0];
-  if (initialExample) select(initialExample);
-  else if (initialDocument) selectDocumented(initialDocument);
+  if (!groups && initialExample) select(initialExample);
+  else if (!groups && initialDocument) selectDocumented(initialDocument);
   return panel;
+}
+function ibdGuidePanel(record, kind, prompts) {
+  const doc = record.original_documents.find(item => item.kind === kind);
+  const card = el('div', null, 'panel-box');
+  const actions = el('div', null, 'file-actions');
+  actions.append(smallButton('Read guide', () => openDocument(record.dataset_id, kind)));
+  for (const [label,query] of prompts) actions.append(smallButton(label, () => ask(query)));
+  card.append(el('h3', doc.label), el('p', doc.description), actions);
+  return card;
 }
 function readmesPanel(record) {
   const panel = el('div');
@@ -444,7 +505,19 @@ async function openDataset(id) {
     } heading.append(meta); node.append(heading);
     if (record.cohort_report_url) heading.append(cohortReportLink(record.cohort_report_url));
     const tabs = el('nav', null, 'detail-tabs'); tabs.setAttribute('aria-label','Dataset information'); const area = el('div');
-    const views = {'Files and columns':filesAndColumnsPanel, READMEs:readmesPanel, Dictionaries:dictionariesPanel};
+    const views = {'Files and columns':filesAndColumnsPanel};
+    if (id === 'IBD') {
+      views['Build derived data'] = data => ibdGuidePanel(data, 'ibd_workflow', [
+        ['Cohort filters', 'How do I filter and select eligible IBD patients?'],
+        ['Build and save derived files', 'How do I build and save derived IBD data?'],
+        ['Link registry outcomes to EHR', 'Show the IBD registry-to-EHR linkage step by step.']
+      ]);
+      views['IBD agents'] = data => ibdGuidePanel(data, 'ibd_agents', [
+        ['Endoscopy agent output', 'Tell me about the IBD endoscopy agent output'],
+        ['Treatment-response chart review', 'Tell me about the chart review agent for treatment response']
+      ]);
+    }
+    Object.assign(views, {READMEs:readmesPanel, Dictionaries:dictionariesPanel});
     function select(name) { [...tabs.children].forEach(b => b.classList.toggle('active', b.textContent === name)); area.replaceChildren(views[name](record)); }
     for (const name of Object.keys(views)) tabs.append(smallButton(name, () => select(name), ''));
     node.append(tabs, area); select('Files and columns'); window.scrollTo({top:0,behavior:'smooth'});

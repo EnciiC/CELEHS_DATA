@@ -73,6 +73,7 @@ def prepare_topics(record, docs):
                 raise ValueError('Registered synthetic columns differ from original README')
             topic['files'].append({
                 **item, 'name':item['name'], 'id':spec['id']+'_'+item['id'],
+                'file_group':spec.get('file_group'),
                 'file':item.get('file'), 'location':location.rstrip('/')+'/'+item['source_file'],
                 'source_files':[item['source_file'] + (' — '+item['worksheet']+' worksheet' if item.get('worksheet') else '')],
                 'columns':columns,'column_descriptions':descriptions,
@@ -95,6 +96,7 @@ def prepare_topics(record, docs):
                 description=excerpt(document,descriptions[index]) if descriptions else overview
                 topic['files'].append({
                     'id':spec['id']+'_'+str(index), 'name':spec['name']+' — '+name,
+                    'file_group':spec.get('file_group'),
                     'file':None, 'location':path, 'source_files':[path.rsplit('/',1)[-1]],
                     'columns':[], 'column_descriptions':[], 'row_meaning':'',
                     'description':description, 'readme_kind':kind, 'topic_id':spec['id'],
@@ -124,7 +126,8 @@ def prepare_topics(record, docs):
         record['documented_files'].extend(topic['files'])
         record['resources'].extend({
             'name':f['name'], 'kind':spec.get('resource_type','Project data'),
-            'location':f['location'], 'description':overview, 'source_kind':kind,
+            'location':f['location'], 'description':f['description'], 'source_kind':kind,
+            'file_group':f['file_group'],
         } for f in topic['files'])
     record['readme_topics'] = prepared
 
@@ -187,7 +190,8 @@ def match_topic(catalog, query, previous):
                            'rows preview first five 5 10 14 52 week weeks wk wks numbers number cohorts cohort '
                            'baseline treatment matching match map mapping normalized broader stricter sensitivity '
                            'current recommended definition definitions defined version versions table tables score scores workbook worksheets worksheet '
-                           'both all at 3 12 30 endoscopy legacy prism mgh genetic polygenic risk grs prs'.split())
+                           'both all at 3 12 30 endoscopy legacy prism mgh genetic polygenic risk grs prs '
+                           'stats statistics summary examples workflow who managed manages manager contact related'.split())
             if re.search(r'\b(?:run|compute|calculate|fit|train|execute|perform)\b',query,re.I): continue
             if set(words(query))-known-operations: continue
             matches.append((strength,(record,topic,topic_view)))
@@ -216,7 +220,10 @@ def topic_answer(catalog, query, previous):
         targets=focused_files
         if len(targets)==1 and targets[0].get('outcome_facts'):
             facts=targets[0]['outcome_facts']
-    files=topic['linkage_files'] if view=='linkage' else topic['files'] if view in {'overview','location','columns','preview'} else []
+    file_views = {'overview','location','columns','preview'}
+    if topic['id']=='ibd_agents':
+        file_views.add('statistics')
+    files=topic['linkage_files'] if view=='linkage' else topic['files'] if view in file_views else []
     selected=named_files(files,query)
     if selected: files=selected
     files=[{**f,'show_columns':view in {'columns','preview'},'show_preview':view=='preview' and bool(f.get('file'))} for f in files]
@@ -239,12 +246,23 @@ def topic_answer(catalog, query, previous):
         actions.append({'label':'Show columns','query':f'Show columns for {target_name}'})
     if focus and focus.get('preview_available') and view!='preview':
         actions.append({'label':'Show 5 fake rows','query':f'Show 5 fake rows for {target_name}'})
-    if view!='linkage' and 'linkage' in topic['prepared_views']:
+    if view!='linkage' and 'linkage' in topic['prepared_views'] and topic.get('link_target'):
         target=' with '+topic['link_target'] if topic.get('link_target') else ''
         actions.append({'label':'How to link'+target,'query':f"How do I link {target_name}{target}?"})
     if view!='location':
         actions.append({'label':'Show file locations',
                         'query':f"Where are the {target_name} files?"})
+    if topic['id']=='ibd_agents':
+        if view=='statistics':
+            intro='Here are the documented counts for the endoscopy output.'
+        related = (['MGH treatment-response registry','Legacy PRISM treatment-response registry']
+                   if view=='treatment_agent' else ['PRISM endoscopy scores'])
+        if view=='treatment_agent':
+            intro='Chart review agent for treatment response'
+            actions=[]
+        actions.extend({'label':name,'query':f'Tell me about {name}'} for name in related)
+        if view!='treatment_agent':
+            actions.append({'label':'Treatment-response chart review agent','query':'Tell me about the chart review agent for treatment response'})
     return {'query':query,'engine':'catalog','model':None,'intent':'readme_topic',
             'interpretation':'verified_readme_topic','intro':intro,
             'answer':'\n\n'.join([intro,*[f['text'] for f in facts],

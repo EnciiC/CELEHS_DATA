@@ -72,6 +72,7 @@ def prepare_readmes(record, directory):
         record['lab_summary'] = {'coverage': coverage, 'coverage_text': section(text, 'Dataset coverage and repeated measurements')}
         record['documented_files'].append({
             'id': 'ibd_lab_monthly', 'name': 'IBD monthly laboratory summary',
+            'file_group': 'counts',
             'file': None, 'location': location, 'source_files': filenames,
             'columns': [r['Column'] for r in field_rows], 'column_descriptions': field_rows,
             'row_meaning': row_meaning[0].upper() + row_meaning[1:], 'owner': re.search(r'^\*\*Owner:\*\* (.+)', text, re.M)[1],
@@ -83,6 +84,7 @@ def prepare_readmes(record, directory):
         })
         record['resources'].append({
             'name': 'IBD monthly laboratory summary', 'kind': 'Processed laboratory data',
+            'file_group': 'counts',
             'location': location, 'description': section(text, 'Purpose'),
             'source_kind': 'ibd_lab', 'source': 'IBD_LAB_MONTHLY_README.md',
         })

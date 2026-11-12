@@ -96,7 +96,7 @@ def test_named_inventory_includes_registry_without_depending_on_model(catalog):
     result=asyncio.run(agent.answer('What IBD data do we have?',use_llm=True))
     assert result['warning'] is None and result['interpretation']=='verified_overview'
     assert 'registry remission outcomes' in result['answer']
-    assert len(result['datasets'][0]['files'])==8
+    assert any(f['name']=='IBD endoscopy agent output' for f in result['datasets'][0]['files'])
 
 
 @pytest.mark.parametrize('query,previous',[

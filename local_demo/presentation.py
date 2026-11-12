@@ -30,8 +30,8 @@ def dictionaries_for(record, name):
     if record["dataset_id"] != "IBD": return items
     name = name.lower()
     if "raw" in name or "mart" in name:
-        return [d for d in items if "CONCEPT_CD" in d["name"]]
-    return [d for d in items if ("nlp" in d["name"].lower()) == ("nlp" in name) and "CONCEPT_CD" not in d["name"]]
+        return []
+    return [d for d in items if ("nlp" in d["name"].lower()) == ("nlp" in name)]
 
 
 def file_views(record, query, purpose):
