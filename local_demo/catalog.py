@@ -6,10 +6,12 @@ import csv
 import hashlib
 import html
 import json
+import os
 import re
 import sqlite3
 import xml.etree.ElementTree as ET
 import zipfile
+from contextlib import closing
 from pathlib import Path
 from .notes import fake_data_notes
 from .document_stats import ibd_date_summaries
@@ -17,6 +19,7 @@ from .tracker import load_tracker, tracker_notes
 from .readme_resources import prepare_readmes, extra_facts
 from .resource_guides import ResourceLibrary
 from .hosting import provider
+from .ms import SITES, load_ms, ms_ids
 
 PROJECT = Path(__file__).resolve().parents[1]
 INPUT = PROJECT / "demo_input"
@@ -151,6 +154,9 @@ def split_chunks(text: str, limit: int = 950) -> list[str]:
 class Catalog:
     def __init__(self, root: Path = INPUT, database: Path = DATABASE):
         self.root, self.database = root, database
+        ms_dir = os.environ.get('CATALOG_MS_DIR') if provider() == 'ollama' else None
+        self.ms_directory = Path(ms_dir).resolve() if ms_dir else None
+        self.public_ms_directory = self.root / 'ms_public' if provider() == 'cloudflare' else None
         # The same README registrations support local and hosted resource discovery.
         self.library = ResourceLibrary()
         self.records: dict[str, dict] = {}
@@ -224,7 +230,14 @@ class Catalog:
                 documents[folder]['tracker'] = tracker_notes(record['tracker_source'])
             records[folder] = record
             facts[folder] = self.build_facts(record, documents[folder])
-        with self.connect() as db:
+        ms_source = self.ms_directory or self.public_ms_directory
+        if ms_source and ms_source.is_dir():
+            for site in SITES:
+                dataset_id = site + '_MS'
+                directory = ms_source if self.public_ms_directory else ms_source / dataset_id
+                records[dataset_id], documents[dataset_id], facts[dataset_id] = load_ms(
+                    directory, site, public=self.public_ms_directory is not None)
+        with closing(self.connect()) as db, db:
             db.executescript("""
                 CREATE TABLE IF NOT EXISTS datasets (id TEXT PRIMARY KEY, record TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS documents
@@ -340,6 +353,8 @@ class Catalog:
                 "fake_files": len(r["files"]), "synthetic_rows": sum(f["rows"] for f in r["files"]),
                 'has_tracker':bool(r.get('tracker_source')),
                 'original_documents':r.get('original_documents', []),
+                'readme_curator':r.get('readme_curator'), 'documentation_only':r.get('documentation_only', False),
+                'public_summary':r.get('public_summary', False),
                 'documented_resources':len(r.get('documented_files', []))}
 
     def find(self, query: str, previous: list[str] | None = None):
@@ -348,12 +363,15 @@ class Catalog:
         ad = bool(re.search(r"\bad\b|alzheimer|dementia|阿尔茨|痴呆", q))
         mgb = bool(re.search(r"\bmgb\b|mass general|massachusetts general", q))
         upmc = bool(re.search(r"\bupmc\b|pittsburgh|匹兹堡", q))
-        if re.search(r"\bvinci\b|\bva\b|\bkdi\b|\bms\b|\bra\b|multiple sclerosis|rheumatoid|mimic", q) and not (ibd or ad):
+        ms = ms_ids(q, self.records)
+        if re.search(r"\bvinci\b|\bva\b|\bkdi\b|\bra\b|rheumatoid|mimic", q) and not (ibd or ad):
+            return []
+        if re.search(r'\bms\b|multiple sclerosis', q) and not (ibd or ad or ms):
             return []
         candidates = list(self.records)
-        explicit = ibd or ad
-        if ibd or ad:
-            candidates = [i for i in candidates if (ibd and i == "IBD") or (ad and i.endswith("_AD"))]
+        explicit = ibd or ad or ms
+        if explicit:
+            candidates = [i for i in candidates if (ibd and i == "IBD") or (ad and i.endswith("_AD")) or i in ms]
         if mgb and not upmc:
             candidates = [i for i in candidates if self.records[i]["site"] == "MGB"]
         if upmc and not mgb:
@@ -370,7 +388,7 @@ class Catalog:
         if not tokens:
             return []
         expression = " OR ".join('"' + token + '"' for token in tokens)
-        with self.connect() as db:
+        with closing(self.connect()) as db:
             ids = {row["dataset_id"] for row in db.execute(
                 "SELECT DISTINCT dataset_id FROM chunks WHERE chunks MATCH ?", (expression,))}
         return [i for i in candidates if i in ids]
@@ -400,6 +418,14 @@ class Catalog:
 
     def downloadable(self, dataset_id: str, filename: str) -> Path:
         record = self.records[dataset_id]
+        if record.get('documentation_only'):
+            if not self.ms_directory or filename not in {doc['file'] for doc in record['original_documents']}:
+                raise ValueError('File is not an approved documentation download')
+            directory = (self.ms_directory / dataset_id).resolve()
+            path = (directory / filename).resolve()
+            if path.parent != directory or not path.is_file():
+                raise ValueError('Invalid documentation path')
+            return path
         allowed = {f["file"] for f in record["files"]} | {
             "column_dictionary.csv", "schema.json", "catalog_record.json"} | {
                 doc['file'] for doc in record.get('original_documents', [])} | {

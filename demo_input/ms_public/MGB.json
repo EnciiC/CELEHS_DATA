@@ -1,0 +1,599 @@
+{
+  "site": "MGB",
+  "report_stats": {
+    "generated": "2026-11-09 16:42",
+    "inventory": 41052,
+    "cohort": 16900,
+    "registry_ms": 7527,
+    "inventory_label": "All patients with EHR or NLP data",
+    "labels": {
+      "patients with labels": "7,527",
+      "labelled patient-months": "88,682",
+      "months with EDSS": "71,407",
+      "patients with EDSS": "7,478",
+      "median EDSS": "2.0",
+      "months with a relapse": "12,876"
+    },
+    "profile": {
+      "Patients with codified EHR": "16,900",
+      "Patients with NLP": "16,895",
+      "Distinct codified feature codes": "10,848",
+      "Distinct NLP concepts": "159,433",
+      "Median EHR history span": "11.2 y",
+      "Median active EHR months": "23",
+      "Median NLP history span": "9.7 y",
+      "Median active NLP months": "17",
+      "Median age at diagnosis": "44.8 y",
+      "Patients with EDSS": "7,478",
+      "Months with EDSS": "71,407"
+    },
+    "overlap": "Of 7,478 patients with EDSS and EHR, 7,415 (99.2%) had overlapping windows. Median overlap was 4.4 years, with a median of 1.6 years of EHR before the first EDSS.",
+    "counts": "41,052 patients with EHR or NLP data in the source inventory and 16,900 patients in the filtered cohort report. 7,527 are registry patients in the MS diagnosis group."
+  },
+  "columns": {
+    "all_ehr_absolute_date.parquet": [
+      {
+        "Column": "patient_num",
+        "Type": "int64",
+        "Meaning": "EHR patient identifier"
+      },
+      {
+        "Column": "calendar_date",
+        "Type": "timestamp[s]",
+        "Meaning": "Absolute event date"
+      },
+      {
+        "Column": "calendar_month",
+        "Type": "str",
+        "Meaning": "'YYYY-MM' of calendar_date"
+      },
+      {
+        "Column": "feature_id",
+        "Type": "str",
+        "Meaning": "Ontology Group_Code from the rollup"
+      },
+      {
+        "Column": "local_code",
+        "Type": "str",
+        "Meaning": "Raw un-rolled source code, verbatim"
+      },
+      {
+        "Column": "type",
+        "Type": "str",
+        "Meaning": "LabTest, Procedures, Diagnosis, Medications, Physical, Chief_Complaint"
+      },
+      {
+        "Column": "count",
+        "Type": "int32",
+        "Meaning": "Units of information: source rows for this patient/day/local_code, counted once per concept the code names"
+      },
+      {
+        "Column": "count_events",
+        "Type": "float64",
+        "Meaning": "The same, divided across the concepts the event reached, stored already divided. sum(count_events) is the number of events that happened. Equals count on every row that did not fan out"
+      },
+      {
+        "Column": "mapping_index",
+        "Type": "Int64",
+        "Meaning": "Registry identifier"
+      }
+    ],
+    "all_ehr_calendar_month_aggregation.parquet": [
+      {
+        "Column": "patient_num",
+        "Type": "int64",
+        "Meaning": "EHR patient identifier"
+      },
+      {
+        "Column": "calendar_month",
+        "Type": "str",
+        "Meaning": "'YYYY-MM'"
+      },
+      {
+        "Column": "feature_id",
+        "Type": "str",
+        "Meaning": "Ontology Group_Code — the rollup grain"
+      },
+      {
+        "Column": "type",
+        "Type": "str",
+        "Meaning": "Event category"
+      },
+      {
+        "Column": "count",
+        "Type": "int32",
+        "Meaning": "Events in the month naming this feature"
+      },
+      {
+        "Column": "n_days",
+        "Type": "int32",
+        "Meaning": "Distinct days in the month carrying this feature"
+      },
+      {
+        "Column": "mapping_index",
+        "Type": "Int64",
+        "Meaning": "Registry identifier"
+      }
+    ],
+    "all_nlp_calendar_month_aggregation.parquet": [
+      {
+        "Column": "patient_num",
+        "Type": "int64",
+        "Meaning": "EHR patient identifier"
+      },
+      {
+        "Column": "calendar_month",
+        "Type": "str",
+        "Meaning": "Back-calculated from t0 — see below"
+      },
+      {
+        "Column": "cui",
+        "Type": "str",
+        "Meaning": "UMLS Concept Unique Identifier, uppercased"
+      },
+      {
+        "Column": "count",
+        "Type": "int32",
+        "Meaning": "Days with a mention of this CUI in the source's 30.4375-day window, 1–31; not a mention count. The source's n, unchanged (data_summary_MGB.md §2)"
+      },
+      {
+        "Column": "n_source_months",
+        "Type": "int32",
+        "Meaning": "Source months_since_t0 buckets folded into this calendar month. Always 1 under the default calendar convention"
+      },
+      {
+        "Column": "mapping_index",
+        "Type": "Int64",
+        "Meaning": "Registry identifier"
+      }
+    ],
+    "df_registry_monthly_labels.parquet": [
+      {
+        "Column": "patient_num",
+        "Type": "Int64",
+        "Meaning": "EHR identifier"
+      },
+      {
+        "Column": "mapping_index",
+        "Type": "Int64",
+        "Meaning": "Registry identifier (primary key with calendar_month)"
+      },
+      {
+        "Column": "calendar_month",
+        "Type": "str",
+        "Meaning": "'YYYY-MM'"
+      },
+      {
+        "Column": "female_gender",
+        "Type": "Int8",
+        "Meaning": "Carried from demographics"
+      },
+      {
+        "Column": "white_race",
+        "Type": "Int8",
+        "Meaning": "Carried from demographics"
+      },
+      {
+        "Column": "nonhispanic_ethnicity",
+        "Type": "Int8",
+        "Meaning": "Carried from demographics"
+      },
+      {
+        "Column": "white_nonhispanic",
+        "Type": "Int8",
+        "Meaning": "Carried from demographics"
+      },
+      {
+        "Column": "yob",
+        "Type": "float64",
+        "Meaning": "Year of birth"
+      },
+      {
+        "Column": "age_at_diagnosis_EHR_demographics",
+        "Type": "float64",
+        "Meaning": "Age at first MS/AD diagnosis code"
+      },
+      {
+        "Column": "age_at_death_years",
+        "Type": "float64 / Int8",
+        "Meaning": "Mortality"
+      },
+      {
+        "Column": "is_deceased",
+        "Type": "float64 / Int8",
+        "Meaning": "Mortality"
+      },
+      {
+        "Column": "criteria_mcdonald",
+        "Type": "str / float64",
+        "Meaning": "Carried from the registry subjects table"
+      },
+      {
+        "Column": "first_symptom_year_registry",
+        "Type": "str / float64",
+        "Meaning": "Carried from the registry subjects table"
+      },
+      {
+        "Column": "first_diagnostic_year_registry",
+        "Type": "str / float64",
+        "Meaning": "Carried from the registry subjects table"
+      },
+      {
+        "Column": "registry_dx_group",
+        "Type": "str",
+        "Meaning": "Patient-level, as in demographics; the same on every row of a patient, while disease_subtype is the month's own category"
+      },
+      {
+        "Column": "edss",
+        "Type": "float64",
+        "Meaning": "EDSS (0–10), monthly median across visits"
+      },
+      {
+        "Column": "pdds",
+        "Type": "float64",
+        "Meaning": "PDDS (0–8), monthly median"
+      },
+      {
+        "Column": "disease_subtype",
+        "Type": "str",
+        "Meaning": "DISEASE_CATEGORY"
+      },
+      {
+        "Column": "disease_subtype_desc",
+        "Type": "str",
+        "Meaning": "e.g. \"Primary Progressive MS\""
+      },
+      {
+        "Column": "disease_course",
+        "Type": "float64",
+        "Meaning": "DISEASE_COURSE_SUBTYPE, monthly median"
+      },
+      {
+        "Column": "disease_course_desc",
+        "Type": "str",
+        "Meaning": "e.g. \"Other\""
+      },
+      {
+        "Column": "walking_time1",
+        "Type": "float64",
+        "Meaning": "WALKING_TIME1 from visits, monthly median"
+      },
+      {
+        "Column": "walk1",
+        "Type": "float64",
+        "Meaning": "Timed 25-ft walk (s), monthly median"
+      },
+      {
+        "Column": "walk2",
+        "Type": "float64",
+        "Meaning": "Timed 25-ft walk (s), monthly median"
+      },
+      {
+        "Column": "dominant1",
+        "Type": "float64",
+        "Meaning": "9-hole peg, dominant hand (s)"
+      },
+      {
+        "Column": "dominant2",
+        "Type": "float64",
+        "Meaning": "9-hole peg, dominant hand (s)"
+      },
+      {
+        "Column": "nondominant1",
+        "Type": "float64",
+        "Meaning": "9-hole peg, non-dominant hand (s)"
+      },
+      {
+        "Column": "nondominant2",
+        "Type": "float64",
+        "Meaning": "9-hole peg, non-dominant hand (s)"
+      },
+      {
+        "Column": "sdmt_correct",
+        "Type": "float64",
+        "Meaning": "SDMT correct answers, monthly median"
+      },
+      {
+        "Column": "dominant_hand",
+        "Type": "str",
+        "Meaning": "DOMINANT_HAND — R/L, plus 21 rows coded 0/A"
+      },
+      {
+        "Column": "has_relapse",
+        "Type": "Int8",
+        "Meaning": "1 if any attack onset this month, 0 otherwise"
+      },
+      {
+        "Column": "n_visits",
+        "Type": "int32",
+        "Meaning": "Source rows feeding this cell"
+      },
+      {
+        "Column": "n_tests",
+        "Type": "int32",
+        "Meaning": "Source rows feeding this cell"
+      },
+      {
+        "Column": "n_attacks",
+        "Type": "int32",
+        "Meaning": "Source rows feeding this cell"
+      },
+      {
+        "Column": "first_calendar_month",
+        "Type": "str",
+        "Meaning": "First observed month for this patient"
+      },
+      {
+        "Column": "last_calendar_month",
+        "Type": "str",
+        "Meaning": "Last observed month"
+      },
+      {
+        "Column": "followup_duration_months",
+        "Type": "Int32",
+        "Meaning": "Calendar months from first to last, inclusive"
+      }
+    ],
+    "df_patient_demographics.parquet": [
+      {
+        "Column": "patient_num",
+        "Type": "Int64",
+        "Meaning": "EHR identifier"
+      },
+      {
+        "Column": "mapping_index",
+        "Type": "Int64",
+        "Meaning": "Registry identifier"
+      },
+      {
+        "Column": "sex",
+        "Type": "str",
+        "Meaning": "Raw Gender_Legal_Sex"
+      },
+      {
+        "Column": "race",
+        "Type": "str",
+        "Meaning": "Raw Race1"
+      },
+      {
+        "Column": "ethnicity",
+        "Type": "str",
+        "Meaning": "Raw Ethnic_Group"
+      },
+      {
+        "Column": "female_gender",
+        "Type": "Int8",
+        "Meaning": "1=female, 0=male"
+      },
+      {
+        "Column": "white_race",
+        "Type": "Int8",
+        "Meaning": "1=White, 0=other recorded race"
+      },
+      {
+        "Column": "nonhispanic_ethnicity",
+        "Type": "Int8",
+        "Meaning": "1=non-Hispanic, 0=Hispanic"
+      },
+      {
+        "Column": "white_nonhispanic",
+        "Type": "Int8",
+        "Meaning": "Three-valued AND of the two above"
+      },
+      {
+        "Column": "yob",
+        "Type": "float64",
+        "Meaning": "Year of birth (registry only)"
+      },
+      {
+        "Column": "age_at_diagnosis_EHR_demographics",
+        "Type": "float64",
+        "Meaning": "Age in years at first MS/AD diagnosis code. Never filled from the registry"
+      },
+      {
+        "Column": "age_at_death_years",
+        "Type": "float64",
+        "Meaning": "Age in years at death"
+      },
+      {
+        "Column": "is_deceased",
+        "Type": "Int8",
+        "Meaning": "1 if age_at_death present"
+      },
+      {
+        "Column": "criteria_mcdonald",
+        "Type": "str",
+        "Meaning": "CRITERIA_MCDONALD verbatim — three values Y/0/N, not Y/N; 0 is 13% of rows and undocumented"
+      },
+      {
+        "Column": "first_symptom_year_registry",
+        "Type": "float64",
+        "Meaning": "FIRSTSYMP_YEAR"
+      },
+      {
+        "Column": "first_diagnostic_year_registry",
+        "Type": "float64",
+        "Meaning": "FIRSTDIAG_YEAR"
+      },
+      {
+        "Column": "registry_dx_group",
+        "Type": "str",
+        "Meaning": "ms / other_neuroinflammatory / other / unknown, from the last categorised visit's DISEASE_CATEGORY (DISEASE_CATEGORY_GROUP in step2_registry.py; README, *Diagnosis group*). Nothing is filtered on it"
+      },
+      {
+        "Column": "has_ehr_demographics",
+        "Type": "bool",
+        "Meaning": "Row present in the EHR extract"
+      },
+      {
+        "Column": "has_registry_demographics",
+        "Type": "bool",
+        "Meaning": "Row present in the registry subjects table"
+      }
+    ],
+    "list_all_patients.csv": [
+      {
+        "Column": "patient_num",
+        "Type": "int64",
+        "Meaning": "EHR patient identifier"
+      },
+      {
+        "Column": "mapping_index",
+        "Type": "Int64",
+        "Meaning": "Registry identifier"
+      },
+      {
+        "Column": "has_ehr",
+        "Type": "bool",
+        "Meaning": "Appears in the codified EHR data"
+      },
+      {
+        "Column": "has_nlp",
+        "Type": "bool",
+        "Meaning": "Appears in the NLP data"
+      },
+      {
+        "Column": "has_t0",
+        "Type": "bool",
+        "Meaning": "Has a row in the corrected t0 table"
+      },
+      {
+        "Column": "is_registry",
+        "Type": "Int8",
+        "Meaning": "1 if registry-enrolled"
+      },
+      {
+        "Column": "ms_spec_90",
+        "Type": "Int8",
+        "Meaning": "Meets the 90% MS specificity algorithm"
+      },
+      {
+        "Column": "ms_spec_95",
+        "Type": "Int8",
+        "Meaning": "Meets the 95% MS specificity algorithm"
+      }
+    ],
+    "ehr_code_dictionary.csv": [
+      {
+        "Column": "local_code",
+        "Type": "str",
+        "Meaning": "Un-rolled source code"
+      },
+      {
+        "Column": "type",
+        "Type": "str",
+        "Meaning": "Event category, as the source data spells it"
+      },
+      {
+        "Column": "lab_prefixed_code",
+        "Type": "str",
+        "Meaning": "The (Test:<prefix><code>) tag from the description, lower-cased (bh1-4); null for every non-lab code. Read per event, and what the rollup resolves labs by — README.md, Lab codes are resolved by their prefixed code"
+      },
+      {
+        "Column": "feature_id",
+        "Type": "str",
+        "Meaning": "One concept the rollup produced for it"
+      },
+      {
+        "Column": "is_primary",
+        "Type": "bool",
+        "Meaning": "True on the most specific concept overall — the one this code would have had under a single-winner rule. Exactly one row per (code, type, prefix)"
+      },
+      {
+        "Column": "n_concepts",
+        "Type": "int64",
+        "Meaning": "How many concepts this code names; 1 for all but the fan-out, and equal to the number of rows the code has"
+      },
+      {
+        "Column": "rollup_status",
+        "Type": "str",
+        "Meaning": "mapped, already_group_code, or unmapped"
+      },
+      {
+        "Column": "requires_further_mapping",
+        "Type": "bool",
+        "Meaning": "The dictionary flags this code's Group_Code as not final"
+      },
+      {
+        "Column": "mapping_ambiguous",
+        "Type": "bool",
+        "Meaning": "This local_code names several distinct concepts (not one parent/child ladder), so its events reach all of them — about 0.15% of events. Which pairs are coupled: concept_fanout_pairs.csv; the analysis: diagnostics/code_mapping_ambiguity/"
+      },
+      {
+        "Column": "mapping_override",
+        "Type": "str",
+        "Meaning": "own_code or remap when code_mapping_overrides replaced the dictionary's Group_Codes for this code, else null — ../../data/README.md"
+      },
+      {
+        "Column": "dict_type",
+        "Type": "str",
+        "Meaning": "The dictionary Type it was joined against (DX/LAB/MED/PROC); null if the type had no correspondence"
+      },
+      {
+        "Column": "type_status",
+        "Type": "str",
+        "Meaning": "mapped_type, no_counterpart (Physical / Chief_Complaint — expected), or unrecognised (needs a decision)"
+      },
+      {
+        "Column": "local_code_description",
+        "Type": "str",
+        "Meaning": "Human-readable label"
+      },
+      {
+        "Column": "n_events",
+        "Type": "int64",
+        "Meaning": "Event rows with this (code, type, prefix), repeated on each of its concept rows"
+      },
+      {
+        "Column": "n_events_attributed",
+        "Type": "float64",
+        "Meaning": "The same, divided across the code's concepts. sum(n_events_attributed) is the source event total"
+      },
+      {
+        "Column": "n_patients",
+        "Type": "int64",
+        "Meaning": "Distinct patients — exact, since shards cover disjoint ranges"
+      }
+    ],
+    "source_files.tsv": [
+      {
+        "Column": "step",
+        "Meaning": "Pipeline step",
+        "Type": "str"
+      },
+      {
+        "Column": "input",
+        "Meaning": "Input label",
+        "Type": "str"
+      },
+      {
+        "Column": "path",
+        "Meaning": "Source path or pattern",
+        "Type": "str"
+      },
+      {
+        "Column": "n_files",
+        "Meaning": "Number of matching files",
+        "Type": "int"
+      },
+      {
+        "Column": "size_bytes",
+        "Meaning": "Total file size",
+        "Type": "int"
+      },
+      {
+        "Column": "mtime",
+        "Meaning": "Latest input modification time",
+        "Type": "str"
+      }
+    ]
+  },
+  "docs": {
+    "ms_preprocessing": "# MGB MS preprocessing summary\n\nMGB stages the source RData, builds codified and NLP features, and creates registry and demographic outputs.\n\nMGB reconstructs the NLP month from corrected t0. Its primary disability label is EDSS.\n\nO2 output folder `/n/data1/hsph/biostat/celehs/lab/bef299/preprocessed_MGB`.\n\nPipeline module `/n/data1/hsph/biostat/celehs/lab/bef299/ms-thesis/preprocessing/MGB/`.\n\nThe preprocessed outputs retain the broader source inventory. Use the patient inventory to inspect cohort flags and feature availability. The cohort report applies a filter for its summaries.\n\nSource: Benet’s site preprocessing README.",
+    "ms_dictionary": "# MGB MS output data dictionary\n\nThe columns below describe the outputs on O2. Use the file cards or download the combined column dictionary for a CSV.\n\n## Daily codified EHR\n\n`all_ehr_absolute_date.parquet`\n\nEHR features by patient, date, source code and mapped feature.\n\n`patient_num`, `calendar_date`, `calendar_month`, `feature_id`, `local_code`, `type`, `count`, `count_events`, `mapping_index`\n\n## Monthly codified EHR\n\n`all_ehr_calendar_month_aggregation.parquet`\n\nOne row per patient, calendar month and rolled-up feature.\n\n`patient_num`, `calendar_month`, `feature_id`, `type`, `count`, `n_days`, `mapping_index`\n\n## Monthly NLP concepts\n\n`all_nlp_calendar_month_aggregation.parquet`\n\nOne row per patient, month label and NLP concept. The count measures days with a mention in a 30.4375-day source window labeled with a calendar month.\n\n`patient_num`, `calendar_month`, `cui`, `count`, `n_source_months`, `mapping_index`\n\n## Monthly registry labels\n\n`df_registry_monthly_labels.parquet`\n\nOne row for each patient and month with a registry observation. The main disability outcome is EDSS (Expanded Disability Status Scale).\n\n`patient_num`, `mapping_index`, `calendar_month`, `female_gender`, `white_race`, `nonhispanic_ethnicity`, `white_nonhispanic`, `yob`, `age_at_diagnosis_EHR_demographics`, `age_at_death_years`, `is_deceased`, `criteria_mcdonald`, `first_symptom_year_registry`, `first_diagnostic_year_registry`, `registry_dx_group`, `edss`, `pdds`, `disease_subtype`, `disease_subtype_desc`, `disease_course`, `disease_course_desc`, `walking_time1`, `walk1`, `walk2`, `dominant1`, `dominant2`, `nondominant1`, `nondominant2`, `sdmt_correct`, `dominant_hand`, `has_relapse`, `n_visits`, `n_tests`, `n_attacks`, `first_calendar_month`, `last_calendar_month`, `followup_duration_months`\n\n## Patient demographics\n\n`df_patient_demographics.parquet`\n\nOne row per patient in the documented demographics output.\n\n`patient_num`, `mapping_index`, `sex`, `race`, `ethnicity`, `female_gender`, `white_race`, `nonhispanic_ethnicity`, `white_nonhispanic`, `yob`, `age_at_diagnosis_EHR_demographics`, `age_at_death_years`, `is_deceased`, `criteria_mcdonald`, `first_symptom_year_registry`, `first_diagnostic_year_registry`, `registry_dx_group`, `has_ehr_demographics`, `has_registry_demographics`\n\n## Patient inventory and cohort flags\n\n`list_all_patients.csv`\n\nOne row per patient in the site inventory, with availability and cohort flags.\n\n`patient_num`, `mapping_index`, `has_ehr`, `has_nlp`, `has_t0`, `is_registry`, `ms_spec_90`, `ms_spec_95`\n\n## Codified EHR code dictionary\n\n`ehr_code_dictionary.csv`\n\nLocal codes, mapped features, descriptions, and usage counts.\n\n`local_code`, `type`, `lab_prefixed_code`, `feature_id`, `is_primary`, `n_concepts`, `rollup_status`, `requires_further_mapping`, `mapping_ambiguous`, `mapping_override`, `dict_type`, `type_status`, `local_code_description`, `n_events`, `n_events_attributed`, `n_patients`\n\n## Pipeline input manifest\n\n`source_files.tsv`\n\nInput paths, file counts, sizes, and modification times by pipeline step.\n\n`step`, `input`, `path`, `n_files`, `size_bytes`, `mtime`\n\nSource: Benet’s output data dictionary.",
+    "ms_raw": "# MGB MS raw source inventory summary\n\nMGB uses unrolled codified RData, monthly NLP RData, the corrected t0 table, demographics, and dated registry tables. The raw inventory identifies inputs used by the pipeline and files retained for reference.\n\nSource: Benet’s site data summary.",
+    "ms_comparison": "# Comparing MGB MS and UPMC MS\n\n| Topic | MGB | UPMC |\n| --- | --- | --- |\n| Primary disability measure | EDSS | PDDS from PROMOTE |\n| NLP month | Label reconstructed from corrected t0 for a 30.4375-day source window | Actual calendar month from absolute dates |\n| NLP count | Days with a mention in the source window | Distinct days with an asserted mention in the month |\n| Diagnosis counts | Source diagnosis and procedure codes occur at most once per patient-day and code | Raw ICD events preserve same-day diagnosis frequencies |\n| Lab values | Codes and counts | Values, units and reference ranges in the raw layer. Processed features record occurrences. |\n| Registry linkage | EHR mapping joins registry mapping_index to patient_num | PROMOTE bridge joins id_participant to patient_num. Re-enrollments can map to the same patient. |\n\nBoth outputs carry calendar months as YYYY-MM and use dates at day resolution when the source supplies them. The daily codified table preserves local_code and mapped feature_id. Monthly codified counts are grouped by feature_id.\n\nSource: Benet's MGB and UPMC comparison and the two output dictionaries.\n",
+    "ms_mapping": "# MS code-mapping README summary\n\n- `dmt_mapping.csv` lists disease-modifying therapy entries and the feature IDs they roll up to.\n- `dictionary_mapping_v3.4.tsv` is the shared rollup dictionary. `code_mapping_overrides.csv` applies curated corrections before both sites resolve codes.\n- `registry_treatment_map_MGB.csv` maps MGB registry treatment names to RxNorm and the therapy sheet.\n- Labs are resolved to LOINC codes where possible, preserving specimen distinctions. The two sites have different lab feature coverage.\n- `count` can credit the same event to multiple features. `count_events` in the daily codified table apportions it across features.\n\n### Known gap: Plegridy at MGB\n\nThe MGB mapping README documents three source codes that roll up to groups shared with other products or devices. The other MGB peginterferon beta-1a codes are mapped. The documented UPMC codes map to the intended feature.\n\nSource: Benet's code-mapping README.\n",
+    "ms_report": "# MGB MS cohort report summary\n\nReport generated 2026-11-09. 41,052 patients with EHR or NLP data in the source inventory and 16,900 patients in the filtered cohort report. 7,527 are registry patients in the MS diagnosis group.\n\nThe report selects `ms_spec_90 == 1` or registry enrollment, then restricts registry patients to the MS diagnosis group. The broader output inventory is the starting population.\n\nThese figures describe the filtered report cohort.\n\n| Measure | Value |\n| --- | --- |\n| Patients with codified EHR | 16,900 |\n| Patients with NLP | 16,895 |\n| Distinct codified feature codes | 10,848 |\n| Distinct NLP concepts | 159,433 |\n| Median EHR history span | 11.2 y |\n| Median active EHR months | 23 |\n| Median NLP history span | 9.7 y |\n| Median active NLP months | 17 |\n| Median age at diagnosis | 44.8 y |\n| Patients with EDSS | 7,478 |\n| Months with EDSS | 71,407 |\n\n## Label and feature overlap\n\nOf 7,478 patients with EDSS and EHR, 7,415 (99.2%) had overlapping windows. Median overlap was 4.4 years, with a median of 1.6 years of EHR before the first EDSS.\n\nSource: Benet’s cohort report. The full report and charts are available in the local Dataset Finder."
+  }
+}

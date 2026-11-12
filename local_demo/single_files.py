@@ -6,6 +6,7 @@ from .presentation import file_views
 from .readme_resources import tables, clean, source
 from .resource_guides import norm
 from .readme_topics import requested_view
+from .ms import ms_ids
 
 
 def basename(value):
@@ -17,7 +18,7 @@ def file_inventory(catalog):
     for parent,record in catalog.records.items():
         cards=file_views(record,'','browse')
         cards += [f for f in record.get('documented_files',[]) if not any(
-            f.get('file') and f['file']==c.get('file') for c in cards)]
+            (f.get('id') and f['id']==c.get('id')) or (f.get('file') and f['file']==c.get('file')) for c in cards)]
         for resource in record['resources']:
             if not resource.get('location') or any(c.get('location')==resource['location'] for c in cards): continue
             cards.append({'name':resource['name'],'location':resource['location'],
@@ -52,6 +53,8 @@ def file_inventory(catalog):
                         'card':{'name':name,'file':None,'columns':[],'readme_kind':doc['kind'],
                                 'dictionaries':[],'source_files':[name]}})
         # Include individually named source files that have no prepared fake example.
+        if record.get('documentation_only'):
+            continue
         documents=[('original',catalog.documents[parent]['original_section'])]+[
             (d['kind'],catalog.documents[parent][d['kind']]) for d in record.get('original_readmes',[])]
         for kind,document in documents:
@@ -128,11 +131,12 @@ def file_inventory(catalog):
 
 OPERATIONS=set('a an the i we you our this these those them their it its is are was were do does did have has '
     'what which where how can could would should want wanted please tell show see find get me about with to of '
-    'for from in on and or also available availability data dataset datasets resource resources records information '
+    'for from in on at and or also available availability data dataset datasets resource resources records information '
     'details detail more further overview describe description help explain use using look looks like structure '
     'file files path paths location original readme documented columns column schema fields field preview sample '
     'samples fake synthetic rows row first five 5 10 monthly daily raw codified nlp type types dictionary contents '
-    'o2 eris server storage stored notebook worksheet patient patients start started guide code script counts count'.split())
+    'o2 eris server storage stored notebook worksheet patient patients start started guide code script counts count '
+    'ms multiple sclerosis mass general brigham pittsburgh'.split())
 
 
 def match_files(catalog,query,previous=None):
@@ -142,6 +146,7 @@ def match_files(catalog,query,previous=None):
     if re.search(r'\bibd\b|inflammatory bowel',q): explicit.append('IBD')
     if re.search(r'\bmgb ad\b|\bmgb alzheimer',q): explicit.append('MGB_AD')
     if re.search(r'\bupmc ad\b|\bupmc alzheimer',q): explicit.append('UPMC_AD')
+    explicit += ms_ids(query, catalog.records)
     explicit += [i for i,e in catalog.library.entries.items() if ' '+norm(e['label'])+' ' in q]
     if not explicit: explicit=catalog.library.explicit(query)
     matches=[]

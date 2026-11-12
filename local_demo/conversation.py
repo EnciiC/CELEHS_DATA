@@ -43,7 +43,8 @@ def choices(previous=None, labels=None):
         return [{'label':'Show monthly columns', 'query':f'Show {label} monthly columns'},
                 {'label':'Show fake rows', 'query':f'Show sample rows for {label} monthly counts'},
                 {'label':'Browse datasets', 'view':'browse'}]
-    return [{'label':'Find IBD data', 'query':'Where can I find IBD data?'},
+    return ([{'label':'Explore MS data', 'query':'What MS data do we have?'}] if 'MGB_MS' in labels else []) + [
+            {'label':'Find IBD data', 'query':'Where can I find IBD data?'},
             {'label':'Explore AD data', 'query':'What AD data do we have?'},
             {'label':'Browse datasets', 'view':'browse'}]
 
@@ -72,7 +73,7 @@ def opening(query, previous, labels, pending=None, handle_pending=True):
         return guide('clarification', ['Which next step would you like?'], choices(previous, labels), previous, pending)
     if re.search(r'what can you do|how (?:do i|can i) use (?:this|the) (?:demo|tool)|^help(?: me)?$', q):
         return guide('help', ['I can help you find file locations, compare columns, read original READMEs, and view fake sample rows.',
-                             'Start with a dataset name or a research question. This demo currently covers MGB IBD, MGB AD and UPMC AD.'], choices(previous, labels), previous, pending)
+                             'Start with a dataset name or a research question. Documented clinical datasets include ' + ', '.join(labels.values()) + '.'], choices(previous, labels), previous, pending)
     if re.search(r'(?:what|which) (?:information|documentation|details|files).*(?:need|collect|provide|add)|how (?:do i|can i|to).*(?:add|include).*dataset', q):
         topic = mentioned_topic(query) or pending
         name = topic_name(topic) if topic else 'a new dataset'

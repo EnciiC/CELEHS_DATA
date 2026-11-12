@@ -24,6 +24,7 @@ from .readme_topics import topic_answer
 from .single_files import single_file_answer
 from .exploration import infer_selection,resolve_exploration,valid_selection
 from .compare_resources import comparison_answer
+from .ms import ms_answer
 from .hosting import provider
 from .hosted import CloudflareModel, MODEL as CLOUD_MODEL
 
@@ -215,6 +216,10 @@ class Agent:
         if file_result is not None:
             self.last_result={'engine':'catalog','error':None}
             return file_result
+        ms_result = ms_answer(self.catalog, query, previous)
+        if ms_result is not None:
+            self.last_result={'engine':'catalog','error':None}
+            return ms_result
         resource_result = await self.catalog.library.maybe_answer(
             query, previous or [], self.catalog, self.structured, use_llm, self.model)
         if resource_result is not None:

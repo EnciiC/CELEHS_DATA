@@ -5,6 +5,7 @@ from .resource_guides import norm
 from .single_files import file_inventory
 from .presentation import file_views
 from .comparison import comparison_summary
+from .ms import SITE_QUERY, ms_ids
 
 
 COMPARE=r'\b(?:compar\w*|contrast\w*|differences?|different|differ|similarities|similar|versus|vs|interchange\w*)\b|same columns|side[ -]by[ -]side'
@@ -17,6 +18,8 @@ def entities(catalog):
         if key=='IBD': aliases+=['IBD','inflammatory bowel disease','MGB IBD']
         if key.endswith('_AD'):
             aliases += [r['site']+' AD',r['site']+' Alzheimer data',r['site']+' Alzheimer disease',r['site']+' Alzheimer s disease']
+        if key.endswith('_MS'):
+            aliases += [r['site']+' multiple sclerosis', 'MS at '+r['site'], 'multiple sclerosis at '+r['site']]
         result[key]={'id':key,'name':r['label'],'kind':'dataset','aliases':aliases,'record':r}
     for key,e in catalog.library.entries.items():
         result[key]={'id':key,'name':e['label'],'kind':'resource','aliases':[e['label'],*e['aliases']],'entry':e}
@@ -47,6 +50,9 @@ def parent_mentions(query,index):
     if re.search(r'\bad\b|alzheimer|dementia',q) and not full_ad:
         sites=[site for site in ['MGB','UPMC'] if re.search(r'\b'+site.lower()+r'\b',q)]
         ids += [site+'_AD' for site in sites or ['MGB','UPMC']]
+    inferred_ms = ms_ids(q, index)
+    if inferred_ms and (not ids or (len(inferred_ms) == 2 and all(key.endswith('_MS') for key in ids))):
+        ids.extend(inferred_ms)
     return list(dict.fromkeys(ids))
 
 
@@ -82,15 +88,26 @@ def dimension(query):
 
 
 def resolve(query,index,catalog,selection,previous):
-    requested_files=re.findall(r'[\w.-]+\.(?:csv|rdata|rds|tsv|rrf|jsonl|pq|xlsx|dsv)\b',query,re.I)
+    requested_files=re.findall(r'[\w.-]+\.(?:csv|rdata|rds|tsv|rrf|jsonl|parquet|pq|xlsx|dsv)\b',query,re.I)
     unknown=[name for name in requested_files if not any(norm(name) in norm(alias) for e in index.values() for alias in e['aliases'])]
     if unknown:
         return None,clarification(query,'I could not find documentation for '+', '.join(unknown)+'. Please choose a documented file or provide its README.')
     global_parents=parent_mentions(query,index)
+    ms_pair = len(global_parents) == 2 and all(key.endswith('_MS') for key in global_parents)
+    if ms_pair and len({name.lower() for name in requested_files}) == 1:
+        filename = requested_files[0].lower()
+        matches = [e for e in index.values() if e['kind'] == 'file' and e['item']['parent'] in global_parents
+                   and filename in {name.lower() for name in e['item']['card'].get('source_files', [])}]
+        if len(matches) == 2 and {e['item']['parent'] for e in matches} == set(global_parents):
+            return matches, None
     selected=[]; unresolved=[]
     parts=clauses(query,index)
     for part in parts:
         local_parents=parent_mentions(part,index)
+        if ms_pair:
+            site_keys = [key for key in global_parents if re.search(SITE_QUERY[key.split('_')[0]], part)]
+            if site_keys:
+                local_parents = site_keys
         if not local_parents and re.search(r'\bad\b|alzheimer|dementia',norm(query)):
             wrappers=set('compare comparing comparison difference differences between for the data dataset datasets '
                          'monthly daily raw codified nlp counts count columns fields schema storage access dates '
@@ -125,7 +142,7 @@ def resolve(query,index,catalog,selection,previous):
     clinical_parents=[key for key in global_parents if index[key]['kind']=='dataset']
     levels=[s for s in ['raw','daily','monthly'] if re.search(r'\b'+s+r'\b',query,re.I)]
     kinds=[s for s in ['codified','nlp'] if re.search(r'\b'+s+r'\b',query,re.I)]
-    explicit_filename=bool(re.search(r'\.(?:csv|rdata|rds|tsv|rrf|jsonl|pq|xlsx)\b',query,re.I))
+    explicit_filename=bool(re.search(r'\.(?:csv|rdata|rds|tsv|rrf|jsonl|parquet|pq|xlsx)\b',query,re.I))
     if len(clinical_parents)>=2 and len(clinical_parents)==len(global_parents) and dimension(query)=='columns' and len(levels)<=1 and len(kinds)<=1 and not explicit_filename and not unresolved:
         return [index[key] for key in clinical_parents],None
     if len(global_parents)==1 and index[global_parents[0]]['kind']=='dataset' and (len(levels)>1 or len(kinds)>1 or all(e['kind']=='dataset' for e in selected)) and re.search(r'\bmonthly\b|\bdaily\b|\braw\b|\bcodified\b|\bnlp\b',query,re.I):
@@ -133,7 +150,8 @@ def resolve(query,index,catalog,selection,previous):
         levels=[s for s in ['raw','daily','monthly'] if re.search(r'\b'+s+r'\b',query,re.I)] or ['monthly']
         cards=[card for level in levels for card in file_views(r,level+' '+(' '.join(k for k in ['codified','nlp'] if re.search(r'\b'+k+r'\b',query,re.I))),'columns')]
         selected=[e for e in index.values() if e['kind']=='file' and e['item']['parent']==r['dataset_id'] and any(
-            card.get('file') and card.get('file')==e['item'].get('card',{}).get('file') for card in cards)]
+            (card.get('file') and card['file']==e['item'].get('card',{}).get('file')) or
+            (card.get('id') and card['id']==e['item'].get('card',{}).get('id')) for card in cards)]
     unique={e['id']:e for e in selected}
     # File selection replaces its parent when both were identified in the same clause.
     file_parents={e['item']['parent'] for e in unique.values() if e['kind']=='file'}
@@ -174,6 +192,20 @@ def data_for(entity,catalog,query):
         data['sources']=[{'kind':'original','label':r['label']+' — original README','url':f"/api/datasets/{r['dataset_id']}/readme/original",'dataset_id':r['dataset_id']}]
         data['preview']=str(len(r['files']))+' prepared synthetic files.'
         data['files']='\n'.join(f['name'] for f in data['schemas'])
+        if r.get('documentation_only'):
+            mgb = r['site'] == 'MGB'
+            stats = r['report_stats']
+            data.update(counts=f"{stats['counts']} Report generated {stats['generated']}.",
+                        dates=('Calendar coverage charts in the cohort report.' if mgb else
+                               'Raw source inventory: codified EHR January 2004–December 2022, NLP 2011–2021. See the cohort report for filtered coverage.'),
+                        access='Preprocessed files are stored on O2.', code='Preprocessing README and shared code-mapping README.',
+                        disability='EDSS (primary), plus PDDS' if mgb else 'PDDS (primary) from PROMOTE, with limited EDSS coverage',
+                        nlp_time='Mention days in 30.4375-day windows mapped onto calendar months using corrected t0.' if mgb else
+                                 'Distinct days with asserted concepts within actual calendar months.',
+                        labs='Lab codes and counts.' if mgb else 'Lab values, units and reference ranges in the raw layer. Processed files have counts.')
+            data['locations'] = [r['storage_location']]
+            data['sources'] = [{'dataset_id': r['dataset_id'], **doc} for doc in r['original_documents']
+                               if doc['kind'] in {'ms_comparison', 'ms_report', 'ms_preprocessing', 'ms_mapping', 'ms_raw'}]
     elif kind=='resource':
         e=entity['entry']
         data.update(type=e['resource_type'],contents=e['description'],storage=e['storage'],contact=e['contact'])
@@ -245,7 +277,14 @@ def comparison_answer(catalog,query,selection=None,previous=None):
     scope_query=query+' '+' '.join(levels+kinds) if follow else query
     data=[data_for(e,catalog,scope_query) for e in chosen]
     fields=[('Resource type','type'),('Contents','contents'),('Storage','storage'),('Documented files','files')]
+    two_ms_sites = len(chosen) == 2 and all(e['kind'] == 'dataset' and e['record'].get('documentation_only') for e in chosen)
+    if two_ms_sites and requested == 'overview':
+        fields = [('Storage', 'storage'), ('Primary disability label', 'disability'), ('NLP time resolution', 'nlp_time'),
+                  ('Lab data', 'labs'), ('Cohort report counts', 'counts'), ('Documented files', 'files')]
     if requested=='location': fields=[('Storage','storage')]
+    if requested == 'location' and two_ms_sites:
+        for d in data:
+            d['storage'] = d['locations'][0]
     if requested=='overview' and all(e['kind']=='file' for e in chosen) and any(d['columns'] for d in data):
         fields.append(('Column names','columns'))
     if requested=='columns': fields=[('Resource type','type'),('Storage','storage'),('Column names','columns')]
@@ -277,12 +316,14 @@ def comparison_answer(catalog,query,selection=None,previous=None):
     schema=comparison_summary('Compare '+scope_query,sections,catalog.records) if requested=='columns' else None
     intro=schema['summary'] if schema else 'Here is a comparison of the documented '+('column names and formats.' if requested=='columns' else
         {'counts':'counts.','dates':'date coverage.','access':'access requirements.','code':'code references.','location':'storage locations.'}.get(requested,'contents and storage.'))
+    if two_ms_sites and requested == 'overview':
+        intro = 'Both MS sites provide calendar-labeled EHR, NLP and registry outputs. Their primary disability measures and NLP time windows differ.'
     if (requested=='columns' or requested=='overview' and all(e['kind']=='file' for e in chosen)) and not schema:
         columns=[d['columns'] for d in data]
         if all(columns):
             shared=set(columns[0]).intersection(*[set(c) for c in columns[1:]])
             intro=f'These files share {len(shared)} exact column names. '+('Their column names match.' if all(c==columns[0] for c in columns) else 'Their column lists differ.')
-        elif not any(columns) and requested=='columns': intro='Column descriptions are not documented for these resources; their documented contents and formats are shown below.'
+        elif not any(columns) and not any(d['schemas'] for d in data) and requested=='columns': intro='Column descriptions are not documented for these resources; their documented contents and formats are shown below.'
     if re.search(r'best|better|interchange|merge|combin|performance|accuracy|effective|efficacy',query,re.I):
         intro+=' Documentation alone does not establish performance or that the data can be combined without further checks.'
     names=[e['name'] for e in chosen]

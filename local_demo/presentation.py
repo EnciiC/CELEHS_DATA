@@ -35,6 +35,18 @@ def dictionaries_for(record, name):
 
 
 def file_views(record, query, purpose):
+    if record.get('documentation_only'):
+        level, kinds = scope(query)
+        if re.search(r'\b(registry|edss|pdds|labels?)\b', query, re.I):
+            kinds = ['registry']
+        elif re.search(r'\bdemographics?\b', query, re.I):
+            kinds = ['demographics']
+        elif re.search(r'cohort flags|patient inventory', query, re.I):
+            kinds = ['cohort']
+        return [{**item, 'show_columns': purpose == 'columns', 'show_preview': False}
+                for item in record['documented_files'] if (not level or item['level'] == level)
+                and (not kinds or item['data_kind'] in kinds)
+                and (purpose == 'browse' or item['data_kind'] not in {'mapping', 'provenance'})]
     if is_lab_query(query) and record.get('documented_files'):
         return [{**item, 'show_columns': purpose in {'columns', 'preview', 'fake'},
                  'show_preview': False, 'show_types': False}
@@ -71,6 +83,8 @@ def file_views(record, query, purpose):
 
 
 def location_views(record, query):
+    if record.get('documentation_only'):
+        return file_views(record, query, 'location')
     level, kinds = scope(query)
     if is_lab_query(query) and record.get('documented_files'):
         return [item for item in record['documented_files'] if item.get('readme_kind') == 'ibd_lab']

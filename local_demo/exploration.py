@@ -116,9 +116,11 @@ def file_guidance(catalog,item,view,query):
                     card['show_columns']=True
                     result['answer']+='\n\nColumns: '+', '.join(card['columns'])
     if view=='original':
-        result['intro']='Original README for '+item['name']
-        action={'label':'Open original README','document':{'resource_id':item['parent']}} if not item['clinical'] else {
-            'label':'Open original README','document':{'dataset_id':item['parent'],'kind':item['source']['kind'] if item['source']['kind']!='notes' else 'original'}}
+        summary = item['clinical'] and catalog.records[item['parent']].get('public_summary')
+        result['intro']=('Documentation for ' if summary else 'Original README for ')+item['name']
+        label = 'Open documentation' if summary else 'Open original README'
+        action={'label':label,'document':{'resource_id':item['parent']}} if not item['clinical'] else {
+            'label':label,'document':{'dataset_id':item['parent'],'kind':item['source']['kind'] if item['source']['kind']!='notes' else 'original'}}
         result['actions'].insert(0,action)
     if view in {'access','start','code','linkage'} and item['clinical']:
         result['intro']={'access':'Access instructions','start':'Usage instructions','code':'Processing code','linkage':'Linkage instructions'}[view]+' for '+item['name']
@@ -187,6 +189,8 @@ def resolve_exploration(catalog,query,selection,previous):
         label=next(t['name'] for t in catalog.records[parent]['readme_topics'] if t['id']==key)
     elif focus['kind']=='dataset': label=catalog.records[focus['id']]['label']
     else: label=catalog.library.entries[focus['id']]['label']
+    if view == 'original' and focus['kind'] == 'dataset' and catalog.records[focus['id']].get('documentation_only'):
+        return None, 'Show the original preprocessing README for ' + label, focus
     prefix={'columns':'Show columns for ','preview':'Show fake sample rows for ','location':'Where can I find ',
             'start':'How do I get started with ','access':'What access requirements apply to ',
             'code':'What code is documented for ','linkage':'How do I link '}.get(view,'Tell me more about ')

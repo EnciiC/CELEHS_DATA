@@ -49,7 +49,7 @@ async def local_origin(request: Request, call_next):
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["Referrer-Policy"] = "same-origin"
     response.headers["Cache-Control"] = "no-store"
-    response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'"
+    response.headers.setdefault("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'")
     response.headers["X-Frame-Options"] = "DENY"
     if hosting.public:
         response.headers["Strict-Transport-Security"] = "max-age=31536000"
@@ -133,8 +133,9 @@ def detail(dataset_id: str, request: Request):
                      if item['clinical'] and item['parent']==dataset_id
                      for key in [item['card'].get('file'),item['card'].get('id')] if key}
     return {**r, "documents": [
-        {"kind": "notes", "label": "Dataset notes", "url": f"/api/datasets/{dataset_id}/readme/notes"},
-        {"kind": "synthetic", "label": "How the fake data were made", "url": f"/api/datasets/{dataset_id}/readme/synthetic"},
+        *([] if r.get('documentation_only') else [
+            {"kind": "notes", "label": "Dataset notes", "url": f"/api/datasets/{dataset_id}/readme/notes"},
+            {"kind": "synthetic", "label": "How the fake data were made", "url": f"/api/datasets/{dataset_id}/readme/synthetic"}]),
         *r.get('original_documents', []),
         *([{"kind":"tracker", "label":"Spreadsheet entry", "url":f"/api/datasets/{dataset_id}/readme/tracker"}] if r.get('tracker_source') else [])],
         "synthetic_only": True, "file_details": file_views(r, '', 'browse'), 'file_selections':file_selections}
@@ -144,6 +145,8 @@ def detail(dataset_id: str, request: Request):
 def readme(dataset_id: str, kind: str, request: Request, files: str = Query(default='', max_length=1800)):
     r = record(request, dataset_id)
     if kind == 'notes':
+        if r.get('documentation_only'):
+            raise HTTPException(404, 'Use the registered dataset documentation')
         requested = files.split(',') if files else None
         if requested and any(f not in {item['file'] for item in r['files']} for f in requested):
             raise HTTPException(422, 'Unknown file for dataset notes')
@@ -156,7 +159,17 @@ def readme(dataset_id: str, kind: str, request: Request, files: str = Query(defa
             "text": request.app.state.catalog.documents[dataset_id][kind],
             "html": original_html(INPUT / dataset_id / "README_original.docx") if kind == "original" else None,
             "title": next((doc['label'] for doc in r.get('original_documents', []) if doc['kind'] == kind), None),
-            "scope_note": None}
+            "scope_note": None, **({'report_url': r['cohort_report_url']} if kind == 'ms_report' and r.get('cohort_report_url') else {})}
+
+
+@app.get('/api/datasets/{dataset_id}/cohort-report')
+def cohort_report(dataset_id: str, request: Request):
+    r = record(request, dataset_id)
+    if request.app.state.hosting.public or not r.get('cohort_report_url'):
+        raise HTTPException(404, 'No local cohort report registered')
+    path = request.app.state.catalog.downloadable(dataset_id, 'cohort_report.html')
+    return FileResponse(path, media_type='text/html; charset=utf-8', headers={
+        'Content-Security-Policy': "sandbox; default-src 'none'; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"})
 
 
 @app.get("/api/datasets/{dataset_id}/schema")
@@ -183,8 +196,6 @@ def preview(dataset_id: str, filename: str, request: Request, limit: int = Query
 @app.get("/api/datasets/{dataset_id}/download/{filename}")
 def download(dataset_id: str, filename: str, request: Request):
     r = record(request, dataset_id)
-    try: path = request.app.state.catalog.downloadable(dataset_id, filename)
-    except ValueError: raise HTTPException(404, "File is not an approved demo download")
     if filename == 'column_dictionary.csv':
         # Export the same English display copy, not the bilingual source bytes.
         # A UTF-8 BOM also helps Excel recognize punctuation and symbols correctly.
@@ -195,6 +206,8 @@ def download(dataset_id: str, filename: str, request: Request):
         writer.writerows(rows)
         return Response(output.getvalue().encode('utf-8-sig'), media_type='text/csv; charset=utf-8',
                         headers={'Content-Disposition':'attachment; filename="column_dictionary.csv"'})
+    try: path = request.app.state.catalog.downloadable(dataset_id, filename)
+    except ValueError: raise HTTPException(404, "File is not an approved demo download")
     return FileResponse(path, filename=filename)
 
 
@@ -264,7 +277,9 @@ async def chat(question: Question, request: Request):
                                         question.selection.model_dump(exclude_none=True) if question.selection else None)
         if result.get('engine') == 'local_llm':
             result['engine'] = 'hosted_llm'
-        if question.use_llm and not use_llm:
+        if question.use_llm and not use_llm and not (result['engine'] == 'catalog' and (
+            any(key.endswith('_MS') for key in result.get('context_dataset_ids', [])) or
+            result.get('interpretation') == 'verified_ms_documentation')):
             result['warning'] = 'Hosted chat is paused. This answer uses saved documentation; you can also browse datasets.'
         return result
     return await agent.answer(query, question.previous_dataset_ids, question.use_llm, question.pending_topic,

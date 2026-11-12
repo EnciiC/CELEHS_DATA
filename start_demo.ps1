@@ -1,10 +1,17 @@
 param([switch]$OpenBrowser)
 $ErrorActionPreference = 'Stop'
+$env:CATALOG_PROVIDER = 'ollama'
 $catalogProject = $PSScriptRoot
 $catalogPython = Join-Path $catalogProject '.venv\Scripts\python.exe'
 $catalogRuntime = Join-Path $catalogProject 'runtime'
 if (-not (Test-Path -LiteralPath $catalogPython)) { throw 'The project Python environment is missing. See local_demo/README.md.' }
 New-Item -ItemType Directory -Path $catalogRuntime -Force | Out-Null
+$catalogMSDirectory = Join-Path $catalogRuntime 'ms_documentation'
+$catalogExpectedDatasets = 3
+if (Test-Path -LiteralPath $catalogMSDirectory -PathType Container) {
+    $env:CATALOG_MS_DIR = $catalogMSDirectory
+    $catalogExpectedDatasets = 5
+}
 
 try {
     $catalogModels = Invoke-RestMethod 'http://127.0.0.1:11435/api/tags' -TimeoutSec 2
@@ -25,7 +32,7 @@ $env:CATALOG_OLLAMA_URL = 'http://127.0.0.1:11435'
 $catalogRunning = $false
 try {
     $catalogHealth = Invoke-RestMethod 'http://127.0.0.1:8000/api/health' -TimeoutSec 3
-    $catalogRunning = $catalogHealth.status -eq 'ok' -and $catalogHealth.datasets -eq 3
+    $catalogRunning = $catalogHealth.status -eq 'ok' -and $catalogHealth.local_only -and $catalogHealth.datasets -eq $catalogExpectedDatasets
 } catch { }
 if (-not $catalogRunning) {
     if (Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue) {

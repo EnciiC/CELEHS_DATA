@@ -28,13 +28,15 @@ function datasetCard(dataset) {
   const top = el('div', null, 'card-top');
   top.append(el('span', dataset.site, 'site-label'), el('span', '↗', 'arrow'));
   const bottom = el('div', null, 'card-bottom');
-  bottom.append(el('span', dataset.platforms.join(' / ')), el('span', `${dataset.fake_files} synthetic files · ${dataset.synthetic_rows.toLocaleString()} generated rows`));
+  bottom.append(el('span', dataset.platforms.join(' / ')), el('span', dataset.documentation_only
+    ? `${dataset.documented_resources} documented files` : `${dataset.fake_files} synthetic files · ${dataset.synthetic_rows.toLocaleString()} generated rows`));
   card.append(top, el('h3', dataset.label), el('p', dataset.description), bottom);
   card.addEventListener('click', () => openDataset(dataset.id));
   return card;
 }
 async function loadCatalog() {
   const data = await api('/api/inventory'); state.datasets = data.datasets;state.resources=data.resources;
+  $('#ms-question').hidden = !state.datasets.some(dataset => dataset.id === 'MGB_MS');
   renderInventory();
   const choices=await api('/api/comparison-options');
   for(const [id,initial] of [['compare-first','MGB_AD'],['compare-second','UPMC_AD']]){
@@ -70,7 +72,13 @@ async function openDocument(id, kind, files = []) {
     if (doc.html) {
       // Server produces escaped HTML from local DOCX; never insert model/user HTML.
       $('#document-text').innerHTML = doc.html;
-    } else $('#document-text').append(markdownDocument(doc.text));
+    } else {
+      const dataset = state.datasets.find(d => d.id === id);
+      const current = dataset?.original_documents?.find(d => d.kind === kind);
+      $('#document-text').append(markdownDocument(doc.text, current?.repository_path ?
+        (label, target) => resolveDocumentationLink(dataset, current, label, target) : null));
+    }
+    if (doc.report_url) $('#document-text').append(cohortReportLink(doc.report_url));
     if (kind === 'notes') {
       const details = el('div'); details.append(smallButton('Read generation notes', () => openDocument(id, 'synthetic')));
       $('#document-text').append(disclosure('How the fake data were made', details));
@@ -85,6 +93,22 @@ function smallButton(label, action, cls = 'quiet-button') {
 function link(label, url, cls = 'quiet-button') {
   const a = el('a', label, cls); a.href = url; return a;
 }
+function cohortReportLink(url) {
+  const report = link('Open full HTML cohort report', url);
+  report.target = '_blank'; report.rel = 'noopener noreferrer'; return report;
+}
+function resolveDocumentationLink(dataset, current, label, target) {
+  if (target.startsWith('#')) return document.createTextNode(label);
+  if (/^(?:[a-z][a-z+.-]*:|\/)/i.test(target)) return null;
+  const path = new URL(target, 'https://docs.invalid/' + current.repository_path).pathname.slice(1);
+  const candidates = [dataset, ...state.datasets.filter(d => d.documentation_only && d.id !== dataset.id)];
+  for (const candidate of candidates) {
+    const doc = candidate.original_documents.find(d => d.repository_path === path ||
+      (d.kind === 'ms_raw' && d.repository_path.split('/').at(-1) === path.split('/').at(-1)));
+    if (doc) return smallButton(label, () => openDocument(candidate.id, doc.kind), 'text-button');
+  }
+  return null;
+}
 function table(columns, rows, cls = '') {
   const wrap = el('div', null, 'table-scroll');
   const t = el('table', null, cls); const head = el('thead'); const tr = el('tr');
@@ -93,7 +117,7 @@ function table(columns, rows, cls = '') {
   rows.forEach(row => { const r = el('tr'); columns.forEach(c => r.append(el('td', row[c] === '' && cls === 'preview-table' ? 'NA' : row[c]))); body.append(r); });
   t.append(head, body); wrap.append(t); return wrap;
 }
-function markdownDocument(text) {
+function markdownDocument(text, resolveLink = null) {
   const content = el('div'); const lines = text.split('\n');
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim(); if (!line) continue;
@@ -109,19 +133,22 @@ function markdownDocument(text) {
         const values = cells(lines[i]); rows.push(Object.fromEntries(columns.map((c, j) => [c, values[j] || ''])));
       } i--;
       const grid = table(columns, rows);
-      for (const cell of grid.querySelectorAll('td, th')) { const value = cell.textContent; cell.replaceChildren(); appendInline(cell, value); }
+      for (const cell of grid.querySelectorAll('td, th')) { const value = cell.textContent; cell.replaceChildren(); appendInline(cell, value, resolveLink); }
       content.append(grid);
     } else if (/^#{1,4} /.test(line)) content.append(el(line.startsWith('# ') ? 'h2' : 'h3', line.replace(/^#+ /, '')));
     else {
       const p = el('p');
-      appendInline(p, line.replace(/^- /, '• '));
+      appendInline(p, line.replace(/^- /, '• '), resolveLink);
       content.append(p);
     }
   }
   return content;
 }
-function appendInline(parent, text) {
-  for (const token of text.split(/(`[^`]+`|\*\*[^*]+\*\*)/g)) {
+function appendInline(parent, text, resolveLink = null) {
+  const pattern = resolveLink ? /(\[[^\]]+\]\([^)]+\)|`[^`]+`|\*\*[^*]+\*\*)/g : /(`[^`]+`|\*\*[^*]+\*\*)/g;
+  for (const token of text.split(pattern)) {
+    const match = resolveLink && token.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+    if (match) { parent.append(resolveLink(match[1].replaceAll('`',''), match[2]) || document.createTextNode(token)); continue; }
     if (token.startsWith('`')) parent.append(el('code', token.slice(1,-1), 'column-name'));
     else if (token.startsWith('**')) parent.append(el('strong', token.slice(2,-2)));
     else parent.append(document.createTextNode(token));
@@ -182,8 +209,11 @@ function answerFile(section, file) {
   const links = el('div', null, 'resource-links'); const path = pathDisclosure(file);
   if (path) links.append(path);
   if (file.dictionaries?.length) links.append(dictionaryDisclosure(file.dictionaries));
-  if (file.readme_kind) links.append(smallButton('Original README', () => openDocument(section.dataset.id, file.readme_kind)));
+  if (file.readme_kind) links.append(smallButton(section.dataset.public_summary ? 'File documentation' : 'Original README', () => openDocument(section.dataset.id, file.readme_kind)));
   card.append(links);
+  if (section.dataset.documentation_only && file.column_descriptions?.length) {
+    card.append(disclosure('Column definitions', table(['Column','Meaning','Type'], file.column_descriptions, 'field-table')));
+  }
   if (file.file) {
     const preview = el('div', null, 'preview-area');
     const button = smallButton('Show 5 fake rows', () => {
@@ -260,16 +290,16 @@ function renderAnswer(result, box) {
     if (section.additional_note) block.append(el('p', section.additional_note, 'fact'));
     const links = el('div', null, 'answer-links');
     if (result.intent === 'location' || result.intent === 'overview') {
-      links.append(smallButton('See monthly columns', () => ask(`Show ${section.dataset.label} monthly columns`), ''),
-                   smallButton('Show fake rows', () => ask(`Show sample rows for ${section.dataset.label} monthly counts`), ''));
+      links.append(smallButton('See monthly columns', () => ask(`Show ${section.dataset.label} monthly columns`), ''));
+      if (!section.dataset.documentation_only) links.append(smallButton('Show fake rows', () => ask(`Show sample rows for ${section.dataset.label} monthly counts`), ''));
     }
     const documentationOnly = section.files?.length && section.files.every(f => f.preview_available === false);
-    if (result.intent !== 'project' && !documentationOnly) links.append(smallButton('Dataset notes', () => openDocument(section.dataset.id, 'notes', (section.files || []).map(f => f.file).filter(Boolean)), ''));
+    if (result.intent !== 'project' && !documentationOnly && !section.dataset.documentation_only) links.append(smallButton('Dataset notes', () => openDocument(section.dataset.id, 'notes', (section.files || []).map(f => f.file).filter(Boolean)), ''));
     const originals = section.dataset.original_documents || [{kind:'original',label:'Original README'}];
     if (originals.length > 1) {
       const choices = el('div');
       for (const doc of originals) choices.append(smallButton(doc.label, () => openDocument(section.dataset.id, doc.kind)));
-      links.append(disclosure('Original READMEs', choices));
+      links.append(disclosure(section.dataset.public_summary ? 'Documentation' : 'Original READMEs', choices));
     } else links.append(smallButton('Original README', () => openDocument(section.dataset.id, 'original'), ''));
     if (result.intent === 'project') links.append(smallButton('Open full MAJOR IBD project README', () => openDocument(section.dataset.id, 'ibd_project'), ''));
     if (section.dataset.has_tracker) links.append(smallButton('Spreadsheet entry', () => openDocument(section.dataset.id, 'tracker'), ''));
@@ -324,7 +354,7 @@ function filesAndColumnsPanel(record) {
   }
   function selectDocumented(file) {
     state.selection=record.file_selections?.[file.id] || {kind:'dataset',id:record.dataset_id};
-    dictionaryDownload.hidden = true;
+    dictionaryDownload.hidden = !record.documentation_only;
     [...picker.children].forEach(button => button.classList.toggle('active', button.dataset.file === file.id));
     const card = el('div', null, 'panel-box'), heading = el('div', null, 'file-heading');
     heading.append(el('h3', file.name), el('span', 'DOCUMENTATION ONLY', 'documented-label'));
@@ -333,13 +363,14 @@ function filesAndColumnsPanel(record) {
     if (file.owner) card.append(el('p', 'Owner: ' + file.owner));
     for (const name of file.source_files) card.append(el('code', name, 'column-name'), document.createTextNode(' '));
     card.append(pathDisclosure(file));
-    if (file.column_descriptions?.length) card.append(el('h4', 'Column explanations'), table(['Column','Meaning'], file.column_descriptions, 'field-table'));
+    if (file.column_descriptions?.length) card.append(el('h4', 'Column explanations'), table(
+      record.documentation_only ? ['Column','Meaning','Type'] : ['Column','Meaning'], file.column_descriptions, 'field-table'));
     if (file.processing_script) card.append(disclosure('Processing script', el('code', file.processing_script, 'source-location')));
     if (file.topic_id && file.link_target) {
       const target = file.link_target ? ` with ${file.link_target}` : '';
       card.append(smallButton('How to link' + target, () => ask(`How do I link ${file.name.split(' — ')[0]}${target}?`)));
     }
-    card.append(smallButton('Read original README', () => openDocument(record.dataset_id, file.readme_kind)));
+    card.append(smallButton(record.public_summary ? 'Read file documentation' : 'Read original README', () => openDocument(record.dataset_id, file.readme_kind)));
     area.replaceChildren(card);
   }
   for (const file of record.files) {
@@ -357,27 +388,35 @@ function filesAndColumnsPanel(record) {
     const row = el('div', null, 'source-row'); row.append(el('h3', r.name), pathDisclosure(r));
     sources.append(row);
   }); panel.append(disclosure('Other source locations and processing scripts', sources));
-  select(record.files.find(f => /monthly/i.test(f.file) && !/nlp/i.test(f.file)) || record.files[0]); return panel;
+  const initialExample = record.files.find(f => /monthly/i.test(f.file) && !/nlp/i.test(f.file)) || record.files[0];
+  const initialDocument = record.documented_files?.find(f => f.level === 'monthly' && f.data_kind === 'codified') || record.documented_files?.[0];
+  if (initialExample) select(initialExample);
+  else if (initialDocument) selectDocumented(initialDocument);
+  return panel;
 }
 function readmesPanel(record) {
   const panel = el('div');
-  const documents = [{kind:'notes',label:'Dataset notes',description:'A short guide to the prepared example rows and columns.'},
+  const documents = [...(record.documentation_only ? [] : [{kind:'notes',label:'Dataset notes',description:'A short guide to the prepared example rows and columns.'}]),
     ...(record.original_documents || [{kind:'original',label:"Sara's original documentation",description:'Original team documentation.',file:'README_original.docx'}])];
   for (const doc of documents) {
     const kind = doc.kind;
     const card = el('div', null, 'panel-box readme-card'); const info = el('div');
     info.append(el('h3', doc.label), el('p', doc.description));
     const actions = el('div', null, 'file-actions'); actions.append(smallButton('Read document', () => openDocument(record.dataset_id, kind)));
-    if (doc.file) actions.append(link(doc.file.endsWith('.md') ? 'Download original Markdown' : doc.file.endsWith('.txt') ? 'Download README text' : 'Download original DOCX', `/api/datasets/${record.dataset_id}/download/${encodeURIComponent(doc.file)}`));
+    if (doc.kind === 'ms_report' && record.cohort_report_url) actions.append(cohortReportLink(record.cohort_report_url));
+    else if (doc.file) actions.append(link(doc.file.endsWith('.md') ? 'Download original Markdown' : doc.file.endsWith('.txt') ? 'Download README text' : 'Download original DOCX', `/api/datasets/${record.dataset_id}/download/${encodeURIComponent(doc.file)}`));
     card.append(info, actions); panel.append(card);
   }
   if (record.tracker_source) {
     const tracker = el('div', null, 'panel-box readme-card');
     tracker.append(el('h3', 'Spreadsheet entry'), smallButton('Read entry', () => openDocument(record.dataset_id, 'tracker'))); panel.append(tracker);
   }
-  const technical = el('div'); technical.append(el('p', 'How the synthetic example files were generated.', 'note'),
-    smallButton('Read generation notes', () => openDocument(record.dataset_id, 'synthetic')));
-  panel.append(disclosure('How the fake data were made', technical)); return panel;
+  if (!record.documentation_only) {
+    const technical = el('div'); technical.append(el('p', 'How the synthetic example files were generated.', 'note'),
+      smallButton('Read generation notes', () => openDocument(record.dataset_id, 'synthetic')));
+    panel.append(disclosure('How the fake data were made', technical));
+  }
+  return panel;
 }
 function dictionariesPanel(record) {
   const panel = el('div');
@@ -387,6 +426,7 @@ function dictionariesPanel(record) {
     if (dictionary.status || !dictionary.location) card.append(el('p', dictionary.status || 'Not documented', 'note'));
     panel.append(card);
   }
+  if (record.documentation_only) panel.append(smallButton('Read code-mapping README', () => openDocument(record.dataset_id, 'ms_mapping')));
   return panel;
 }
 async function openDataset(id) {
@@ -398,9 +438,11 @@ async function openDataset(id) {
     const heading = el('div', null, 'page-heading');
     heading.append(el('span', 'DATASET DETAILS', 'eyebrow'), el('h1', record.label), el('p', record.description));
     const meta = el('div', null, 'detail-meta');
-    for (const [label,value] of [['Site',record.site],['Storage',record.storage_platform.join(' / ')],['Contact',record.contact]]) {
+    const attribution = record.readme_curator ? ['README curator',record.readme_curator] : ['Contact',record.contact];
+    for (const [label,value] of [['Site',record.site],['Storage',record.storage_platform.join(' / ')],attribution]) {
       const cell = el('div'); cell.append(el('small',label),el('span',value)); meta.append(cell);
     } heading.append(meta); node.append(heading);
+    if (record.cohort_report_url) heading.append(cohortReportLink(record.cohort_report_url));
     const tabs = el('nav', null, 'detail-tabs'); tabs.setAttribute('aria-label','Dataset information'); const area = el('div');
     const views = {'Files and columns':filesAndColumnsPanel, READMEs:readmesPanel, Dictionaries:dictionariesPanel};
     function select(name) { [...tabs.children].forEach(b => b.classList.toggle('active', b.textContent === name)); area.replaceChildren(views[name](record)); }
