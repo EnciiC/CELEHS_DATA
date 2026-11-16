@@ -1,6 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
+from local_demo.agent import Agent
 from local_demo.app import app
 from local_demo.exploration import followup_view
 
@@ -199,6 +200,45 @@ def test_upmc_ms_date_coverage_uses_date_facts_without_cohort_report(monkeypatch
         assert 'Codified EHR' not in notes['answer']
         report = ask(client, 'Show summary statistics for UPMC MS', dates)
         assert '10,466' in report['answer'] and 'Filtered cohort' not in dates['answer']
+
+
+def test_hosted_research_followup_is_grounded_in_the_selected_ms_file(monkeypatch):
+    for key, value in {
+        'CATALOG_PROVIDER': 'cloudflare', 'CATALOG_CHAT_ENABLED': 'true',
+        'CATALOG_CLOUD_LIMITS_CONFIRMED': 'true', 'CLOUDFLARE_ACCOUNT_ID': 'a' * 32,
+        'CLOUDFLARE_GATEWAY_ID': 'test', 'CLOUDFLARE_API_TOKEN': 'test-only',
+    }.items():
+        monkeypatch.setenv(key, value)
+    replies = iter([
+        'Splitting by row can put the same patient_num in training and testing. Split by patient_num instead.',
+        'The UPMC_AD files contain a patient_num column.',
+    ])
+
+    async def answer_from_documentation(self, instructions, context, schema):
+        metadata = context['selected_file']
+        assert metadata['dataset'] == 'UPMC MS'
+        assert metadata['name'] == 'Monthly NLP concepts'
+        assert set(metadata['columns']) == {'patient_num', 'calendar_month', 'cui', 'count', 'n_days'}
+        assert set(context) == {'question', 'selected_file'}
+        return {'explanation': next(replies)}
+
+    monkeypatch.setattr(Agent, 'structured', answer_from_documentation)
+    with TestClient(app) as client:
+        file = ask(client, 'Show columns for all_nlp_calendar_month_aggregation.parquet at UPMC')
+        body = {
+            'query': 'For the UPMC file we just opened, explain why randomly splitting feature rows '
+                     'could leak information about the same patient_num between training and test sets.',
+            'previous_dataset_ids': file['context_dataset_ids'], 'selection': file['selection'],
+        }
+        correct = client.post('/api/chat', json=body).json()
+        assert correct['engine'] == 'hosted_llm'
+        assert correct['context_dataset_ids'] == ['UPMC_MS'] and correct['selection'] == file['selection']
+        assert 'Split by patient_num' in correct['answer']
+        assert correct['actions'][0]['document']['dataset_id'] == 'UPMC_MS'
+
+        incorrect = client.post('/api/chat', json=body).json()
+        assert incorrect['warning'] and 'UPMC_AD' not in incorrect['answer']
+        assert incorrect['context_dataset_ids'] == ['UPMC_MS'] and incorrect['selection'] == file['selection']
 
 
 def test_no_context_invalid_context_and_separate_sessions_do_not_guess_a_file(client):

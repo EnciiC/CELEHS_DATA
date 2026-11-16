@@ -130,6 +130,38 @@ def file_guidance(catalog,item,view,query):
     return result
 
 
+def other_dataset_mentioned(catalog, text, active_parent):
+    text = ' ' + norm(text) + ' '
+    return any(' ' + norm(alias) + ' ' in text
+               for key, record in catalog.records.items() if key != active_parent
+               for alias in (key, record['label'], record['dataset_name']))
+
+
+def selected_explanation_file(catalog, query, selection):
+    """Find the file referred to by a methodological follow-up."""
+    if not isinstance(selection, dict) or selection.get('kind') != 'file':
+        return None
+    text = norm(query)
+    if not re.search(r'\b(?:this file|selected file|current file|file (?:we|i) (?:just )?'
+                     r'(?:opened|selected|discussed)|file already selected)\b', text):
+        return None
+    if not re.search(r'\b(?:why|explain (?:how|what)|what information (?:is lost|do i lose)|what would happen)\b', text):
+        return None
+    item = next((f for f in file_inventory(catalog) if f['id'] == selection.get('id')), None)
+    if not item or not item['clinical'] or other_dataset_mentioned(catalog, query, item['parent']):
+        return None
+    return item
+
+
+def column_rows(catalog, item):
+    if not item['clinical']:
+        return item['column_descriptions']
+    card = item['card']
+    return card.get('column_descriptions') or [
+        row for row in catalog.records[item['parent']]['column_descriptions'] if row['File'] == card.get('file')
+    ]
+
+
 def column_explanation(catalog,query,focus):
     if not focus or focus['kind']!='file': return None
     q = norm(query)
@@ -142,13 +174,7 @@ def column_explanation(catalog,query,focus):
     requested=next(x for x in match.groups() if x)
     if requested in {'it','this','that','these','those','it mean','this mean'}: return None
     item=next(f for f in file_inventory(catalog) if f['id']==focus['id'])
-    if item['clinical']:
-        rows=item['card'].get('column_descriptions',[])
-        if not rows:
-            rows=[r for r in catalog.records[item['parent']]['column_descriptions']
-                  if r['File']==item['card'].get('file')]
-    else: rows=item['column_descriptions']
-    rows=[r for r in rows if norm(r['Column'])==requested]
+    rows=[r for r in column_rows(catalog,item) if norm(r['Column'])==requested]
     if len(rows)!=1 or not rows[0].get('Meaning'): return None
     row=rows[0]
     result=file_guidance(catalog,item,'columns',query)
