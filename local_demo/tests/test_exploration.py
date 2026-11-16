@@ -241,6 +241,33 @@ def test_hosted_research_followup_is_grounded_in_the_selected_ms_file(monkeypatc
         assert incorrect['context_dataset_ids'] == ['UPMC_MS'] and incorrect['selection'] == file['selection']
 
 
+def test_hosted_study_ideas_use_the_requested_dataset_and_cite_files(monkeypatch):
+    monkeypatch.setenv('CATALOG_PROVIDER', 'cloudflare')
+    calls = []
+
+    async def suggest(self, instructions, context, schema):
+        calls.append(context)
+        assert {file['dataset'] for file in context['files']} == {'UPMC MS'}
+        related = next(file for file in context['files'] if file['name'] == 'Monthly NLP concepts')
+        return {'ideas': [{'question': 'How do documented concepts vary over follow-up?',
+                           'approach': 'Summarize concept counts over time using patient_num.',
+                           'check': 'Check variation in the number of observed periods.',
+                           'file_ids': [related['id']]}]}
+
+    monkeypatch.setattr(Agent, 'structured', suggest)
+    with TestClient(app) as client:
+        agent = client.app.state.agent
+        monkeypatch.setattr(type(agent.cloud), 'ready', property(lambda self: True))
+        for query in ('What kinds of analyses could I do with UPMC MS data?',
+                      'What could I study using all_nlp_calendar_month_aggregation.parquet at UPMC?'):
+            answer = client.post('/api/chat', json={'query': query}).json()
+            assert answer['engine'] == 'hosted_llm' and answer['context_dataset_ids'] == ['UPMC_MS']
+            assert answer['analysis_ideas'][0]['files'] == ['UPMC MS · Monthly NLP concepts']
+            assert answer['sources'][0]['kind'] == 'ms_dictionary'
+        assert len(calls[0]['files']) > 1 and len(calls[1]['files']) == 1
+        assert ask(client, 'What kinds of analyses could I do?')['intent'] == 'analysis_scope'
+
+
 def test_no_context_invalid_context_and_separate_sessions_do_not_guess_a_file(client):
     r=ask(client,'tell me more')
     assert r['interpretation']=='exploration_choice'

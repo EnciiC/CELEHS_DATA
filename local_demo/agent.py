@@ -27,6 +27,7 @@ from .exploration import (
     selected_explanation_file, valid_selection,
 )
 from .compare_resources import comparison_answer
+from .analysis_ideas import is_analysis_idea, research_ideas_answer
 from .ms import ms_answer, ms_ids
 from .ibd_workflow import ibd_workflow_answer
 from .hosting import provider
@@ -188,6 +189,8 @@ class Agent:
         return chosen
 
     async def answer(self, query, previous=None, use_llm=True, pending_topic=None, selection=None):
+        if is_analysis_idea(query):
+            return await research_ideas_answer(self, query, previous, selection, use_llm)
         selected_file = selected_explanation_file(self.catalog, query, selection)
         if selected_file is not None:
             return await self.explain_selected_file(query, selected_file, selection, use_llm)

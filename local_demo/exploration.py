@@ -132,8 +132,9 @@ def file_guidance(catalog,item,view,query):
 
 def other_dataset_mentioned(catalog, text, active_parent):
     text = ' ' + norm(text) + ' '
+    active = {active_parent} if isinstance(active_parent, str) else set(active_parent)
     return any(' ' + norm(alias) + ' ' in text
-               for key, record in catalog.records.items() if key != active_parent
+               for key, record in catalog.records.items() if key not in active
                for alias in (key, record['label'], record['dataset_name']))
 
 

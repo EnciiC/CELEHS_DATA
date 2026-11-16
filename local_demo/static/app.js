@@ -267,6 +267,13 @@ function renderAnswer(result, box) {
     summary.append(el('p', result.comparison.caution, 'note')); box.append(summary);
   }
   for (const message of result.messages || []) box.append(el('p', message, 'guide-message'));
+  for (const idea of result.analysis_ideas || []) {
+    const block = el('section', null, 'answer-section');
+    block.append(el('h3', idea.question), el('p', idea.approach, 'fact'),
+      el('p', 'Before analysis, ' + idea.check[0].toLowerCase() + idea.check.slice(1), 'fact'),
+      el('p', idea.files.join(' · '), 'note'));
+    box.append(block);
+  }
   if (result.actions?.length) {
     const actions = el('div', null, 'suggested-actions');
     for (const action of result.actions) actions.append(smallButton(action.label, () => {
