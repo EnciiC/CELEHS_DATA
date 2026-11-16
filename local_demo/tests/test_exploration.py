@@ -185,6 +185,22 @@ def test_ms_lab_answers_show_raw_result_location_and_keep_processed_counts_separ
         assert 'ms_obs_fact_' not in mgb['answer']
 
 
+def test_upmc_ms_date_coverage_uses_date_facts_without_cohort_report(monkeypatch):
+    monkeypatch.setenv('CATALOG_PROVIDER', 'cloudflare')
+    with TestClient(app) as client:
+        dates = ask(client, 'What is the UPMC MS date coverage?')
+        assert dates['context_dataset_ids'] == ['UPMC_MS'] and dates['intent'] == 'ms_coverage'
+        assert 'January 2004 to December 2022' in dates['answer']
+        assert 'January 2011 to December 2021' in dates['answer']
+        assert '10,466' not in dates['answer']
+        assert {source['kind'] for source in dates['sources']} == {'ms_raw'}
+        notes = ask(client, 'What is the date range of the raw notes?', dates)
+        assert 'November 2021' in notes['answer'] and 'June 2013' in notes['answer']
+        assert 'Codified EHR' not in notes['answer']
+        report = ask(client, 'Show summary statistics for UPMC MS', dates)
+        assert '10,466' in report['answer'] and 'Filtered cohort' not in dates['answer']
+
+
 def test_no_context_invalid_context_and_separate_sessions_do_not_guess_a_file(client):
     r=ask(client,'tell me more')
     assert r['interpretation']=='exploration_choice'

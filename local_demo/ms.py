@@ -282,6 +282,8 @@ def ms_answer(catalog, query, previous=None):
         return None
     explicit = re.search(MS_QUERY, q)
     lab_question = is_lab_query(query)
+    date_coverage = re.search(r'\b(?:date|time|calendar|temporal) (?:coverage|range|span)\b|'
+                              r'\b(?:what|which) years\b|\b(?:earliest|latest) (?:available )?dates?\b', q)
     processed_labs = lab_question and re.search(r'\b(?:monthly|daily|processed)\b', q) and not re.search(r'\braw\b', q)
     ids = ms_ids(q, catalog.records)
     named_sites = [site for site in SITES if re.search(SITE_QUERY[site], q)]
@@ -293,7 +295,7 @@ def ms_answer(catalog, query, previous=None):
     if not ids and not active and not re.search(r'\b(?:edss|pdds)\b', q):
         return None
     if not ids:
-        if not explicit and not lab_question and not re.search(r'cohort|registry|edss|pdds|calendar|\bt0\b|overlap|\bdmt\b|'
+        if not explicit and not lab_question and not date_coverage and not re.search(r'cohort|registry|edss|pdds|calendar|\bt0\b|overlap|\bdmt\b|'
                                            r'patient counts?|how many patients|what about|mapping|readme|reports?|statistics|'
                                            r'\bwhere\b|\bcolumns\b|\bmonths?\b|\baccess\b', q):
             return None
@@ -328,6 +330,9 @@ def ms_answer(catalog, query, previous=None):
         view, intro = 'overlap', 'The cohort reports describe where registry labels and EHR or NLP feature windows overlap.'
     elif re.search(r'summary stat|cohort stat|report stat|cohort profile|cohort characteristics', q):
         view, intro = 'report', 'Here are the inventory counts and summary statistics for the filtered report cohorts.'
+    elif date_coverage:
+        view, intent, intro = 'dates', 'ms_coverage', 'Documented date coverage for ' + ' and '.join(
+            catalog.records[key]['label'] for key in ids) + '.'
     elif count:
         view, intro = 'count', 'Here are the counts and their denominators in the supplied documentation.'
     elif cohort:
@@ -336,7 +341,7 @@ def ms_answer(catalog, query, previous=None):
         view, intro = 'mapping', 'Here is how Benet documents the mappings used by the preprocessing pipelines.'
     elif re.search(r'raw|source inventory|input files?', q):
         view, intro = 'raw', 'The raw-source inventory for each site identifies which inputs the preprocessing reads.'
-    elif re.search(r'report|characterization|coverage|date range', q):
+    elif re.search(r'report|characterization|coverage', q):
         view, intro = 'report', 'The cohort documentation describes counts, coverage and registry labels.'
     elif re.search(r'\b(?:scripts?|pipeline|preprocessing code)\b', q):
         view, intro = 'preprocessing', 'Benet documents each preprocessing step and its inputs and outputs.'
@@ -412,11 +417,27 @@ def ms_answer(catalog, query, previous=None):
                     add(text, 'ms_report', 'Do labels and features overlap in time?')
                 else:
                     add(stats['overlap'], 'ms_report', 'Do labels and features overlap in time?')
-            if view == 'report' and re.search(r'coverage|date range', q):
-                add(('The UPMC raw-source summary reports codified EHR from January 2004 to December 2022 and NLP from 2011 to 2021.'
-                     if site == 'UPMC' else 'The MGB cohort report summarizes coverage over calendar time.'),
-                    'ms_raw' if site == 'UPMC' else 'ms_report')
             open_doc('ms_report')
+        if view == 'dates':
+            codified_only = re.search(r'\bcodified\b|\behr\b', q) and not re.search(r'\bnlp\b', q)
+            nlp_only = re.search(r'\bnlp\b|\bnotes?\b', q) and not re.search(r'\bcodified\b|\behr\b', q)
+            if site == 'UPMC':
+                if not nlp_only:
+                    add('**Codified EHR** covers January 2004 to December 2022.', 'ms_raw', '1. What this cohort is', markdown=True)
+                if not codified_only:
+                    if re.search(r'\braw\b.*\bnotes?\b|\bnotes?\b.*\braw\b', q):
+                        add('**Raw NLP note files** span January 2011 to November 2021. June 2013 is missing from the file listing.',
+                            'ms_raw', 'Raw NLP note files', markdown=True)
+                    else:
+                        add('**NLP feature extract** covers January 2011 to December 2021.', 'ms_raw', '3. NLP', markdown=True)
+            else:
+                if not nlp_only:
+                    add('**Unrolled codified EHR source** spans 1960 to 2023. Far fewer patients have recorded events from December 2022 onward.',
+                        'ms_raw', '12. Unrolled Codified Data', markdown=True)
+                if not codified_only:
+                    add('The source inventory documents **monthly NLP** through January 2023.',
+                        'ms_raw', '12. Unrolled Codified Data', markdown=True)
+            open_doc('ms_raw')
         if view == 'labels':
             add(('EDSS is the Expanded Disability Status Scale. MGB uses it as the primary disability measure and also documents PDDS.'
                  if site == 'MGB' else 'PDDS is Patient-Determined Disease Steps, the primary disability measure from the UPMC PROMOTE registry. EDSS has limited coverage there.'),

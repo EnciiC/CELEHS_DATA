@@ -298,7 +298,7 @@ function renderAnswer(result, box) {
     }
     const documentationOnly = section.files?.length && section.files.every(f => f.preview_available === false);
     if (result.intent !== 'project' && !documentationOnly && !section.dataset.documentation_only) links.append(smallButton('Dataset notes', () => openDocument(section.dataset.id, 'notes', (section.files || []).map(f => f.file).filter(Boolean)), ''));
-    if (result.intent !== 'ms_labs') {
+    if (!['ms_labs','ms_coverage'].includes(result.intent)) {
       const originals = section.dataset.original_documents || [{kind:'original',label:'Original README'}];
       if (originals.length > 1) {
         const choices = el('div');
