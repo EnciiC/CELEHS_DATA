@@ -100,6 +100,27 @@ def test_column_meaning_comes_from_the_active_file(client):
     assert r['resources'][0]['selected_file_name']=='patient_summary.csv'
 
 
+def test_ms_column_followup_with_here_uses_the_selected_upmc_file(monkeypatch):
+    monkeypatch.setenv('CATALOG_PROVIDER', 'cloudflare')
+    with TestClient(app) as client:
+        compared = ask(client, 'Compare monthly NLP columns for MGB MS and UPMC MS')
+        assert compared['selection']['kind'] == 'comparison'
+        selected = ask(client, 'Show columns for all_nlp_calendar_month_aggregation.parquet at UPMC', compared)
+        assert selected['selection']['kind'] == 'file'
+        for query in ('What does count mean here', 'What does `count` mean in this file?', 'What does count mean?'):
+            response = client.post('/api/lookup', json={
+                'query': query, 'previous_dataset_ids': selected['context_dataset_ids'],
+                'selection': selected['selection'],
+            }).json()
+            assert response['context_dataset_ids'] == ['UPMC_MS']
+            assert response['selection'] == selected['selection']
+            assert 'asserted mention' in response['answer'] and 'count equals n_days' in response['answer']
+            assert response['engine'] == 'catalog' and response['warning'] is None
+            [file] = response['datasets'][0]['files']
+            assert file['columns'] == ['count']
+            assert [row['Column'] for row in file['column_descriptions']] == ['count']
+
+
 def test_no_context_invalid_context_and_separate_sessions_do_not_guess_a_file(client):
     r=ask(client,'tell me more')
     assert r['interpretation']=='exploration_choice'

@@ -132,8 +132,12 @@ def file_guidance(catalog,item,view,query):
 
 def column_explanation(catalog,query,focus):
     if not focus or focus['kind']!='file': return None
-    q=norm(query)
-    match=re.fullmatch(r'(?:what (?:does|is|s) (?:the )?(?:column |field )?(.+?)(?: mean)?|explain (?:the )?(?:column |field )?(.+))',q)
+    q = norm(query)
+    context_suffix = r' (?:(?:right )?here|(?:in|for) (?:this|that|the current) (?:file|table|dataset))'
+    match = re.fullmatch(
+        r'(?:what (?:does|is|s) (?:the )?(?:column |field )?(.+?)(?: mean)?'
+        r'|explain (?:the )?(?:column |field )?(.+?))'
+        rf'(?:{context_suffix})?', q)
     if not match: return None
     requested=next(x for x in match.groups() if x)
     if requested in {'it','this','that','these','those','it mean','this mean'}: return None
@@ -148,6 +152,8 @@ def column_explanation(catalog,query,focus):
     if len(rows)!=1 or not rows[0].get('Meaning'): return None
     row=rows[0]
     result=file_guidance(catalog,item,'columns',query)
+    if result is None:
+        return None
     result['intro']=row['Column']+': '+row['Meaning']
     result['answer']=result['intro']
     if item['clinical']:
@@ -155,6 +161,8 @@ def column_explanation(catalog,query,focus):
             section['facts']=[]
             for card in section['files']:
                 card['columns']=[row['Column']]
+                if card.get('column_descriptions'):
+                    card['column_descriptions'] = [row]
     else:
         result['resources'][0]['blocks']=[{'title':row['Column'],'text':row['Meaning'],'items':[],'kind':'bullets'}]
     return result
