@@ -213,7 +213,9 @@ function answerFile(section, file) {
   if (file.readme_kind) links.append(smallButton(section.dataset.public_summary ? 'File documentation' : 'Original README', () => openDocument(section.dataset.id, file.readme_kind)));
   card.append(links);
   if ((section.dataset.documentation_only || file.topic_id === 'ibd_agents') && file.column_descriptions?.length) {
-    card.append(disclosure('Column definitions', table(['Column','Meaning','Type'], file.column_descriptions, 'field-table')));
+    const definitions = disclosure('Column definitions', table(['Column','Meaning','Type'], file.column_descriptions, 'field-table'));
+    definitions.open = file.data_kind === 'lab' && Boolean(file.show_columns);
+    card.append(definitions);
   }
   if (file.file) {
     const preview = el('div', null, 'preview-area');
@@ -296,12 +298,14 @@ function renderAnswer(result, box) {
     }
     const documentationOnly = section.files?.length && section.files.every(f => f.preview_available === false);
     if (result.intent !== 'project' && !documentationOnly && !section.dataset.documentation_only) links.append(smallButton('Dataset notes', () => openDocument(section.dataset.id, 'notes', (section.files || []).map(f => f.file).filter(Boolean)), ''));
-    const originals = section.dataset.original_documents || [{kind:'original',label:'Original README'}];
-    if (originals.length > 1) {
-      const choices = el('div');
-      for (const doc of originals) choices.append(smallButton(doc.label, () => openDocument(section.dataset.id, doc.kind)));
-      links.append(disclosure(section.dataset.public_summary ? 'Documentation' : 'Original READMEs', choices));
-    } else links.append(smallButton('Original README', () => openDocument(section.dataset.id, 'original'), ''));
+    if (result.intent !== 'ms_labs') {
+      const originals = section.dataset.original_documents || [{kind:'original',label:'Original README'}];
+      if (originals.length > 1) {
+        const choices = el('div');
+        for (const doc of originals) choices.append(smallButton(doc.label, () => openDocument(section.dataset.id, doc.kind)));
+        links.append(disclosure(section.dataset.public_summary ? 'Documentation' : 'Original READMEs', choices));
+      } else links.append(smallButton('Original README', () => openDocument(section.dataset.id, 'original'), ''));
+    }
     if (result.intent === 'project') links.append(smallButton('Open full MAJOR IBD project README', () => openDocument(section.dataset.id, 'ibd_project'), ''));
     if (section.dataset.id === 'IBD' && ['overview','project'].includes(result.intent)) {
       links.append(smallButton('Build derived IBD data', () => ask('How do I build and save derived IBD data?'), ''));

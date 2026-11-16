@@ -156,6 +156,35 @@ def test_ms_registry_question_switches_from_ibd_and_keeps_the_new_context(monkey
         assert explicit_ibd['context_dataset_ids'] == ['IBD']
 
 
+def test_ms_lab_answers_show_raw_result_location_and_keep_processed_counts_separate(monkeypatch):
+    monkeypatch.setenv('CATALOG_PROVIDER', 'cloudflare')
+    with TestClient(app) as client:
+        broad = ask(client, 'Are lab values available for MS?')
+        assert broad['intent'] == 'ms_labs'
+        assert 'UPMC MS has raw lab results on O2' in broad['intro']
+        assert 'MGB MS provides lab test codes and counts' in broad['intro']
+        assert 't0' not in broad['answer']
+
+        upmc = ask(client, 'Are lab values available for UPMC MS?', broad)
+        assert upmc['context_dataset_ids'] == ['UPMC_MS']
+        assert upmc['answer'].count('ms_obs_fact_') == 4
+        assert '/SHARE/UPMC/MS/data_raw/data_codified' in upmc['answer']
+        assert 'headerless' in upmc['answer'] and 'reference ranges' in upmc['answer']
+        assert 't0' not in upmc['answer'] and 'MGB' not in upmc['answer']
+        columns = ask(client, 'What are the columns?', upmc)
+        [card] = columns['datasets'][0]['files']
+        assert card['show_columns']
+        assert card['columns'][5:] == ['Result value', 'Unit', 'Reference low', 'Reference high']
+
+        monthly = ask(client, 'Do the monthly UPMC MS files have lab values?', upmc)
+        assert 'raw codified files hold the result values' in monthly['answer']
+        [card] = monthly['datasets'][0]['files']
+        assert card['name'] == 'Monthly codified EHR'
+        mgb = ask(client, 'Are lab values available for MGB MS?', upmc)
+        assert 'Result values are absent' in mgb['intro']
+        assert 'ms_obs_fact_' not in mgb['answer']
+
+
 def test_no_context_invalid_context_and_separate_sessions_do_not_guess_a_file(client):
     r=ask(client,'tell me more')
     assert r['interpretation']=='exploration_choice'

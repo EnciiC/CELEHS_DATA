@@ -5,7 +5,7 @@ import re
 
 from lxml import html
 
-from .readme_resources import clean, fact, section, source
+from .readme_resources import clean, fact, is_lab_query, section, source
 
 
 SITES = ('MGB', 'UPMC')
@@ -37,6 +37,20 @@ CORE_FILES = (
     ('list_all_patients.csv', 'Patient inventory and cohort flags', None, 'cohort', 'One row per patient in the site inventory, with availability and cohort flags.'),
     ('ehr_code_dictionary.csv', 'Codified EHR code dictionary', None, 'mapping', 'Local codes, mapped features, descriptions, and usage counts.'),
     ('source_files.tsv', 'Pipeline input manifest', None, 'provenance', 'Input paths, file counts, sizes, and modification times by pipeline step.'),
+)
+UPMC_LAB_SECTION = '13.1 Lab values, units and reference ranges'
+UPMC_LAB_FOLDER = '/n/data1/hsph/biostat/celehs/lab/SHARE/UPMC/MS/data_raw/data_codified'
+UPMC_LAB_SHARDS = [f'ms_obs_fact_{end}_012023.csv' for end in (5000, 10000, 15000, 20000)]
+UPMC_LAB_FIELDS = (
+    ('patient_num', 'Patient identifier', 'Identifier'),
+    ('concept_cd', 'Lab concept code, including LOINC and local codes', 'Text'),
+    ('start_date', 'Test date in YYYY-MM-DD format', 'Date'),
+    ('Field 4', 'Empty in the rows described in the source inventory', 'Empty in inspected rows'),
+    ('Test name', 'Name of the laboratory test', 'Text'),
+    ('Result value', 'Reported result, which can be numeric, bounded, or qualitative', 'Text'),
+    ('Unit', 'Reported measurement unit, when present', 'Text'),
+    ('Reference low', 'Lower reference value, when present', 'Text'),
+    ('Reference high', 'Upper reference value, when present', 'Text'),
 )
 
 
@@ -218,6 +232,30 @@ def load_ms(directory, site, public=False):
         record['documented_files'].append(card)
         record['resources'].append(dict(name=name, kind=kind, location=path, description=description, source_kind='ms_dictionary'))
         record['column_descriptions'].extend({**col, 'File': filename} for col in columns)
+    if site == 'UPMC':
+        lab_columns = [{'Column': name, 'Meaning': meaning, 'Type': data_type}
+                       for name, meaning, data_type in UPMC_LAB_FIELDS]
+        lab_file = {
+            'id': 'upmc_ms_raw_labs', 'name': 'Raw lab results', 'file': None,
+            'source_files': UPMC_LAB_SHARDS, 'location': UPMC_LAB_FOLDER,
+            'description': 'Four headerless raw codified CSVs contain lab results, units and lower and upper reference values.',
+            'columns': [column['Column'] for column in lab_columns], 'column_descriptions': lab_columns,
+            'dictionaries': [], 'readme_kind': 'ms_raw', 'preview_available': False, 'level': 'raw', 'data_kind': 'lab',
+            'source': source(record, 'ms_raw', UPMC_LAB_SECTION),
+        }
+        record['documented_files'].append(lab_file)
+        record['resources'].append(dict(name=lab_file['name'], kind='lab', location=UPMC_LAB_FOLDER,
+                                        description=lab_file['description'], source_kind='ms_raw'))
+        record['column_descriptions'].extend({**column, 'File': 'ms_obs_fact_*_012023.csv'} for column in lab_columns)
+        if public:
+            schema_rows = '\n'.join(f'| {i} | {name} | {meaning} |'
+                                    for i, (name, meaning, _) in enumerate(UPMC_LAB_FIELDS, start=1))
+            docs['ms_raw'] += (f'\n\n## {UPMC_LAB_SECTION}\n\nThe four headerless CSVs are on O2 in '
+                               f'`{UPMC_LAB_FOLDER}`.\n\n' + '\n'.join(f'- `{filename}`' for filename in UPMC_LAB_SHARDS) +
+                               '\n\n| Position | Field | Meaning |\n| --- | --- | --- |\n' + schema_rows +
+                               '\n\nThe raw result field can contain numeric, bounded or qualitative text. '
+                               'Units and reference limits may be blank. The source inventory did not measure how many rows carry a result. '
+                               'Processed codified tables carry test occurrences.')
     for filename, description in (
         ('dmt_mapping.csv', 'Disease-modifying therapy vocabulary and mapped feature IDs for both sites.'),
         ('code_mapping_overrides.csv', 'Shared corrections applied to the rollup dictionary before resolving codes.'),
@@ -243,6 +281,8 @@ def ms_answer(catalog, query, previous=None):
     if re.search(r'\b(?:ibd|alzheimer|dementia|rheumatoid|ad)\b', q):
         return None
     explicit = re.search(MS_QUERY, q)
+    lab_question = is_lab_query(query)
+    processed_labs = lab_question and re.search(r'\b(?:monthly|daily|processed)\b', q) and not re.search(r'\braw\b', q)
     ids = ms_ids(q, catalog.records)
     named_sites = [site for site in SITES if re.search(SITE_QUERY[site], q)]
     if not ids and named_sites == ['UPMC'] and 'UPMC_MS' in catalog.records and re.search(r'\bregistry\b', q):
@@ -253,7 +293,7 @@ def ms_answer(catalog, query, previous=None):
     if not ids and not active and not re.search(r'\b(?:edss|pdds)\b', q):
         return None
     if not ids:
-        if not explicit and not re.search(r'cohort|registry|edss|pdds|calendar|\bt0\b|overlap|\bdmt\b|'
+        if not explicit and not lab_question and not re.search(r'cohort|registry|edss|pdds|calendar|\bt0\b|overlap|\bdmt\b|'
                                            r'patient counts?|how many patients|what about|mapping|readme|reports?|statistics|'
                                            r'\bwhere\b|\bcolumns\b|\bmonths?\b|\baccess\b', q):
             return None
@@ -274,7 +314,17 @@ def ms_answer(catalog, query, previous=None):
     count = re.search(r'how many|patient counts?|cohort size|number of patients', q)
     cohort = re.search(r'cohort filter|cohort flags|cohort selection|cohort (?:was )?selected|how.*select.*cohort|report cohort|ms_spec_9[05]', q)
     named_mappings = {d['name'] for key in ids for d in catalog.records[key]['dictionaries'] if d['name'].lower() in q}
-    if overlap:
+    if lab_question:
+        view, intent = 'labs', 'ms_labs'
+        if processed_labs:
+            intro = 'The requested processed MS files record lab test occurrences.'
+        elif ids == ['UPMC_MS']:
+            intro = 'Yes. UPMC MS has lab results in the raw codified files on O2.'
+        elif ids == ['MGB_MS']:
+            intro = 'The documented MGB MS extract has lab test codes and counts. Result values are absent.'
+        else:
+            intro = 'UPMC MS has raw lab results on O2. MGB MS provides lab test codes and counts.'
+    elif overlap:
         view, intro = 'overlap', 'The cohort reports describe where registry labels and EHR or NLP feature windows overlap.'
     elif re.search(r'summary stat|cohort stat|report stat|cohort profile|cohort characteristics', q):
         view, intro = 'report', 'Here are the inventory counts and summary statistics for the filtered report cohorts.'
@@ -292,7 +342,7 @@ def ms_answer(catalog, query, previous=None):
         view, intro = 'preprocessing', 'Benet documents each preprocessing step and its inputs and outputs.'
     elif re.search(r'\bwhere\b|\bo2\b|storage|\bpaths?\b|\baccess\b|download', q):
         view, intro, intent = 'location', 'The documented MS outputs are on O2.', 'location'
-    elif re.search(r'calendar|\bt0\b|negat|assertion|\btime\b.*nlp|dates?|lab values?|\bcount_events\b', q) and not re.search(r'\bcolumns?\b|schema', q):
+    elif re.search(r'calendar|\bt0\b|negat|assertion|\btime\b.*nlp|dates?|\bcount_events\b', q) and not re.search(r'\bcolumns?\b|schema', q):
         view, intro = 'time', 'Check the source resolution and feature definitions before comparing the sites.'
     elif re.search(r'\b(?:join|link|linkage|connect|merge)\b', q):
         view, intro = 'linkage', 'Use the site-specific EHR identifier and calendar month to align the documented outputs.'
@@ -377,15 +427,35 @@ def ms_answer(catalog, query, previous=None):
                  'Mention days can fall in a neighboring calendar month. Its daily codified table carries actual calendar dates.'
                  if site == 'MGB' else 'UPMC NLP counts distinct days with an asserted concept in the actual calendar month. '
                  'Both feature sources have absolute dates, so no `t0` reconstruction is required.'), 'ms_comparison', 'Three traps in a two-site model')
-            if re.search(r'lab', q):
-                add(('The documented MGB inputs carry lab codes and counts.' if site == 'MGB' else
-                     'UPMC raw lab files carry results, units and reference ranges. The processed feature tables record occurrences.'),
-                    'ms_comparison', 'The differences')
             if re.search(r'count_events', q):
                 add('In the daily codified table, `count` credits an event to each mapped concept. '
                     '`count_events` apportions the event across those concepts so the values can be summed for source-event totals.',
                     'ms_dictionary', '`all_ehr_absolute_date.parquet`')
             open_doc('ms_comparison')
+        if view == 'labs':
+            show_columns = bool(re.search(r'\b(?:columns?|fields?|schema|structure)\b', q))
+            if site == 'UPMC' and not processed_labs:
+                add('The four headerless CSVs include the test date and name, result, unit, and reference ranges. '
+                    'The result field can contain numbers, bounded results such as `<20`, or text such as `Neg`. '
+                    'Processed codified tables record test occurrences.', 'ms_raw', UPMC_LAB_SECTION, markdown=True)
+                if re.search(r'how many|coverage|patient count|row count', q):
+                    add('The source inventory lists four files totaling 2.73 GB. The number of rows with a result is unmeasured.',
+                        'ms_raw', UPMC_LAB_SECTION)
+                raw_lab = next(file for file in record['documented_files'] if file['data_kind'] == 'lab')
+                cards = [{**raw_lab, 'show_columns': show_columns}]
+                if not show_columns:
+                    actions.append({'label': 'Show UPMC raw lab columns', 'query': 'Show the raw lab columns for UPMC MS'})
+            else:
+                description = ('MGB includes `LabTest` events in its coded EHR files. The documented extract contains codes and dates. '
+                               'Numeric results, units and reference ranges are absent.' if site == 'MGB' else
+                               'The daily and monthly codified EHR tables contain lab test codes and occurrence counts. '
+                               'The raw codified files hold the result values, units and reference ranges.')
+                add(description, 'ms_comparison', 'The differences', markdown=True)
+                cadence = 'daily' if 'daily' in q and 'monthly' not in q else 'monthly' if 'monthly' in q and 'daily' not in q else ''
+                cards = file_views(record, cadence + ' codified', 'columns' if show_columns else 'location')
+                if site == 'UPMC':
+                    actions.append({'label': 'Find UPMC raw results', 'query': 'Where are the raw lab results for UPMC MS?'})
+            sources.extend(card.get('source') or source(record, 'ms_dictionary', f'`{card["id"]}`') for card in cards)
         if view == 'linkage':
             add(('At MGB, `EHR_mapping.csv` connects registry `mapping_index` to EHR `patient_num`.' if site == 'MGB' else
                  'At UPMC, the PROMOTE bridge connects `id_participant` to EHR `patient_num`. '
@@ -421,10 +491,19 @@ def ms_answer(catalog, query, previous=None):
         actions.insert(0, {'label': 'Link registry labels to EHR',
                            'query': 'How do I link registry labels to EHR for ' +
                                     ' and '.join(catalog.records[key]['label'] for key in ids) + '?'})
+    answer = [intro, *(f['text'] for s in sections for f in s['facts'])]
+    if intent in {'columns', 'ms_labs'}:
+        for dataset_section in sections:
+            for card in dataset_section['files']:
+                if card.get('show_columns'):
+                    answer.append(card['name'] + ': ' + ', '.join(card['columns']))
+                if intent == 'ms_labs':
+                    answer.append(card['name'] + ' on O2: ' + card['location'])
+                    if card['data_kind'] == 'lab':
+                        answer.append(', '.join(card['source_files']))
     return {'query': query, 'engine': 'catalog', 'model': None, 'intent': intent,
             'interpretation': 'verified_ms_documentation', 'intro': intro,
-            'answer': '\n\n'.join([intro, *(f['text'] for s in sections for f in s['facts']),
-                                 *(f['name'] + ': ' + ', '.join(f['columns']) for s in sections for f in s['files'] if intent == 'columns')]),
+            'answer': '\n\n'.join(answer),
             'datasets': sections, 'sources': list({(s['url'], s.get('heading')): s for s in sources}.values()),
             'context_dataset_ids': ids, 'pending_topic': None, 'warning': None,
             'compact': False, 'elapsed_seconds': 0, 'actions': actions}
