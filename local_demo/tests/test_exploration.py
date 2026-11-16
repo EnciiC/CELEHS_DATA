@@ -266,6 +266,10 @@ def test_hosted_study_ideas_use_the_requested_dataset_and_cite_files(monkeypatch
             assert answer['sources'][0]['kind'] == 'ms_dictionary'
         assert len(calls[0]['files']) > 1 and len(calls[1]['files']) == 1
         assert ask(client, 'What kinds of analyses could I do?')['intent'] == 'analysis_scope'
+        saved = ask(client, 'What kinds of analyses could I do with UPMC MS data?')
+        assert saved['engine'] == 'catalog'
+        assert 'PDDS change' in saved['analysis_ideas'][0]['question']
+        assert 'UPMC MS · Monthly registry labels' in saved['analysis_ideas'][0]['files']
 
 
 def test_no_context_invalid_context_and_separate_sessions_do_not_guess_a_file(client):
