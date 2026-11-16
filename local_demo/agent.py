@@ -14,7 +14,7 @@ import httpx
 
 from .catalog import Catalog
 from .presentation import answer_views, file_views, scope
-from .conversation import opening, unavailable, semantic_guidance, valid_topic
+from .conversation import guide, opening, unavailable, semantic_guidance, valid_topic
 from .storage_answers import is_storage_question, direct_storage_answer, names
 from .semantic import ROUTER_SYSTEM, routing_context, route_schema, validate_route, direct_document_request
 from .document_stats import date_view
@@ -24,7 +24,7 @@ from .readme_topics import topic_answer
 from .single_files import single_file_answer
 from .exploration import infer_selection,resolve_exploration,valid_selection
 from .compare_resources import comparison_answer
-from .ms import ms_answer
+from .ms import ms_answer, ms_ids
 from .ibd_workflow import ibd_workflow_answer
 from .hosting import provider
 from .hosted import CloudflareModel, MODEL as CLOUD_MODEL
@@ -197,22 +197,34 @@ class Agent:
 
     async def _answer(self, query, previous=None, use_llm=True, pending_topic=None):
         started = time.monotonic()
+        if pending_topic == 'registry_scope':
+            dataset = query.strip(' .?!').lower()
+            scopes = {'ibd': 'MGB IBD', 'mgb ibd': 'MGB IBD', 'ms': 'MS',
+                      'multiple sclerosis': 'MS', 'mgb ms': 'MGB MS',
+                      'upmc': 'UPMC MS', 'upmc ms': 'UPMC MS', 'promote': 'UPMC MS'}
+            if dataset in scopes:
+                query = 'How do I connect registry labels to EHR for ' + scopes[dataset] + '?'
         if re.search(r'download|export|see|show|view', query, re.I) and re.search(r'real (?:patient |clinical )?(?:data|records|notes)|actual patient',query,re.I):
             intro='This website provides documentation and clearly labeled fake examples. Real patient data must be accessed through the documented source platform with the required permission.'
             return {'query':query,'engine':'guide','model':None,'intent':'data_access',
                     'intro':intro,'answer':intro,'datasets':[],'resources':[],'sources':[],
                     'context_dataset_ids':previous or [],'pending_topic':None,'warning':None,'compact':True,
                     'actions':[{'label':'Browse resources','view':'browse'}],'elapsed_seconds':0}
-        workflow = ibd_workflow_answer(self.catalog, query, previous)
-        if workflow is not None:
-            self.last_result = {'engine': 'catalog', 'error': None}
-            return workflow
         # An explicit path or a duplicated filename needs resolution before a
         # project-topic shortcut can silently choose another file version.
         early_file=single_file_answer(self.catalog,query,previous or [])
         if early_file and (early_file.get('interpretation')=='ambiguous_file' or re.search(r'/n/|//SMB|\\\\',query,re.I)):
             self.last_result={'engine':'catalog','error':None}
             return early_file
+        if ms_ids(query, self.catalog.records) and re.search(r'\b(?:registry|labels?|promote)\b', query, re.I):
+            result = ms_answer(self.catalog, query, previous)
+            if result is not None:
+                self.last_result = {'engine': 'catalog', 'error': None}
+                return result
+        workflow = ibd_workflow_answer(self.catalog, query, previous)
+        if workflow is not None:
+            self.last_result = {'engine': 'catalog', 'error': None}
+            return workflow
         documented_topic = topic_answer(self.catalog, query, previous or [])
         if documented_topic is not None:
             self.last_result = {'engine':'catalog', 'error':None}
@@ -225,6 +237,18 @@ class Agent:
         if ms_result is not None:
             self.last_result={'engine':'catalog','error':None}
             return ms_result
+        if re.search(r'\bregistry\b', query, re.I) and re.search(r'\behr\b', query, re.I) and re.search(
+            r'\b(?:link\w*|join\w*|connect\w*|align\w*|merg\w*|match\w*|map\w*)\b', query, re.I
+        ):
+            choices = [key for key in ('IBD', 'MGB_MS', 'UPMC_MS') if key in self.catalog.records]
+            actions = [{'label': self.catalog.records[key]['label'],
+                        'query': 'How do I link registry labels to EHR for ' + self.catalog.records[key]['label'] + '?'}
+                       for key in choices]
+            self.last_result = {'engine': 'guide', 'error': None}
+            return {**guide('registry_scope', ['Which dataset’s registry labels do you want to connect to EHR?'],
+                            actions, pending='registry_scope'),
+                    'interpretation': 'registry_scope', 'compact': True,
+                    'elapsed_seconds': round(time.monotonic() - started, 2)}
         resource_result = await self.catalog.library.maybe_answer(
             query, previous or [], self.catalog, self.structured, use_llm, self.model)
         if resource_result is not None:

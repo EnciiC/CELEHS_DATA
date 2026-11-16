@@ -12,7 +12,9 @@ def client():
 
 def ask(client,q,previous=None):
     body={'query':q,'use_llm':False}
-    if previous: body.update(previous_dataset_ids=previous.get('context_dataset_ids',[]),selection=previous.get('selection'))
+    if previous:
+        body.update(previous_dataset_ids=previous.get('context_dataset_ids',[]),
+                    selection=previous.get('selection'), pending_topic=previous.get('pending_topic'))
     r=client.post('/api/chat',json=body)
     assert r.status_code==200
     return r.json()
@@ -119,6 +121,39 @@ def test_ms_column_followup_with_here_uses_the_selected_upmc_file(monkeypatch):
             [file] = response['datasets'][0]['files']
             assert file['columns'] == ['count']
             assert [row['Column'] for row in file['column_descriptions']] == ['count']
+
+
+def test_registry_linkage_asks_for_scope_then_resolves_a_short_reply(monkeypatch):
+    monkeypatch.setenv('CATALOG_PROVIDER', 'cloudflare')
+    with TestClient(app) as client:
+        query = 'How do I connect the registry labels to EHR'
+        question = ask(client, query)
+        assert question['intent'] == 'registry_scope'
+        assert not question['context_dataset_ids'] and not question['sources']
+        assert {item['label'] for item in question['actions']} == {'MGB IBD', 'MGB MS', 'UPMC MS'}
+        scoped = ask(client, 'MS', question)
+        assert set(scoped['context_dataset_ids']) == {'MGB_MS', 'UPMC_MS'}
+        assert 'id_participant' in scoped['answer'] and 'mapping_index' in scoped['answer']
+        upmc = ask(client, 'UPMC MS', question)
+        assert upmc['context_dataset_ids'] == ['UPMC_MS']
+        ibd = ask(client, 'IBD', question)
+        assert ibd['context_dataset_ids'] == ['IBD'] and 'baseline_date' in ibd['answer']
+
+
+def test_ms_registry_question_switches_from_ibd_and_keeps_the_new_context(monkeypatch):
+    monkeypatch.setenv('CATALOG_PROVIDER', 'cloudflare')
+    with TestClient(app) as client:
+        ibd = ask(client, 'How do I link IBD registry data to EHR?')
+        ms = ask(client, 'do we have registry data in MS', ibd)
+        assert set(ms['context_dataset_ids']) == {'MGB_MS', 'UPMC_MS'}
+        assert 'EDSS' in ms['answer'] and 'PDDS' in ms['answer']
+        for query in ('How do I connect the registry labels to EHR', 'How do I connect these to EHR?'):
+            linked = ask(client, query, ms)
+            assert set(linked['context_dataset_ids']) == {'MGB_MS', 'UPMC_MS'}
+            assert 'calendar_month' in linked['answer'] and 'PROMOTE' in linked['answer']
+            assert all(source['kind'].startswith('ms_') for source in linked['sources'])
+        explicit_ibd = ask(client, 'How do I link IBD registry data to EHR?', ms)
+        assert explicit_ibd['context_dataset_ids'] == ['IBD']
 
 
 def test_no_context_invalid_context_and_separate_sessions_do_not_guess_a_file(client):

@@ -179,6 +179,11 @@ def resolve_exploration(catalog,query,selection,previous):
             result['selection']={**focus,'view':'columns'}
             return result,None,focus
         return None,None,None
+    if view == 'linkage' and focus and focus['kind'] == 'choices' and all(
+        key.endswith('_MS') for key in focus['ids']
+    ):
+        labels = ' and '.join(catalog.records[key]['label'] for key in focus['ids'])
+        return None, 'How do I link registry labels to EHR for ' + labels + '?', None
     if not focus or focus['kind']=='choices': return clarification(catalog,query,focus,previous),None,focus
     if view=='broader':
         parent=focus['id'].split(':',1)[0] if focus['kind'] in {'file','topic'} else focus['id']

@@ -245,8 +245,12 @@ def ms_answer(catalog, query, previous=None):
     explicit = re.search(MS_QUERY, q)
     ids = ms_ids(q, catalog.records)
     named_sites = [site for site in SITES if re.search(SITE_QUERY[site], q)]
+    if not ids and named_sites == ['UPMC'] and 'UPMC_MS' in catalog.records and re.search(r'\bregistry\b', q):
+        ids = ['UPMC_MS']
     active = [key for key in previous or [] if key.endswith('_MS') and key in catalog.records]
-    if not explicit and not active and not re.search(r'\b(?:edss|pdds)\b', q):
+    if len(active) != len(previous or []):
+        active = []
+    if not ids and not active and not re.search(r'\b(?:edss|pdds)\b', q):
         return None
     if not ids:
         if not explicit and not re.search(r'cohort|registry|edss|pdds|calendar|\bt0\b|overlap|\bdmt\b|'
@@ -292,8 +296,9 @@ def ms_answer(catalog, query, previous=None):
         view, intro = 'time', 'Check the source resolution and feature definitions before comparing the sites.'
     elif re.search(r'\b(?:join|link|linkage|connect|merge)\b', q):
         view, intro = 'linkage', 'Use the site-specific EHR identifier and calendar month to align the documented outputs.'
-    elif re.search(r'\b(?:edss|pdds|outcomes?|labels?|disability)\b', q) and not re.search(r'\bcolumns?\b|schema', q):
-        view, intro = 'labels', 'The primary disability measure differs by site.'
+    elif re.search(r'\b(?:registry|edss|pdds|outcomes?|labels?|disability)\b', q) and not re.search(r'\bcolumns?\b|schema', q):
+        view, intro = 'labels', 'Monthly registry labels are available for ' + ' and '.join(
+            catalog.records[key]['label'] for key in ids) + '.'
     elif re.search(r'columns?|schema|fields|look like', q):
         view, intro, intent = 'files', 'Here are the documented files and their columns.', 'columns'
     elif re.search(r'sample|preview|fake rows', q):
@@ -412,6 +417,10 @@ def ms_answer(catalog, query, previous=None):
                          'offer_preview': False, 'additional_note': None, 'date_summary': None})
     if view == 'overview' and len(ids) == 2:
         actions.insert(0, {'label': 'Compare MGB and UPMC', 'query': 'Compare MGB MS and UPMC MS'})
+    if view == 'labels':
+        actions.insert(0, {'label': 'Link registry labels to EHR',
+                           'query': 'How do I link registry labels to EHR for ' +
+                                    ' and '.join(catalog.records[key]['label'] for key in ids) + '?'})
     return {'query': query, 'engine': 'catalog', 'model': None, 'intent': intent,
             'interpretation': 'verified_ms_documentation', 'intro': intro,
             'answer': '\n\n'.join([intro, *(f['text'] for s in sections for f in s['facts']),

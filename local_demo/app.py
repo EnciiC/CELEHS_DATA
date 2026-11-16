@@ -277,7 +277,7 @@ async def chat(question: Question, request: Request):
                                         question.selection.model_dump(exclude_none=True) if question.selection else None)
         if result.get('engine') == 'local_llm':
             result['engine'] = 'hosted_llm'
-        if question.use_llm and not use_llm and not (result['engine'] == 'catalog' and (
+        if question.use_llm and not use_llm and result.get('intent') != 'registry_scope' and not (result['engine'] == 'catalog' and (
             any(key.endswith('_MS') for key in result.get('context_dataset_ids', [])) or
             result.get('interpretation') == 'verified_ms_documentation')):
             result['warning'] = 'Hosted chat is paused. This answer uses saved documentation; you can also browse datasets.'

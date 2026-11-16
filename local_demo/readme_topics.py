@@ -165,7 +165,13 @@ def match_topic(catalog, query, previous):
                              if any(' '+' '.join(words(alias))+' ' in q for alias in aliases)),view)
             aliases=[topic['name'],*topic['aliases'],
                      *(alias for f in topic['files'] for alias in file_aliases(f))]
-            strength=max((len(words(alias)) for alias in aliases if ' '+' '.join(words(alias))+' ' in q),default=0)
+            matching_aliases = {' '.join(words(alias)) for alias in aliases
+                                if ' ' + ' '.join(words(alias)) + ' ' in q}
+            if topic['id'] == 'ibd_registry' and previous != [dataset_id] and not re.search(
+                r'\b(?:ibd|inflammatory bowel disease)\b', q
+            ):
+                matching_aliases.discard('registry')
+            strength = max((len(alias.split()) for alias in matching_aliases), default=0)
             named=bool(strength)
             context_link=(view=='linkage' and previous==[dataset_id]
                           and len([t for t in record.get('readme_topics',[]) if t.get('link_target')=='EHR'])==1
