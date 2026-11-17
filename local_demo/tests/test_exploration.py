@@ -249,10 +249,10 @@ def test_hosted_study_ideas_use_the_requested_dataset_and_cite_files(monkeypatch
         calls.append(context)
         assert {file['dataset'] for file in context['files']} == {'UPMC MS'}
         related = next(file for file in context['files'] if file['name'] == 'Monthly NLP concepts')
-        return {'ideas': [{'question': 'How do documented concepts vary over follow-up?',
-                           'approach': 'Summarize concept counts over time using patient_num.',
-                           'check': 'Check variation in the number of observed periods.',
-                           'file_ids': [related['id']]}]}
+        return {'ideas': 'Question: How do documented concepts vary over follow-up?\n'
+                         'Approach: Summarize concept counts over time using patient_num.\n'
+                         'Check: Check variation in the number of observed periods.\n'
+                         f"Files: {related['id']}"}
 
     monkeypatch.setattr(Agent, 'structured', suggest)
     with TestClient(app) as client:
