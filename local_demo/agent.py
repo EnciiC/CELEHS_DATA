@@ -136,10 +136,10 @@ class Agent:
             return {"reachable": False, "model": MODEL, "installed": False, "endpoint": OLLAMA,
                     "last_result": self.last_result}
 
-    async def structured(self, system, context, schema):
+    async def structured(self, system, context, schema, *, json_object=False):
         if self.cloud:
             async with self.lock:
-                return await self.cloud.structured(system, context, schema)
+                return await self.cloud.structured(system, context, schema, json_object=json_object)
         body = {"model": MODEL, "stream": False, "think": "low", "format": schema,
                 "options": {"num_ctx": 12288, "num_predict": 1500, "temperature": 0, "seed": 42},
                 "keep_alive": "30m", "messages": [{"role": "system", "content": system},

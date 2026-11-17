@@ -38,13 +38,15 @@ class CloudflareModel:
                 "enabled": self.ready, "reachable": self.last_success, "installed": self.configured,
                 "verified": self.last_success}
 
-    async def structured(self, system, context, schema):
+    async def structured(self, system, context, schema, *, json_object=False):
         if not self.ready:
             raise ValueError("Hosted chat is not enabled")
         # The model-in-path API is required for Workers AI prepaid Gateway billing.
         url = f"https://api.cloudflare.com/client/v4/accounts/{self.account}/ai/run/{MODEL}"
-        body = {"stream": False, "max_tokens": 2048, "temperature": 0,
-                "response_format": {"type": "json_schema", "json_schema": schema},
+        response_format = ({"type": "json_object"} if json_object else
+                           {"type": "json_schema", "json_schema": schema})
+        body = {"stream": False, "max_tokens": 896 if json_object else 2048, "temperature": 0,
+                "response_format": response_format,
                 "messages": [{"role": "system", "content": "Reasoning: low\n" + system},
                              {"role": "user", "content": json.dumps(context, ensure_ascii=False)}]}
         headers = {"Authorization": "Bearer " + self._token, "cf-aig-gateway-id": self.gateway,

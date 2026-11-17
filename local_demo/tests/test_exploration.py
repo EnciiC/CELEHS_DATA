@@ -1,3 +1,6 @@
+import json
+
+import httpx
 import pytest
 from fastapi.testclient import TestClient
 
@@ -245,16 +248,23 @@ def test_hosted_study_ideas_use_the_requested_dataset_and_cite_files(monkeypatch
     monkeypatch.setenv('CATALOG_PROVIDER', 'cloudflare')
     calls = []
 
-    async def suggest(self, instructions, context, schema):
+    async def suggest(self, url, **request):
+        body = request['json']
+        assert body['response_format'] == {'type': 'json_object'}
+        context = json.loads(body['messages'][-1]['content'])
         calls.append(context)
         assert {file['dataset'] for file in context['files']} == {'UPMC MS'}
         related = next(file for file in context['files'] if file['name'] == 'Monthly NLP concepts')
-        return {'ideas': 'Question: How do documented concepts vary over follow-up?\n'
-                         'Approach: Summarize concept counts over time using patient_num.\n'
-                         'Check: Check variation in the number of observed periods.\n'
-                         f"Files: {related['id']}"}
+        result = {'ideas': [{
+            'question': 'How do documented concepts vary over follow-up?',
+            'approach': 'Summarize concept counts over time using patient_num.',
+            'check': 'Check variation in the number of observed periods.',
+            'files': [related['id'] if len(calls) < 3 else 'unknown'],
+        }]}
+        return httpx.Response(200, json={'success': True, 'result': {'response': result}},
+                              request=httpx.Request('POST', url))
 
-    monkeypatch.setattr(Agent, 'structured', suggest)
+    monkeypatch.setattr(httpx.AsyncClient, 'post', suggest)
     with TestClient(app) as client:
         agent = client.app.state.agent
         monkeypatch.setattr(type(agent.cloud), 'ready', property(lambda self: True))
@@ -265,6 +275,9 @@ def test_hosted_study_ideas_use_the_requested_dataset_and_cite_files(monkeypatch
             assert answer['analysis_ideas'][0]['files'] == ['UPMC MS · Monthly NLP concepts']
             assert answer['sources'][0]['kind'] == 'ms_dictionary'
         assert len(calls[0]['files']) > 1 and len(calls[1]['files']) == 1
+        rejected = client.post('/api/chat', json={'query': 'What analyses could I do with UPMC MS data?'}).json()
+        assert rejected['engine'] == 'catalog' and 'saved study ideas' in rejected['warning']
+        assert 'unknown' not in rejected['answer']
         assert ask(client, 'What kinds of analyses could I do?')['intent'] == 'analysis_scope'
         saved = ask(client, 'What kinds of analyses could I do with UPMC MS data?')
         assert saved['engine'] == 'catalog'
