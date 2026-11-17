@@ -261,7 +261,8 @@ def test_hosted_study_ideas_use_the_requested_dataset_and_cite_files(monkeypatch
             'check': 'Check variation in the number of observed periods.',
             'files': [related['id'] if len(calls) < 3 else 'unknown'],
         }]}
-        return httpx.Response(200, json={'success': True, 'result': {'response': result}},
+        output = '```json\n' + json.dumps(result) + '\n```'
+        return httpx.Response(200, json={'success': True, 'result': {'response': output}},
                               request=httpx.Request('POST', url))
 
     monkeypatch.setattr(httpx.AsyncClient, 'post', suggest)

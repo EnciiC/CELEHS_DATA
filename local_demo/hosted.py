@@ -64,7 +64,7 @@ class CloudflareModel:
                 raise ValueError("Provider rejected the request")
             result = payload.get("result", payload)
             stage = 'assistant_output'
-            value = parse_result(result)
+            value = parse_result(result, allow_json_code_block=json_object)
             stage = 'schema_validation'
             Draft202012Validator(schema).validate(value)
         except (httpx.HTTPError, ValueError, KeyError, TypeError, IndexError, ValidationError) as error:
@@ -76,6 +76,9 @@ class CloudflareModel:
                 self.last_failure['reason'] = str(error)
             if isinstance(error, httpx.HTTPStatusError):
                 self.last_failure['http_status'] = error.response.status_code
+            if isinstance(error, json.JSONDecodeError):
+                self.last_failure['output_length'] = len(error.doc)
+                self.last_failure['has_code_block'] = '```' in error.doc
             logging.getLogger(__name__).warning('Hosted inference failure: %s', self.last_failure)
             # Do not propagate remote bodies, headers, credentials or account details.
             raise ValueError("Hosted model unavailable or returned invalid JSON") from None
@@ -84,7 +87,7 @@ class CloudflareModel:
         return value
 
 
-def parse_result(result):
+def parse_result(result, *, allow_json_code_block=False):
     """Accept native response and Responses-style assistant text, never reasoning."""
     if not isinstance(result, dict):
         raise ValueError("Invalid provider response")
@@ -104,4 +107,10 @@ def parse_result(result):
         if not text:
             raise ValueError("No assistant response")
         value = "".join(text)
-    return json.loads(value) if isinstance(value, str) else value
+    if not isinstance(value, str):
+        return value
+    if allow_json_code_block:
+        blocks = re.findall(r'```(?:json)?[ \t]*\r?\n(.*?)\r?\n[ \t]*```', value, re.IGNORECASE | re.DOTALL)
+        if len(blocks) == 1:
+            value = blocks[0].strip()
+    return json.loads(value)
