@@ -1,0 +1,111 @@
+{
+  "overview": "Clinical notes from the MVP note pool and DAS_agent results for a KOMAP-positive rheumatoid arthritis cohort on KDI.",
+  "locations": [
+    {
+      "label": "JSON notes",
+      "kind": "data",
+      "value": "/scratch/MVP_CORE_OPS/caitianrun/notes/RA_KOMAP_positive"
+    },
+    {
+      "label": "Parquet notes",
+      "kind": "data",
+      "value": "/scratch/MVP_CORE_OPS/caitianrun/notes/RA_KOMAP_positive_parquet"
+    },
+    {
+      "label": "Agent output",
+      "kind": "data",
+      "value": "/mnt/mvpfs/MVP_CORE_OPS/caitianrun/DAS_Agent/TEST/output"
+    }
+  ],
+  "sections": [
+    {
+      "title": "Cohort and coverage",
+      "views": [
+        "statistics",
+        "counts",
+        "dates"
+      ],
+      "match": "cohort|patients|how many notes|coverage|date range|komap",
+      "items": [
+        "1,987 KOMAP-positive RA patients and about 3.5 million notes. Coverage ends September 30, 2024. The README writes the cutoff as cutoff - 1.387 ppv90%."
+      ]
+    },
+    {
+      "title": "Notes prepared for the agent",
+      "views": [
+        "files",
+        "columns"
+      ],
+      "match": "parquet|json|note fields|note columns",
+      "items": [
+        "The source note pool was stored in Snappy-compressed Parquet. The prepared JSON and Parquet files group 30 patients per file.",
+        "Documented fields are MVPCore_ID, TiuDocumentSID, EpisodeBeginDateTime and ScrubbedText."
+      ]
+    },
+    {
+      "title": "Agent output files",
+      "views": [
+        "files",
+        "columns"
+      ],
+      "match": "tags|results csv|output|link|join",
+      "items": [
+        "tags.csv records informativeness. results.csv lists existing_DAS_score, calculated_das_score, calculated_das_category, TiuDocumentSID and evidences.",
+        "TiuDocumentSID appears in both the note fields and results.csv. The README does not specify join cardinality."
+      ]
+    },
+    {
+      "title": "Disease activity scores",
+      "views": [
+        "files"
+      ],
+      "match": "extract|calculat|score|categor",
+      "items": [
+        "The agent extracts a score recorded in a note or calculates one from the note using a DAS formula. It evaluates informative notes for high, moderate, low or remission status.",
+        "The listed cutoffs are 5.1, 3.2 and 2.5. The README does not specify how equality at a cutoff is handled."
+      ]
+    },
+    {
+      "title": "Chart review",
+      "views": [
+        "statistics"
+      ],
+      "match": "validat|chart review|performance|accuracy|checked",
+      "items": [
+        "Agent results were compared with human chart review on 187 notes. The README gives no numerical performance estimate."
+      ]
+    },
+    {
+      "title": "Access",
+      "views": [
+        "access",
+        "location"
+      ],
+      "match": "access|permission|o2",
+      "items": [
+        "KDI access is required. KDI is the documented storage platform."
+      ]
+    },
+    {
+      "title": "Reading a file",
+      "views": [
+        "start",
+        "code"
+      ],
+      "match": "python|read a file|open a file",
+      "items": [
+        "Use pyarrow.parquet.read_table to select columns from a Parquet file, then call to_pandas(). The README includes a separate pandas example for writing a Parquet file."
+      ]
+    }
+  ],
+  "columns": [
+    "MVPCore_ID",
+    "TiuDocumentSID",
+    "EpisodeBeginDateTime",
+    "ScrubbedText",
+    "existing_DAS_score",
+    "calculated_das_score",
+    "calculated_das_category",
+    "evidences"
+  ]
+}

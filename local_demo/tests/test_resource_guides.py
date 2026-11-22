@@ -23,7 +23,7 @@ def ask(client, query, previous=None):
 def test_new_member_and_real_data_download_scope(client):
     result=ask(client,'I am new. What can I find here?')
     assert result['intent']=='resource_inventory'
-    assert len(result['inventory']['resources'])==16
+    assert len(result['inventory']['resources'])==18
     assert len(result['inventory']['datasets'])==3
     result=ask(client,'Can I download the real patient notes from here?')
     assert result['intent']=='data_access' and not result['resources'] and not result['datasets']
@@ -38,7 +38,7 @@ def test_hosted_guides_use_same_sources_and_correct_engine(monkeypatch):
     from local_demo.catalog import Catalog
     monkeypatch.setenv('CATALOG_PROVIDER','cloudflare')
     catalog=Catalog()
-    assert len(catalog.library.entries)==16
+    assert len(catalog.library.entries)==18
     agent=Agent(catalog)
     async def select(system,context,schema):
         return {'resource_ids':['ZX_AOU'],'intent':'location'}
@@ -64,8 +64,8 @@ def test_general_overview_does_not_become_access_instructions():
 
 def test_all_readmes_are_registered_unmodified_and_not_payloads(client):
     library=client.app.state.catalog.library
-    assert len(library.entries)==16
-    assert len(library.summaries('datasets'))==5
+    assert len(library.entries)==18
+    assert len(library.summaries('datasets'))==7
     assert len(library.summaries('derived'))==11
     assert library.summaries('models')==[]
     manifest=json.loads((ROOT/'source_manifest.json').read_text(encoding='utf8'))
@@ -262,7 +262,7 @@ def test_variant_gene_discovery_remains_available_without_disease_inference(clie
 ])
 def test_note_discovery_returns_note_resources_not_count_examples(client,query):
     result=ask(client,query)
-    assert {r['id'] for r in result['resources']}=={'ZX_4CE','ZX_CORAL'}
+    assert {r['id'] for r in result['resources']}=={'ZX_4CE','ZX_CORAL','KDI_RA'}
     assert not result['datasets']
     assert result['intent']=='resource_overview'
     assert all([b['title'] for b in r['blocks']]==['What it is'] for r in result['resources'])
@@ -276,7 +276,7 @@ def test_broad_discovery_keeps_overview_even_when_model_picks_access():
     async def access_plan(system,context,schema):
         return {'resource_ids':[context['candidates'][0]['id']],'intent':'access'}
     agent.structured=access_plan
-    for query,expected in [('Do we have any note data?',{'ZX_4CE','ZX_CORAL'}),
+    for query,expected in [('Do we have any note data?',{'ZX_4CE','ZX_CORAL','KDI_RA'}),
                            ('Do we have any relation pairs?',{'ZX_RELATIONS','ZX_FAVOR_GENE','ZX_FAVOR_VARIANT'})]:
         result=asyncio.run(agent.answer(query))
         assert result['intent']=='resource_overview'
@@ -299,7 +299,7 @@ def test_note_discovery_retains_disease_specific_model_selection():
 def test_topic_qualified_notes_limit_candidates_to_documented_topic():
     library=ResourceLibrary()
     assert library.candidates('Do we have any notes for breast cancer?',[])==['ZX_CORAL']
-    assert set(library.candidates('Do we have any note data?',[]))=={'ZX_4CE','ZX_CORAL'}
+    assert set(library.candidates('Do we have any note data?',[]))=={'ZX_4CE','ZX_CORAL','KDI_RA'}
 
 
 def test_access_and_start_content_remain_excerpts_of_the_original(client):
@@ -308,6 +308,9 @@ def test_access_and_start_content_remain_excerpts_of_the_original(client):
         for view in ['start','access','files','code']:
             result=library.view(entry,view,'')
             for block in result['blocks']:
+                if 'guide' in entry:
+                    assert result['source']['resource_id']==entry['id']
+                    continue
                 if 'west' in entry:
                     if block.get('text'):assert block['text'] in entry['original']
                     continue

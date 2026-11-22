@@ -355,6 +355,44 @@
         "bch",
         "kim greco"
       ]
+    },
+    {
+      "id": "MGB_BIOBANK",
+      "label": "MGB Biobank",
+      "aliases": [
+        "mgb biobank",
+        "mass general brigham biobank"
+      ],
+      "category": "datasets",
+      "storage": "Eris/Partners and MSSQL",
+      "resource_type": "Biobank EHR and NLP counts",
+      "topics": [
+        "mgb biobank",
+        "mass general brigham biobank"
+      ],
+      "source_group": "clinical_readmes"
+    },
+    {
+      "id": "KDI_RA",
+      "label": "KDI RA",
+      "aliases": [
+        "kdi ra",
+        "ra kdi",
+        "ra on kdi",
+        "kdi rheumatoid arthritis",
+        "das agent"
+      ],
+      "category": "datasets",
+      "storage": "KDI",
+      "resource_type": "Clinical notes and disease activity scores",
+      "topics": [
+        "kdi ra",
+        "ra kdi",
+        "ra on kdi",
+        "kdi rheumatoid arthritis",
+        "das agent"
+      ],
+      "source_group": "clinical_readmes"
     }
   ]
 }

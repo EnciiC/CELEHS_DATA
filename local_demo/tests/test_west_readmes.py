@@ -18,7 +18,7 @@ def ask(client,query):
 
 def test_west_readmes_are_dataset_guides_without_inferred_o2_paths_or_fake_files(client):
     inventory=client.get('/api/inventory').json()
-    assert len(inventory['datasets'])+len(inventory['resources'])==19
+    assert len(inventory['datasets'])+len(inventory['resources'])==21
     west=[r for r in inventory['resources'] if r['id'].startswith('KIM_')]
     assert len(west)==2 and all(r['category']=='datasets' for r in west)
     for summary in west:
@@ -76,4 +76,4 @@ def test_processing_scripts_and_paper_are_readme_content(client):
 
 def test_note_discovery_does_not_treat_west_sequences_as_supplied_notes(client):
     result=ask(client,'Do we have any note data?')
-    assert {r['id'] for r in result['resources']}=={'ZX_4CE','ZX_CORAL'}
+    assert {r['id'] for r in result['resources']}=={'ZX_4CE','ZX_CORAL','KDI_RA'}

@@ -113,12 +113,22 @@ class ResourceLibrary:
             receipt = receipts[row['id']]
             path = (self.root / receipt['snapshot']).resolve()
             group=row.get('source_group','zongxin')
-            if group not in {'zongxin','kim_greco'} or not path.is_relative_to(self.root.resolve() / group):
+            if group not in {'zongxin','kim_greco','clinical_readmes'} or not path.is_relative_to(self.root.resolve() / group):
                 raise ValueError('README path outside resource snapshot')
             data = path.read_bytes()
             if hashlib.sha256(data).hexdigest() != receipt['sha256']:
                 raise ValueError('Resource README changed without updating provenance')
             text = data.decode('utf-8')
+            if group == 'clinical_readmes':
+                guide = json.loads(path.with_name('guide.json').read_text(encoding='utf-8'))
+                self.entries[row['id']] = {**row, 'guide':guide, 'description':guide['overview'],
+                    'sections':{}, 'canonical_location':'', 'primary_platform':row['storage'],
+                    'contact':receipt['readme_contact'], 'original':text, 'source_path':path,
+                    'original_filename':receipt['original_filename'], 'sha256':receipt['sha256'],
+                    'source_date':receipt['source_document_date'], 'snapshot_date':receipt['snapshot_date'],
+                    'locations':guide['locations'], 'has_columns':True, 'has_access':True,
+                    'has_code':any('code' in s['views'] for s in guide['sections'])}
+                continue
             if row.get('source_adapter')=='west_txt':
                 data=parse_west(text)
                 entry={**row,'description':data['description'],'contact':data['contact'],'sections':{},
@@ -216,6 +226,8 @@ class ResourceLibrary:
         tokens = {singular.get(t,t) for t in q.split()} - set('a an the i we you do have data dataset datasets resource resources on o2 from for to of what where which show me can how use study research available public and or with as about using also in by any some want like please could would should it this these those'.split())
         scores = []
         for e in self.entries.values():
+            if 'guide' in e:
+                continue
             if not documented_endpoints(e['id']):
                 continue
             terms = {singular.get(t,t) for t in norm(' '.join([e['label'],e['resource_type'],*e['topics']])).split()}
@@ -249,6 +261,16 @@ class ResourceLibrary:
                 'url':f"/api/resources/{entry['id']}/readme"}
 
     def view(self, entry, requested, query):
+        if 'guide' in entry:
+            guide = entry['guide']
+            sections = [s for s in guide['sections'] if requested in s['views']]
+            if requested == 'topic':
+                sections = [s for s in guide['sections'] if re.search(s['match'],norm(query))]
+            blocks = [{'title':s['title'],'items':s['items'],'text':None,'kind':'bullets'} for s in sections]
+            if requested in {'overview','research','compare'}:
+                blocks = [{'title':'What it is','items':[],'text':guide['overview'],'kind':'bullets'}]
+            return {**self.summary(entry),'locations':guide['locations'],'blocks':blocks,
+                    'source':self.source(entry),'sources':[self.source(entry)],'show_locations':requested=='location'}
         if 'west' in entry:
             blocks,sections=west_blocks(entry,requested,query)
             return {**self.summary(entry),'location_label':'Raw data source','locations':[],

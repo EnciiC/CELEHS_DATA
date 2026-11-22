@@ -146,6 +146,28 @@
       "bytes": 3484,
       "readme_contact": "Kim Greco",
       "source_document_date": null
+    },
+    {
+      "id": "MGB_BIOBANK",
+      "original_filename": "MGB Biobank Data Documentation and Summary.md",
+      "source_document": "MGB Biobank Data Documentation and Summary.docx",
+      "snapshot": "clinical_readmes/MGB_BIOBANK/README_original.md",
+      "sha256": "b49a04d42be364c36df32846c3f45c8e4ffeb9e82d33d5301cc6b26a7b79a68d",
+      "bytes": 2108,
+      "readme_contact": "SM Sweet",
+      "source_document_date": "2026-09",
+      "snapshot_date": "2026-11-22"
+    },
+    {
+      "id": "KDI_RA",
+      "original_filename": "KDI RA data documentation.md",
+      "source_document": "KDI RA data documentation .docx",
+      "snapshot": "clinical_readmes/KDI_RA/README_original.md",
+      "sha256": "32887d5d3e38ef599f9061a945cfb7c2bed5022707a0d7dca34b599c6210c420",
+      "bytes": 2791,
+      "readme_contact": "Tianrun (Austin) Cai",
+      "source_document_date": null,
+      "snapshot_date": "2026-11-22"
     }
   ]
 }

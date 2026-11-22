@@ -1,0 +1,143 @@
+{
+  "overview": "The MGB Biobank README describes daily codified EHR files, monthly unrolled NLP data and a demographics file for the 2025 patients.",
+  "locations": [
+    {
+      "label": "2025 project",
+      "kind": "data",
+      "value": "/data/vbio-methodsdev/SHARE/BIOBANK/2025"
+    },
+    {
+      "label": "Daily codified CSV batches",
+      "kind": "data",
+      "value": "/data/vbio-methodsdev/SHARE/BIOBANK/2025/Processed_Data/codified/rolled_<TYPE>_Group_Code"
+    },
+    {
+      "label": "Raw NILE output (relative to project)",
+      "kind": "data",
+      "value": "Raw_Data/Raw_NILE_output"
+    },
+    {
+      "label": "Monthly NLP",
+      "kind": "data",
+      "value": "/data/vbio-methodsdev/SHARE/BIOBANK/Processed_Data/cleaned_unrolled"
+    },
+    {
+      "label": "Demographics (relative to project)",
+      "kind": "data",
+      "value": "Processed_Data/Demographic/Biobank2025_Demographic_RaceFeldman_CD_ZIP_Dth_Cnst_hcu_addr_n159763_2026_0506_sq.csv"
+    }
+  ],
+  "sections": [
+    {
+      "title": "Storage and access",
+      "views": [
+        "access",
+        "location"
+      ],
+      "match": "o2|access|mssql",
+      "items": [
+        "The README places the project on Eris/Partners and raw codified data in MSSQL. Its September 2026 update lists O2 access as pending HMS–BWH DUA acceptance."
+      ]
+    },
+    {
+      "title": "Daily codified data",
+      "views": [
+        "files",
+        "start"
+      ],
+      "match": "codified|diagnos|medication|procedure|lab",
+      "items": [
+        "Daily CSV batches are grouped by diagnosis (Phecode), medication (Med), laboratory (Lab) and procedure (Proc). Raw codified data are in MSSQL."
+      ]
+    },
+    {
+      "title": "Patients and codes by data type",
+      "views": [
+        "statistics",
+        "counts"
+      ],
+      "match": "patient|how many|unique|codes",
+      "items": [
+        "Diagnosis: 156,735 patients / 1,868 codes. Medication: 151,617 / 2,662. Lab: 148,955 / 7,276. Procedure: 155,827 / 248. These are separate counts for each type."
+      ]
+    },
+    {
+      "title": "Codified date coverage",
+      "views": [
+        "statistics",
+        "dates"
+      ],
+      "match": "dates?|coverage|earliest|latest",
+      "items": [
+        "Minimum / median / maximum by type: diagnosis 1994-01-01 / 2018-10-30 / 2025-05-06; lab 1994-01-01 / 2017-09-13 / 2025-05-06; procedure 1994-01-02 / 2017-04-17 / 2025-02-28.",
+        "Medication: 1994-01-01 / 2017-01-23 / 2915-08-16 as printed. Confirm the maximum with the curator before using it."
+      ]
+    },
+    {
+      "title": "NLP",
+      "views": [
+        "files",
+        "start",
+        "statistics",
+        "counts",
+        "dates"
+      ],
+      "match": "nlp|nile|cui",
+      "items": [
+        "Raw NILE output is organized by RPDR note file. Monthly unrolled NLP data are batched by patient.",
+        "154,954 patients and 296,265 distinct CUIs including acronyms. Minimum March 1976, median December 2005, maximum July 2025."
+      ]
+    },
+    {
+      "title": "Demographics",
+      "views": [
+        "files",
+        "columns",
+        "statistics",
+        "counts",
+        "dates"
+      ],
+      "match": "demograph|birth|race",
+      "items": [
+        "The summary table reports 157,963 unique patients. Minimum, median and maximum birth dates are 1912-11-06, 1962-12-18 and 2021-12-03.",
+        "Demographic file columns: PATIENT_NUM, BIRTH_DATE, SEX_CD, RACE_CD, subject_id, Race_Cd_updated, EMPI, zip_cd, VITAL_STATUS_Death_Flag, Death_date, Consent_date, race_American_Indian_Alaska_Native, race_Native_Hawaiian_Pacific_Islander, race_White, race_Other, race_Declined, race_Unknown, race_Unavailable, race_Not_Given, race_NOT_REPORTED, hispanic, race_feldman, hcu, empi, Address, Address2, City, State, Zip, hypertension, diabetes, cad, hf, ra."
+      ]
+    }
+  ],
+  "columns": [
+    "PATIENT_NUM",
+    "BIRTH_DATE",
+    "SEX_CD",
+    "RACE_CD",
+    "subject_id",
+    "Race_Cd_updated",
+    "EMPI",
+    "zip_cd",
+    "VITAL_STATUS_Death_Flag",
+    "Death_date",
+    "Consent_date",
+    "race_American_Indian_Alaska_Native",
+    "race_Native_Hawaiian_Pacific_Islander",
+    "race_White",
+    "race_Other",
+    "race_Declined",
+    "race_Unknown",
+    "race_Unavailable",
+    "race_Not_Given",
+    "race_NOT_REPORTED",
+    "hispanic",
+    "race_feldman",
+    "hcu",
+    "empi",
+    "Address",
+    "Address2",
+    "City",
+    "State",
+    "Zip",
+    "hypertension",
+    "diabetes",
+    "cad",
+    "hf",
+    "ra"
+  ]
+}

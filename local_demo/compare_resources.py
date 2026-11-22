@@ -222,6 +222,12 @@ def data_for(entity,catalog,query):
         data['files']='\n'.join(f['name'] for f in file_inventory(catalog) if f['parent']==e['id']) or 'Access guide; no individual data files listed.'
         shape=next((line.removeprefix('- ') for line in identity.splitlines() if line.startswith('- Shape:')),None)
         if shape: data['files']+='\n'+shape
+        if 'guide' in e:
+            sections = e['guide']['sections']
+            for field in ('files','counts','dates'):
+                data[field]='\n'.join(line for s in sections if field in s['views'] for line in s['items'])
+            data['columns']=e['guide']['columns']
+            data['locations']=[location['value'] for location in e['locations']]
     else:
         item=entity['item']; card=item.get('card',{})
         data.update(type='File or folder',contents=item['description'],sources=[item['source']],columns=card.get('columns',[]) or
