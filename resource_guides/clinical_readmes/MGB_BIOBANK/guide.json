@@ -67,7 +67,7 @@
         "statistics",
         "dates"
       ],
-      "match": "dates?|coverage|earliest|latest",
+      "match": "^(?:(?!.*\\b(?:nlp|nile|cui|demographics?)\\b)|(?=.*\\b(?:codified|diagnosis|medication|lab|procedure)\\b)).*\\b(?:dates?|coverage|earliest|latest)\\b",
       "items": [
         "Minimum / median / maximum by type: diagnosis 1994-01-01 / 2018-10-30 / 2025-05-06; lab 1994-01-01 / 2017-09-13 / 2025-05-06; procedure 1994-01-02 / 2017-04-17 / 2025-02-28.",
         "Medication: 1994-01-01 / 2017-01-23 / 2915-08-16 as printed. Confirm the maximum with the curator before using it."

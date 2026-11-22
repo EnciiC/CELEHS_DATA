@@ -25,9 +25,9 @@
         "counts",
         "dates"
       ],
-      "match": "cohort|patients|how many notes|coverage|date range|komap",
+      "match": "cohort|patients|how many notes|coverage|date range|komap|ppv",
       "items": [
-        "1,987 KOMAP-positive RA patients and about 3.5 million notes. Coverage ends September 30, 2024. The README writes the cutoff as cutoff - 1.387 ppv90%."
+        "1,987 KOMAP-positive RA patients and about 3.5 million notes, with coverage through September 30, 2024. The reported 90% positive predictive value (PPV) refers to patient selection. Austin records the selection rule as “cutoff - 1.387 ppv90%”. Confirm the sign and comparison rule with Austin before reproducing the cohort."
       ]
     },
     {
@@ -48,10 +48,10 @@
         "files",
         "columns"
       ],
-      "match": "tags|results csv|output|link|join",
+      "match": "tags|results csv|output|link|join|trace|source note|document id",
       "items": [
-        "tags.csv records informativeness. results.csv lists existing_DAS_score, calculated_das_score, calculated_das_category, TiuDocumentSID and evidences.",
-        "TiuDocumentSID appears in both the note fields and results.csv. The README does not specify join cardinality."
+        "tags.csv records whether a note is informative or non-informative. results.csv lists existing_DAS_score, calculated_das_score, calculated_das_category, TiuDocumentSID and evidences.",
+        "Match TiuDocumentSID in results.csv to TiuDocumentSID in the notes to find the source document."
       ]
     },
     {
@@ -59,10 +59,11 @@
       "views": [
         "files"
       ],
-      "match": "extract|calculat|score|categor",
+      "match": "extract|calculat|score|categor|remission|moderate|disease activity|das cutoffs?",
       "items": [
-        "The agent extracts a score recorded in a note or calculates one from the note using a DAS formula. It evaluates informative notes for high, moderate, low or remission status.",
-        "The listed cutoffs are 5.1, 3.2 and 2.5. The README does not specify how equality at a cutoff is handled."
+        "existing_DAS_score is a score recorded in the note. calculated_das_score is calculated from the note when the required information is available.",
+        "As clarified in the project discussion, an informative note can receive a calculated_das_category even when calculated_das_score is blank.",
+        "The boundaries are 2.5 between remission and low, 3.2 between low and moderate, and 5.1 between moderate and high. Austin’s README does not specify which category includes a score exactly at a boundary."
       ]
     },
     {
